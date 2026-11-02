@@ -1,0 +1,2463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>学园偶像大进击！· 单机原型 v0.32</title>
+<style>
+  :root{
+    --red:#e94f6a; --blue:#4f8fe9; --bg:#f5f0fa; --panel:#ffffff;
+    --ink:#3a2e4f; --muted:#9a8fb8; --line:#e6ddf2;
+  }
+  *{ box-sizing:border-box; margin:0; padding:0; }
+  html,body{ height:100%; }
+  body{
+    font-family:"Microsoft YaHei","PingFang SC",sans-serif;
+    background:var(--bg); color:var(--ink);
+    display:flex; flex-direction:column; height:100%; overflow:hidden;
+  }
+
+  header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 18px; background:linear-gradient(90deg,#fde8f1,#eef0fd);
+    border-bottom:1px solid var(--line);
+  }
+  header .title{ font-size:18px; font-weight:bold; }
+  header .title .sub{ font-size:12px; color:var(--muted); font-weight:normal; margin-left:8px; }
+  #turn-banner{ font-size:14px; }
+  .tag{
+    display:inline-block; padding:1px 8px; border-radius:10px;
+    color:#fff; font-size:12px; vertical-align:middle;
+  }
+  .tag.red{ background:var(--red); }
+  .tag.blue{ background:var(--blue); }
+  .tag.green{ background:#3aa66a; }
+  .tag.yellow{ background:#d9a017; }
+
+  main{ flex:1; display:flex; gap:12px; padding:12px; min-height:0; }
+
+  /* 左侧：地图 */
+  #map-panel{
+    flex:1.7; background:var(--panel); border-radius:14px;
+    padding:10px; overflow:auto; box-shadow:0 2px 10px rgba(90,60,140,.08);
+  }
+  #map-wrap{ position:relative; }
+  #map-wrap img{ width:100%; display:block; border-radius:10px; }
+  .piece{
+    position:absolute; width:26px; height:26px; border-radius:50%;
+    border:2.5px solid #fff; transform:translate(-50%,-50%);
+    display:flex; align-items:center; justify-content:center;
+    font-size:12px; font-weight:bold; color:#fff;
+    box-shadow:0 2px 6px rgba(0,0,0,.4); z-index:5; pointer-events:none;
+    transition:left .28s ease, top .28s ease;
+  }
+  .piece.red{ background:var(--red); }
+  .piece.blue{ background:var(--blue); }
+  .piece.green{ background:#3aa66a; }
+  .piece.yellow{ background:#d9a017; }
+
+  /* 右侧：玩家状态 + 日志 */
+  aside{ flex:1.45; min-width:540px; display:flex; flex-direction:column; gap:12px; min-height:0; }
+  .player-card{
+    background:var(--panel); border-radius:12px; padding:10px 14px;
+    border:2px solid transparent; box-shadow:0 2px 8px rgba(90,60,140,.06);
+  }
+  .player-card.active{ border-color:currentColor; }
+  .player-card .pc-head{ display:flex; align-items:center; gap:8px; margin-bottom:6px; }
+  .chip{ width:14px; height:14px; border-radius:50%; border:2px solid #fff; box-shadow:0 0 3px rgba(0,0,0,.3); }
+  .chip.red{ background:var(--red); } .chip.blue{ background:var(--blue); }
+  .chip.green{ background:#3aa66a; } .chip.yellow{ background:#d9a017; }
+  .turn-mark{
+    margin-left:auto; font-size:11px; color:#fff; background:#b89ae0;
+    padding:1px 8px; border-radius:8px; display:none;
+  }
+  .player-card.active .turn-mark{ display:inline-block; }
+  .stars{ margin-left:4px; font-size:13px; letter-spacing:1px; }
+  .pc-row{ font-size:13px; color:#6b5f86; margin:2px 0; }
+  .pc-row b{ color:var(--ink); }
+  .buff-row{ display:flex; flex-wrap:wrap; gap:4px; margin-top:5px; }
+  .buff-row:empty{ display:none; }
+  .buff{ font-size:11px; border-radius:9px; padding:1px 8px; background:#eaf6ec; color:#2e7d43; border:1px solid #c3e2c9; }
+  .buff.bad{ background:#fdeeee; color:#c04848; border-color:#eccac8; }
+
+  #bottom-panels{ flex:1; display:flex; gap:12px; min-height:0; }
+  #log-panel{
+    flex:1; background:var(--panel); border-radius:12px; min-height:0;
+    display:flex; flex-direction:column; box-shadow:0 2px 8px rgba(90,60,140,.06);
+  }
+  /* 专辑池面板 */
+  #pool-panel{
+    flex:1; background:var(--panel); border-radius:12px; min-height:0;
+    display:flex; flex-direction:column; box-shadow:0 2px 8px rgba(90,60,140,.06);
+  }
+  /* 角色一览面板：金框黄底=未被获取（高亮），淡化=已被获取 */
+  #roster-panel{
+    flex:.95; background:var(--panel); border-radius:12px; min-height:0;
+    display:flex; flex-direction:column; box-shadow:0 2px 8px rgba(90,60,140,.06);
+  }
+  #roster-head{ padding:8px 12px; border-bottom:1px solid var(--line); font-size:13px; font-weight:bold; }
+  #roster-head .pool-tip{ font-size:10.5px; color:var(--muted); font-weight:normal; margin-left:6px; }
+  #roster-list{ flex:1; overflow-y:auto; padding:8px 10px; display:flex; flex-direction:column; gap:6px; }
+  .roster-item{
+    font-size:12px; padding:5px 9px; border-radius:8px;
+    border:1.5px solid #f0d9a0; border-left:3px solid #f0b429; background:#fffbe9;
+  }
+  .roster-item .r-name{ font-weight:bold; font-size:12.5px; color:#9c6f1e; display:flex; align-items:center; gap:4px; }
+  .roster-item .r-skill{ color:#8a7a5f; font-size:11px; margin-top:2px; line-height:1.5; }
+  .roster-item .tag{ font-size:10px; padding:0 6px; }
+  .roster-item.taken{ opacity:.5; border-color:var(--line); border-left-color:var(--line); background:#fff; }
+  .roster-item.taken .r-name{ color:var(--muted); }
+  #pool-head{
+    padding:8px 12px; border-bottom:1px solid var(--line);
+    font-size:13px; font-weight:bold;
+  }
+  #pool-head .pool-tip{ font-size:10.5px; color:var(--muted); font-weight:normal; margin-left:6px; }
+  #pool-list{ flex:1; overflow-y:auto; padding:8px 10px; display:flex; flex-direction:column; gap:6px; }
+  .pool-item{ font-size:12px; padding:5px 9px; border-radius:8px; border:1.5px solid var(--line); background:#fff; }
+  .pool-item .p-name{ font-weight:bold; font-size:12.5px; color:#a04468; }
+  .pool-item .p-req{ color:var(--muted); font-size:11px; margin-top:2px; line-height:1.6; }
+  .pool-item .p-req .have{ color:#2e9e5b; font-weight:bold; }
+  .pool-item.creatable{ border-color:#f0b429; background:#fffbe9; }
+  .pool-item.owned-red{ border-color:var(--red); background:#fdf2f5; }
+  .pool-item.owned-blue{ border-color:var(--blue); background:#f0f5fd; }
+  .pool-item.owned-green{ border-color:#3aa66a; background:#effaf3; }
+  .pool-item.owned-yellow{ border-color:#d9a017; background:#fdf8ec; }
+  .pool-item.done{ opacity:.45; }
+  .pool-item.done .p-name{ text-decoration:line-through; }
+  #log-head{
+    padding:8px 14px; border-bottom:1px solid var(--line);
+    font-size:13px; font-weight:bold;
+  }
+  #log{ flex:1; overflow-y:auto; padding:10px 14px; font-size:13px; line-height:1.9; }
+  #log .entry .tag{ margin-right:6px; }
+  #log .entry.turn{ color:#8a7aa8; border-top:1px dashed var(--line); margin-top:4px; padding-top:6px; }
+
+  /* 底部：骰子 + 素材区 + 专辑区 */
+  footer{
+    height:212px; background:var(--panel); border-top:1px solid var(--line);
+    display:flex; gap:12px; padding:12px 16px;
+  }
+  #dice-side{
+    width:110px; display:flex; flex-direction:column;
+    align-items:center; justify-content:center; gap:10px;
+  }
+  #dice{
+    width:56px; height:56px; border-radius:12px; background:#fdf3f8;
+    border:2px solid #e9b7cd; display:flex; align-items:center; justify-content:center;
+    font-size:26px; font-weight:bold; color:#d4568a;
+  }
+  #roll-btn{
+    padding:9px 14px; border:none; border-radius:8px; cursor:pointer;
+    background:linear-gradient(90deg,#e94f6a,#b89ae0); color:#fff;
+    font-size:14px; font-weight:bold;
+  }
+  #roll-btn:disabled{ opacity:.55; cursor:wait; }
+  .block{
+    background:#fbf9fe; border:1.5px solid var(--line); border-radius:12px;
+    padding:10px 12px; display:flex; flex-direction:column; min-width:0;
+  }
+  .mat-half{ flex:0.9; min-width:0; }
+  #album-block{ flex:1; }
+  .block-title{ font-size:13px; font-weight:bold; margin-bottom:8px; display:flex; align-items:center; }
+  .block-title .tag{ margin-right:6px; }
+  #create-album-btn{
+    margin-left:auto; padding:3px 10px; border:none; border-radius:8px;
+    background:linear-gradient(90deg,#e94f6a,#b89ae0); color:#fff;
+    font-size:12px; font-weight:bold; cursor:pointer;
+  }
+  #create-album-btn:disabled{ opacity:.4; cursor:not-allowed; }
+  .mat-half .block-body{ flex:1; overflow-y:auto; }
+  .mat-row{ display:flex; align-items:flex-start; gap:8px; margin-bottom:7px; }
+  .mat-cat{
+    flex:none; font-size:12px; color:#fff; border-radius:6px;
+    padding:2px 8px; margin-top:1px;
+  }
+  .mat-cat.music{ background:#d4a017; }
+  .mat-cat.dance{ background:#e07b39; }
+  .mat-cat.costume{ background:#4fb6d4; }
+  .psec{ border-left:3px solid transparent; padding:1px 0 1px 8px; margin-bottom:8px; }
+  .psec.red{ border-left-color:var(--red); }
+  .psec.blue{ border-left-color:var(--blue); }
+  .psec.green{ border-left-color:#3aa66a; }
+  .psec.yellow{ border-left-color:#d9a017; }
+  .psec > .tag{ font-size:11px; padding:0 7px; margin-bottom:3px; }
+  .sec-wrap{ display:flex; flex-wrap:wrap; gap:6px; align-items:flex-start; }
+  .chips{ display:flex; flex-wrap:wrap; gap:4px; }
+  .chip-mat{
+    font-size:12px; border-radius:10px; padding:2px 9px;
+    background:#fff; border:1.5px solid var(--line); color:var(--ink);
+  }
+  .empty-note{ font-size:12px; color:var(--muted); }
+  #album-block .block-body{ flex:1; overflow-y:auto; display:flex; flex-wrap:wrap; gap:6px; align-content:flex-start; }
+  .album-card{
+    font-size:12.5px; padding:5px 10px; border-radius:8px;
+    background:linear-gradient(90deg,#fde8f1,#f3ecfd);
+    border:1px solid #eec3d8; color:#a04468; font-weight:bold;
+  }
+  /* 角色区 */
+  #char-block{ flex:.8; }
+  #char-block .block-body{ flex:1; overflow-y:auto; display:flex; flex-wrap:wrap; gap:6px; align-content:flex-start; }
+  .char-card{
+    font-size:12.5px; padding:5px 10px; border-radius:8px; font-weight:bold;
+    background:linear-gradient(90deg,#fff6de,#fde8f1); border:1px solid #eed9a8; color:#9c6f1e;
+    cursor:help;
+  }
+
+  /* 大厅（模式选择） */
+  #lobby{ position:fixed; inset:0; z-index:80; background:linear-gradient(135deg,#fde8f1,#eef0fd);
+    display:flex; align-items:center; justify-content:center; }
+  #lobby-box{ width:350px; max-width:92vw; max-height:94%; overflow-y:auto; background:#fff; border-radius:16px; padding:22px;
+    box-shadow:0 10px 40px rgba(90,60,140,.25); display:flex; flex-direction:column; gap:10px; text-align:center; }
+  .lb-title{ font-size:20px; font-weight:bold; color:var(--ink); }
+  .lb-sub{ font-size:12px; color:var(--muted); margin-bottom:6px; }
+  #lobby-box button{ padding:11px; border:none; border-radius:10px; cursor:pointer;
+    background:linear-gradient(90deg,#e94f6a,#b89ae0); color:#fff; font-size:14px; font-weight:bold; }
+  #lb-hotseat{ background:#f3ecfd !important; color:#7a5fa8 !important; border:1.5px solid var(--line) !important; }
+  #lb-nick{ padding:10px; border:1.5px solid var(--line); border-radius:10px; font-size:14px; text-align:center; }
+  .lb-joinrow{ display:flex; gap:8px; }
+  #lb-code{ flex:1; padding:10px; border:1.5px solid var(--line); border-radius:10px; font-size:15px;
+    text-align:center; letter-spacing:3px; text-transform:uppercase; min-width:0; }
+  #lb-join{ flex:none; padding:10px 14px; }
+  #lb-status{ font-size:12px; color:#2e9e5b; min-height:16px; word-break:break-all; }
+  #lb-ori{ font-size:11.5px; color:var(--muted); text-decoration:underline; cursor:pointer; }
+  .lb-code-big{ font-size:26px; font-weight:bold; letter-spacing:6px; color:#e94f6a; margin:4px 0; }
+  .lb-count{ display:flex; gap:8px; align-items:center; justify-content:center; font-size:13px; color:var(--ink); }
+  .lb-count button{ flex:none; width:44px; padding:7px 0 !important; background:#f3ecfd !important; color:#7a5fa8 !important; border:1.5px solid var(--line) !important; }
+  .lb-count button.on{ background:#b89ae0 !important; color:#fff !important; border-color:#b89ae0 !important; }
+
+  /* 弹窗 */
+  #modal-mask{
+    position:fixed; inset:0; background:rgba(35,25,60,.5); z-index:50;
+    display:flex; align-items:center; justify-content:center;
+  }
+  #modal-mask.hidden{ display:none; }
+  /* 弹窗打开时：专辑池浮于遮罩之上，仍可上下滚动查看各专辑所需素材 */
+  body.modal-open #pool-panel{
+    position:relative; z-index:65;
+    box-shadow:0 0 0 3px #b89ae0, 0 6px 24px rgba(90,60,140,.35);
+  }
+  #modal{
+    width:430px; max-width:92vw; max-height:82%; overflow:auto;
+    background:#fff; border-radius:14px; padding:18px 20px;
+    box-shadow:0 10px 40px rgba(0,0,0,.28);
+  }
+  #modal-title{ font-size:15px; font-weight:bold; margin-bottom:8px; }
+  #modal-body{ font-size:13px; color:#6b5f86; }
+  .modal-opts{ display:flex; flex-direction:column; gap:8px; margin-top:12px; }
+  .modal-btn{
+    padding:9px 12px; border:1.5px solid var(--line); border-radius:9px;
+    background:#fbf9fe; cursor:pointer; font-size:13px; text-align:left;
+    color:var(--ink); width:100%;
+  }
+  .modal-btn:hover{ border-color:#b89ae0; background:#f6f1fd; }
+  .modal-btn .req{ display:block; font-size:11.5px; color:var(--muted); margin-top:2px; }
+
+  /* ===== 开局公告 ===== */
+  #notice-mask{
+    position:fixed; inset:0; z-index:95; background:rgba(35,25,60,.55);
+    display:flex; align-items:center; justify-content:center; padding:16px;
+  }
+  #notice-mask.hidden{ display:none; }
+  #notice-box{
+    width:430px; max-width:94vw; max-height:84%; overflow:auto;
+    background:#fff; border-radius:16px; padding:20px 22px;
+    box-shadow:0 10px 40px rgba(0,0,0,.3);
+  }
+  #notice-box .n-title{ font-size:19px; font-weight:bold; color:var(--ink); }
+  #notice-box .n-ver{ font-size:11px; color:var(--muted); margin:2px 0 10px; }
+  #notice-box .n-sec{ font-size:13px; color:#6b5f86; line-height:1.8; }
+  #notice-box .n-sec .n-sec-t{ display:block; color:#a04468; font-weight:bold; margin:8px 0 2px; }
+  #notice-box .n-sec ul{ padding-left:18px; }
+  #notice-box .n-sec li{ margin:2px 0; }
+  #notice-box .n-close{
+    display:block; width:100%; margin-top:14px; padding:11px; border:none; border-radius:10px;
+    background:linear-gradient(90deg,#e94f6a,#b89ae0); color:#fff; font-size:14.5px;
+    font-weight:bold; cursor:pointer;
+  }
+  #notice-btn,#ori-btn,#bgm-btn{
+    cursor:pointer; border:1.5px solid var(--line); background:#fff; color:#7a5fa8;
+    font-size:12px; padding:2px 10px; border-radius:10px; margin-right:10px; vertical-align:middle;
+  }
+  #notice-btn:hover,#ori-btn:hover,#bgm-btn:hover{ background:#f6f1fd; }
+
+  /* ===== 抽卡动画层（事件/机遇/挑战卡）：飞入 → 点击翻面 → 生效 =====
+     z-index 49：位于弹窗(50)之下——旁观动画未自动关闭时，新弹窗仍可正常操作 */
+  #card-mask{
+    position:fixed; inset:0; z-index:49; background:rgba(35,25,60,.62);
+    display:flex; align-items:center; justify-content:center; perspective:1200px;
+  }
+  #card-mask.hidden{ display:none; }
+  #draw-card{
+    width:280px; height:400px; position:relative;
+    transform-style:preserve-3d; transition:transform .65s cubic-bezier(.2,.7,.3,1);
+    cursor:pointer;
+  }
+  #draw-card.flipped{ transform:rotateY(180deg); }
+  #card-mask.dealing #draw-card{ animation:cardDeal .55s cubic-bezier(.22,.9,.34,1.08) both; cursor:default; }
+  @keyframes cardDeal{
+    0%{ transform:translate(46vw,58vh) rotate(22deg) scale(.3); opacity:0; }
+    55%{ opacity:1; }
+    100%{ transform:translate(0,0) rotate(0deg) scale(1); opacity:1; }
+  }
+  .c-face{
+    position:absolute; inset:0; border-radius:16px;
+    backface-visibility:hidden; -webkit-backface-visibility:hidden;
+    box-shadow:0 18px 50px rgba(20,10,50,.5);
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  .c-back{
+    background:
+      radial-gradient(circle at 30% 18%, rgba(255,255,255,.30), transparent 44%),
+      linear-gradient(160deg,#8a63b8 0%,#5f6fd0 52%,#d4568a 100%);
+    border:2px solid rgba(255,255,255,.55);
+    align-items:center; justify-content:center; gap:12px; color:#fff;
+  }
+  .c-back::before{
+    content:''; position:absolute; inset:9px; border:1.5px solid rgba(255,255,255,.5);
+    border-radius:11px; pointer-events:none;
+  }
+  .c-back .c-type{ font-size:14px; letter-spacing:6px; font-weight:bold; text-shadow:0 1px 4px rgba(0,0,0,.3); }
+  .c-symbol{ font-size:64px; text-shadow:0 0 18px rgba(255,255,255,.75); }
+  .c-hint{ font-size:12px; opacity:.85; animation:hintPulse 1.6s ease-in-out infinite; }
+  @keyframes hintPulse{ 0%,100%{ opacity:.5; } 50%{ opacity:1; } }
+  .c-front{
+    transform:rotateY(180deg);
+    background:linear-gradient(180deg,#fffdf7,#faf4ff);
+    border:2px solid #d9c8ef;
+  }
+  .c-front .c-band{ padding:12px 14px; color:#fff; font-size:13px; font-weight:bold; letter-spacing:5px; text-align:center; }
+  .c-front .c-name{ font-size:19px; font-weight:bold; color:#3a2e4f; text-align:center; padding:14px 16px 6px; }
+  .c-front .c-desc{ flex:1; overflow-y:auto; font-size:13px; line-height:1.8; color:#6b5f86; padding:4px 18px 10px; }
+  #card-apply{
+    margin:10px 18px 16px; padding:11px; border:none; border-radius:10px; cursor:pointer;
+    background:linear-gradient(90deg,#e94f6a,#b89ae0); color:#fff; font-size:14.5px; font-weight:bold;
+    opacity:0; pointer-events:none; transition:opacity .35s ease .4s;
+  }
+  #draw-card.flipped #card-apply{ opacity:1; pointer-events:auto; }
+  /* 卡种主题色：事件=绿 / 机遇=红 / 挑战=深蓝（与地图格配色一致） */
+  .t-event .c-band{ background:linear-gradient(90deg,#3aa66a,#2e8f5b); }
+  .t-chance .c-band{ background:linear-gradient(90deg,#e94f6a,#c73e57); }
+  .t-challenge .c-band{ background:linear-gradient(90deg,#4a58b8,#37439a); }
+  .t-event .c-front{ border-color:#bfe3cd; }
+  .t-chance .c-front{ border-color:#f2c4cf; }
+  .t-challenge .c-front{ border-color:#c3c9ee; }
+
+  /* ===== 手机适配：竖屏自动横屏（整体旋转90°）+ 横屏紧凑布局 =====
+     html.force-landscape：手机竖屏时启用，横持手机即正显；
+     html.phone-land：手机（物理横持或旋转后）统一使用紧凑布局。
+     桌面调试：网址后加 ?landscape=1 强制预览旋转效果。 */
+  html.force-landscape{ overflow:hidden; }
+  html.force-landscape body{
+    position:absolute; top:0; left:0;
+    width:100vh; height:100vw;
+    transform:rotate(90deg) translateY(-100%);
+    transform-origin:top left;
+  }
+  @supports (width:100dvh){
+    html.force-landscape body{ width:100dvh; height:100dvw; }
+  }
+  html.phone-land .piece{ width:22px; height:22px; font-size:11px; border-width:2px; }
+  html.phone-land header{ padding:5px 12px; }
+  html.phone-land header .title{ font-size:14px; }
+  html.phone-land header .title .sub{ display:none; }
+  html.phone-land #turn-banner{ font-size:12px; }
+  html.phone-land #notice-btn, html.phone-land #ori-btn, html.phone-land #bgm-btn{ padding:1px 8px; font-size:11px; }
+  html.phone-land main{ padding:6px; gap:8px; }
+  html.phone-land #map-panel{ padding:6px; border-radius:10px; min-height:0; }
+  html.phone-land aside{ min-width:0; gap:6px; overflow-y:auto; }
+  html.phone-land .player-card{ padding:5px 10px; flex:none; }
+  html.phone-land .pc-head{ margin-bottom:2px; }
+  html.phone-land .pc-row{ font-size:11.5px; margin:1px 0; }
+  html.phone-land .stars{ font-size:11px; }
+  html.phone-land #bottom-panels{ flex:none; gap:6px; height:150px; }
+  html.phone-land #log-head, html.phone-land #pool-head, html.phone-land #roster-head{ padding:5px 10px; font-size:12px; }
+  html.phone-land #pool-head .pool-tip, html.phone-land #roster-head .pool-tip{ display:none; }
+  html.phone-land #log{ padding:6px 10px; font-size:11.5px; line-height:1.6; }
+  html.phone-land #pool-list, html.phone-land #roster-list{ padding:6px 8px; gap:4px; }
+  html.phone-land .pool-item{ font-size:11px; padding:4px 8px; }
+  html.phone-land .pool-item .p-name{ font-size:11.5px; }
+  html.phone-land .roster-item{ font-size:11px; padding:3px 7px; }
+  html.phone-land .roster-item .r-skill{ font-size:10px; }
+  html.phone-land footer{ height:150px; padding:8px 10px; gap:8px; }
+  html.phone-land #dice-side{ width:84px; gap:6px; }
+  html.phone-land #dice{ width:44px; height:44px; font-size:20px; border-radius:10px; }
+  html.phone-land #roll-btn{ padding:8px 8px; font-size:12.5px; }
+  html.phone-land .block{ padding:8px 10px; border-radius:10px; }
+  html.phone-land .block-title{ font-size:12px; margin-bottom:6px; }
+  html.phone-land .mat-cat{ font-size:11px; padding:1px 6px; }
+  html.phone-land .chip-mat{ font-size:11px; padding:1px 7px; }
+  html.phone-land .mat-row{ margin-bottom:5px; }
+  html.phone-land .album-card, html.phone-land .char-card{ font-size:11px; padding:4px 8px; }
+  html.phone-land #create-album-btn{ font-size:11px; padding:2px 8px; }
+  html.phone-land #modal{ max-height:92%; padding:14px; }
+  html.phone-land .modal-btn{ padding:11px 12px; font-size:13.5px; }
+  html.phone-land #notice-box{ padding:14px 16px; }
+  html.phone-land #notice-box .n-sec{ font-size:12.5px; line-height:1.7; }
+  html.phone-land #draw-card{ width:236px; height:336px; }
+  html.phone-land .c-front .c-name{ font-size:16px; }
+  html.phone-land .c-front .c-desc{ font-size:12px; line-height:1.65; }
+  html.phone-land #card-apply{ padding:10px; font-size:13.5px; margin:8px 14px 12px; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.32 · 单机/联机</span></div>
+  <div id="turn-banner"><button id="ori-btn" title="手机横竖屏显示异常时可手动切换">横屏:关</button><button id="notice-btn">公告</button><button id="bgm-btn" title="背景音乐开关（三首LoveLive歌曲循环）">音乐:开</button><span id="net-badge" class="tag" style="display:none;background:#8a7aa8;margin-right:10px;"></span>当前回合：<span id="turn-chip" class="tag red">红方</span></div>
+</header>
+
+<main>
+  <section id="map-panel">
+    <div id="map-wrap">
+      <img src="map.jpg" alt="桌游地图">
+      <div class="piece red"  id="piece-red">红</div>
+      <div class="piece blue" id="piece-blue">蓝</div>
+      <div class="piece green" id="piece-green" style="display:none;">绿</div>
+      <div class="piece yellow" id="piece-yellow" style="display:none;">黄</div>
+    </div>
+  </section>
+
+  <aside>
+    <div class="player-card" id="pc-red" style="color:var(--red)">
+      <div class="pc-head"><span class="chip red"></span><b style="color:var(--ink)">红方</b><span class="stars" id="stars-red"></span><span class="turn-mark">行动中</span></div>
+      <div class="pc-row">位置：<b id="pos-red">-</b> · 行进：<b id="dir-red">未选择</b></div>
+      <div class="pc-row">素材：<b id="matcount-red">0</b> 张 · 专辑：<b id="albumcount-red">0</b> 张 · 角色：<b id="charcount-red">0</b> 名</div>
+      <div class="buff-row" id="buffs-red"></div>
+    </div>
+
+    <div class="player-card" id="pc-blue" style="color:var(--blue)">
+      <div class="pc-head"><span class="chip blue"></span><b style="color:var(--ink)">蓝方</b><span class="stars" id="stars-blue"></span><span class="turn-mark">行动中</span></div>
+      <div class="pc-row">位置：<b id="pos-blue">-</b> · 行进：<b id="dir-blue">未选择</b></div>
+      <div class="pc-row">素材：<b id="matcount-blue">0</b> 张 · 专辑：<b id="albumcount-blue">0</b> 张 · 角色：<b id="charcount-blue">0</b> 名</div>
+      <div class="buff-row" id="buffs-blue"></div>
+    </div>
+    <div class="player-card" id="pc-green" style="color:#3aa66a;display:none;">
+      <div class="pc-head"><span class="chip green"></span><b style="color:var(--ink)">绿方</b><span class="stars" id="stars-green"></span><span class="turn-mark">行动中</span></div>
+      <div class="pc-row">位置：<b id="pos-green">-</b> · 行进：<b id="dir-green">未选择</b></div>
+      <div class="pc-row">素材：<b id="matcount-green">0</b> 张 · 专辑：<b id="albumcount-green">0</b> 张 · 角色：<b id="charcount-green">0</b> 名</div>
+      <div class="buff-row" id="buffs-green"></div>
+    </div>
+    <div class="player-card" id="pc-yellow" style="color:#d9a017;display:none;">
+      <div class="pc-head"><span class="chip yellow"></span><b style="color:var(--ink)">黄方</b><span class="stars" id="stars-yellow"></span><span class="turn-mark">行动中</span></div>
+      <div class="pc-row">位置：<b id="pos-yellow">-</b> · 行进：<b id="dir-yellow">未选择</b></div>
+      <div class="pc-row">素材：<b id="matcount-yellow">0</b> 张 · 专辑：<b id="albumcount-yellow">0</b> 张 · 角色：<b id="charcount-yellow">0</b> 名</div>
+      <div class="buff-row" id="buffs-yellow"></div>
+    </div>
+
+    <div id="bottom-panels">
+      <div id="log-panel">
+        <div id="log-head">回合日志</div>
+        <div id="log"></div>
+      </div>
+      <div id="pool-panel">
+        <div id="pool-head">专辑池<span class="pool-tip">金色=当前可创作 · 绿字=已有素材 · 彩框=已被创作 · 按当前玩家缺口升序排列</span></div>
+        <div id="pool-list"></div>
+      </div>
+      <div id="roster-panel">
+        <div id="roster-head">角色一览<span class="pool-tip">金框=未被获取 · 淡化=已被获取</span></div>
+        <div id="roster-list"></div>
+      </div>
+    </div>
+  </aside>
+</main>
+
+<footer>
+  <div id="dice-side">
+    <div id="dice">?</div>
+    <button id="roll-btn" disabled>掷骰移动</button>
+  </div>
+
+  <div class="block mat-half" id="mat-block-0">
+    <div class="block-title" id="mat-title-0">素材 · 红方</div>
+    <div class="block-body" id="mat-body-0"></div>
+  </div>
+
+  <div class="block mat-half" id="mat-block-1" style="display:none;">
+    <div class="block-title" id="mat-title-1">素材 · 蓝方</div>
+    <div class="block-body" id="mat-body-1"></div>
+  </div>
+
+  <div class="block mat-half" id="mat-block-2" style="display:none;">
+    <div class="block-title" id="mat-title-2">素材 · 绿方</div>
+    <div class="block-body" id="mat-body-2"></div>
+  </div>
+
+  <div class="block mat-half" id="mat-block-3" style="display:none;">
+    <div class="block-title" id="mat-title-3">素材 · 黄方</div>
+    <div class="block-body" id="mat-body-3"></div>
+  </div>
+
+  <div class="block" id="char-block">
+    <div class="block-title">角色 · 双方</div>
+    <div class="block-body" id="char-body"></div>
+  </div>
+
+  <div class="block" id="album-block">
+    <div class="block-title">
+      专辑 · 双方
+      <button id="create-album-btn" disabled>＋ 创作专辑</button>
+    </div>
+    <div class="block-body" id="album-body"></div>
+  </div>
+</footer>
+
+<!-- 通用弹窗：方向选择 / 岔路选向 / 专辑创作 -->
+<div id="modal-mask" class="hidden">
+  <div id="modal">
+    <div id="modal-title"></div>
+    <div id="modal-body"></div>
+    <div class="modal-opts" id="modal-opts"></div>
+  </div>
+</div>
+
+<!-- 开局公告：玩法速览 + 更新公告（发布新内容时编辑本块，并把脚本中 NOTICE_VERSION 调大即可让全员重新看到） -->
+<div id="notice-mask">
+  <div id="notice-box">
+    <div class="n-title">学园偶像大进击！</div>
+    <div class="n-ver">当前版本 v0.32 · 2026-11-02</div>
+    <div class="n-sec">
+      <span class="n-sec-t">【玩法速览 · 30秒上手】</span>
+      <ul>
+        <li>目标：率先成功开办 <b>3 场LIVE</b>，夺得 LoveLive 大赛冠军！</li>
+        <li>掷骰移动，停留素材格收集<b>音乐 / 舞蹈 / 服装</b>素材，凑齐后点「创作专辑」。</li>
+        <li>带专辑到LIVE场馆开办演唱会：<b>2骰 &gt;6</b> 成功进度+1；<b>东京巨蛋 2骰 &gt;11</b> 进度+2。</li>
+        <li>事件 / 机遇 / 挑战格抽卡获得增益或干扰对手；【大赛组委会】2张同名素材可换任意1张。</li>
+        <li>支持单机模式（1v1 对战AI）与 2-4 人联机房；开局随机发放唯一角色技能；行进方向 2 人局自选、3-4 人局系统随机，选定后锁定。</li>
+      </ul>
+      <span class="n-sec-t">【更新公告】</span>
+      <ul>
+        <li>v0.32 音乐播放健壮性修复：修复背景音乐/LIVE专属曲因<b>浏览器拦截播放或音频文件缺失</b>而全程静默无提示的问题——播放失败后<b>自动重试</b>（点击页面任意位置即可触发），并在游戏日志与控制台给出明确诊断；LIVE专属曲失败时自动恢复背景音乐播放。</li>
+        <li>v0.31 LIVE成功专属音乐：为《Snow halation》《辉夜の城で踊りたい》《No brand girls》《仆らは今のなかで》四张专辑收录对应歌曲的高潮片段（约20-35秒），LIVE开办成功时<b>专属曲淡入播放</b>，播完（或被下一场LIVE切换）后背景音乐自动淡入续播；联机时全员同步播放；其余专辑无专属曲，背景音乐不受影响。</li>
+        <li>v0.30 新增背景音乐：收录三首LoveLive歌曲《君のこころは輝いてるかい？》《ミはμ'sicのミ》《Happy maker!》<b>顺序循环播放</b>；顶栏「音乐」按钮可随时开关并自动记忆偏好（受浏览器播放策略影响，点击页面任意位置后开始播放）。</li>
+        <li>v0.29 抽卡动画优化：卡片飞入屏幕中央后<b>自动翻开</b>，无需再手动点击翻面（点「生效」结算不变）；联机时客人抽的卡同样自动翻开，点「生效」确认后主机结算。</li>
+        <li>v0.28 玩法优化：① 3-4 人局开局行进方向改为<b>系统随机分配</b>（单机/2人联机仍可自选）；② 「素材获取量+1」等获取量增益（含角色加成）不再复制同名素材，改为<b>额外随机获得一张同类型素材</b>；③ 行进规则修复：同一次移动内<b>每个场馆支线最多穿行一次</b>，杜绝在场馆四格反复横跳刷步。</li>
+        <li>v0.27 联机稳定性强化：公共信令服务器掉线后自动重连（约3秒一次），重连成功后自动补发最新棋局状态与未决的弹窗/抽卡，客人翻卡确认不再因网络抖动丢失；本次已完成联机双端抽卡动画同步实测与挑战卡 AI 全路径回归测试。</li>
+        <li>v0.26 新增抽卡动画：抽到事件/机遇/挑战卡时，卡片会飞到屏幕中央，点击翻面查看效果再「生效」（AI 自动翻卡可旁观；联机全员同步播放动画，客人翻卡确认后才会结算）；同时修复单机开局 AI 方向选择卡死的问题。</li>
+        <li>v0.25 手机横屏适配强化：画布尺寸按实际可视区域像素级校准，修复部分浏览器（地址栏/工具栏）导致的显示不全；弹窗与大厅高度改为按可视区自适应，长选项列表不再被裁切；新增「横屏」手动切换按钮（顶栏与大厅），画面方向异常时可一键纠正。</li>
+        <li>v0.24 「单机热座」升级为「单机模式」：你执红方，与 AI 蓝方 1v1 对战，AI 自动完成掷骰、创作专辑、开办LIVE、挑战与交易等全部行动。</li>
+        <li>v0.23 修复部分手机浏览器（如夸克）竖屏不自动横屏的问题：适配判定不再依赖浏览器的触摸信号上报。</li>
+        <li>v0.22 新增开局公告与顶栏「公告」入口；手机竖屏打开自动横屏显示，并优化横屏紧凑布局。</li>
+        <li>v0.21 「令人尊重的对手们」可指定任意领先对手；规则文档与原型完全对齐。</li>
+      </ul>
+    </div>
+    <button id="notice-close">我知道了，开始游戏</button>
+  </div>
+</div>
+
+<!-- 抽卡动画层：事件/机遇/挑战卡（飞入 → 点击翻面 → 生效） -->
+<div id="card-mask" class="hidden">
+  <div id="draw-card">
+    <div class="c-face c-back">
+      <div class="c-type" id="card-back-type">事件卡</div>
+      <div class="c-symbol" id="card-sym">♪</div>
+      <div class="c-hint" id="card-hint">点击卡片翻开</div>
+    </div>
+    <div class="c-face c-front">
+      <div class="c-band" id="card-band">事件卡</div>
+      <div class="c-name" id="card-name"></div>
+      <div class="c-desc" id="card-desc"></div>
+      <button id="card-apply">✦ 生效</button>
+    </div>
+  </div>
+</div>
+
+<!-- 开局大厅：选择游戏模式 -->
+<div id="lobby">
+  <div id="lobby-box">
+    <div class="lb-title">学园偶像大进击！</div>
+    <div class="lb-sub">LoveLive 大赛主题对战桌游 · 选择模式</div>
+    <div class="lb-count" id="lb-count">联机人数
+      <button data-n="2" class="on">2人</button>
+      <button data-n="3">3人</button>
+      <button data-n="4">4人</button>
+    </div>
+    <input id="lb-nick" maxlength="6" placeholder="你的昵称（可留空，仅字母/汉字）">
+    <button id="lb-single">单机模式 · 对战AI（1v1）</button>
+    <button id="lb-host">创建房间 · 联机对战（我执红方）</button>
+    <div class="lb-joinrow">
+      <input id="lb-code" maxlength="5" placeholder="房间码">
+      <button id="lb-join">加入房间</button>
+    </div>
+    <div id="lb-status"></div>
+    <div id="lb-ori" title="若手机上画面方向不对，点此切换横/竖屏">手机画面方向不对？点此切换横/竖屏</div>
+  </div>
+</div>
+
+<script src="mqtt.min.js"></script><!-- 本地自托管，避免第三方 CDN 在部分网络不可达 -->
+<script>
+/* =========================================================
+ * 一、素材与专辑配置（改数值只动这里）
+ * ========================================================= */
+const MUSIC_TYPES   = ['恋爱','梦想','友情','夏天','冬天','幻想','冒险','回忆','热血','奇迹','闪耀','未来','青春'];
+const DANCE_TYPES   = ['舞曲','抒情','可爱'];
+const COSTUME_TYPES = ['白色系','红色系','黑色系','蓝色系','女仆装','贝雷帽','泳装','制服','星星','和风','摇滚'];
+const TYPE_LIST = { music:MUSIC_TYPES, dance:DANCE_TYPES, costume:COSTUME_TYPES };
+const CAT_LABEL = { music:'音乐', dance:'舞蹈', costume:'服装' };
+const WIN_TARGET = 3;   // 胜利所需：成功开办LIVE场数
+
+/* 专辑卡池：每类素材列出多个选项时，任选其一满足即可 */
+const ALBUM_POOL = [
+  { name:'仆らのLIVE 君とのLIFE',      costume:['白色系','红色系'], music:['梦想','友情'], dance:['舞曲'] },
+  { name:'Snow halation',              costume:['白色系','贝雷帽'], music:['恋爱','冬天'], dance:['抒情'] },
+  { name:'夏色えがおで1,2,Jump!',      costume:['泳装'],            music:['夏天','友情'], dance:['可爱'] },
+  { name:'もぎゅっと"love"で接近中!',  costume:['女仆装','白色系'], music:['恋爱','幻想'], dance:['可爱'] },
+  { name:'Wonderful Rush',             costume:['贝雷帽','白色系'], music:['梦想','冒险'], dance:['可爱'] },
+  { name:'Music S.T.A.R.T!!',          costume:['红色系','星星'],   music:['梦想','幻想'], dance:['舞曲'] },
+  { name:'MOMENT RING',                costume:['白色系','制服'],   music:['友情','回忆'], dance:['抒情'] },
+  { name:'辉夜の城で踊りたい',         costume:['和风'],            music:['恋爱','幻想'], dance:['舞曲'] },
+  { name:'No brand girls',             costume:['黑色系','制服'],   music:['梦想','热血'], dance:['舞曲'] },
+  { name:'仆らは今のなかで',           costume:['白色系','红色系'], music:['梦想','友情'], dance:['舞曲'] },
+  { name:'それは仆たちの奇迹',         costume:['白色系','红色系'], music:['友情','奇迹'], dance:['舞曲'] },
+  { name:'KiRa-KiRa Sensation!',       costume:['星星','制服'],     music:['梦想','闪耀'], dance:['舞曲'] },
+  { name:'Wonder zone',                costume:['制服','女仆装'],   music:['梦想','未来'], dance:['抒情'] },
+  { name:'WILD STARS',                 costume:['黑色系','摇滚'],   music:['恋爱','幻想'], dance:['舞曲'] },
+  { name:'Mermaid festa vol.1',        costume:['泳装'],            music:['恋爱','幻想'], dance:['舞曲'] },
+  { name:'友情ノーチェンジ',           costume:['制服','红色系'],   music:['友情','青春'], dance:['可爱'] },
+  { name:'COLORFUL VOICE',             costume:['制服'],            music:['梦想','幻想'], dance:['可爱'] },
+  { name:'ユメノトビラ',               costume:['星星','蓝色系'],   music:['梦想','青春'], dance:['抒情'] },
+];
+
+/* 事件卡（依托动画梗，事件格触发） */
+const EVENT_CARDS = [
+  { name:'屋顶练习',       effect:'gain',       payload:{ cat:'dance' },   desc:'获得 1 张舞蹈素材' },
+  { name:'音乐教室的演出', effect:'gain',       payload:{ cat:'music' },   desc:'获得 1 张音乐素材' },
+  { name:'偶像专访',       effect:'gain',       payload:{ cat:'costume' }, desc:'获得 1 张服装素材' },
+  { name:'海未的训练课',   effect:'umiTraining',payload:{},                desc:'抽取 1 张素材卡；若获得的素材可以和「梦想」或「夏天」组合，额外获得 1 张随机素材' },
+  { name:'应援的呐喊',     effect:'yell',       payload:{},                desc:'获得 1 张舞蹈素材；若合计素材少于 3 张，额外获得 1 张随机素材' },
+  { name:'对手的背影',     effect:'foeDiceHalf',payload:{},                desc:'对手下回合移动骰点数减半（向上取整）' },
+  { name:'抢镜',           effect:'foeNoGain',  payload:{},                desc:'对手下回合不能获得任何素材' },
+  { name:'闪亮追加公演',   effect:'moveToTokyo',payload:{},                desc:'移动至东京巨蛋，若满足条件可立即进行LIVE检定（2骰>11，成功进度+2）' },
+  { name:'舞台聚光灯',     effect:'spotlight',  payload:{},                desc:'你的下一次LIVE检定 +1' },
+  { name:'成员加入',       effect:'gainChar',   payload:{},                desc:'获得 1 张角色卡（角色具有唯一性）；若角色卡池已尽，改为获得 2 张随机素材' },
+];
+
+/* 机遇卡（依托三次元梗，机遇格触发） */
+const CHANCE_CARDS = [
+  { name:'红白歌会的征召', effect:'gainPlus',  payload:{},                                  desc:'你的下一次素材获取量 +1' },
+  { name:'人气投票第1',    effect:'popPoll',   payload:{},                                  desc:'获得 1 张角色卡（角色具有唯一性），且下一次LIVE检定 +1' },
+  { name:'圣地巡礼计划',   effect:'pilgrimage',payload:{},                                  desc:'从素材池中选择 1 张你需要的素材获得；但下回合不能获得素材' },
+  { name:'前辈禁止',       effect:'senpai',    payload:{},                                  desc:'获得 1 张「友情」素材；若获得后可以创作专辑，再抽取 1 张随机素材' },
+  { name:'冬季演唱会',     effect:'winter',    payload:{},                                  desc:'获得「冬天」与「贝雷帽」素材；但下回合骰点 -1 且无法获得素材' },
+  { name:'追加公演',       effect:'encore',    payload:{},                                  desc:'若你已拥有完成专辑且未举办LIVE，可立即在当前位置进行LIVE检定，但本次检定 -2' },
+  { name:'动画化纪念',     effect:'animeMem',  payload:{},                                  desc:'你的下一次素材获取量 +1；下一张专辑创作时素材需求 -1（三类素材可缺其一）' },
+];
+
+/* 挑战卡（许愿类奖励，挑战格触发；翻开后可选择发起或放弃） */
+const CHALLENGE_CARDS = [
+  { name:'雨中追加公演',     effect:'rainLive',   desc:'条件：你缺少完成任意专辑所需的「服装」素材。立即获得 1 张所需服装素材；但接下来 2 回合移动骰点 -1' },
+  { name:'超密集巡演',       effect:'denseTour',  desc:'条件：你的素材总数 ≥ 3。指定 1 张未完成专辑，其素材需求 -1（之后创作它时三类素材可缺其一）；立即弃置 2 张随机素材' },
+  { name:'令人尊重的对手们', effect:'rivals',     desc:'条件：存在已完成专辑数领先于你的对手。指定 1 名领先对手发起挑战，获得 1 张角色卡，且下一次LIVE检定 +2；但本局剩余时间内不能再获得增益类效果' },
+  { name:'零预算LIVE',       effect:'zeroBudget', desc:'条件：你的素材总数 ≤ 2。指定 1 张专辑立即完成（无需素材）；但本局剩余时间内不能触发机遇格' },
+  { name:'主题公演',         effect:'themeShow',  desc:'无条件，二选一：A 获得 1 张「梦想」或「奇迹」素材，下回合骰点 -2；B 下一次LIVE检定 +2，接下来 2 回合不能触发素材格' },
+  { name:'响彻东京巨蛋吧！', effect:'tokyoDash',  desc:'条件：拥有已完成专辑。立即传送东京巨蛋进行LIVE检定（2骰 > 11，成功 +2）；若失败，本局角色技能失效且无法触发挑战格' },
+];
+
+/* 角色卡（9 名 μ's 成员，开局各选 1 名，游戏中可额外获得；每张卡每局唯一） */
+const CHARACTERS = [
+  { id:'kotori', name:'南小鸟',   skill:'收集服装素材时，素材获得量 +1' },
+  { id:'umi',    name:'园田海未', skill:'其他玩家对你的干扰效果无效' },
+  { id:'honoka', name:'高坂穗乃果', skill:'进行LIVE检定时，检定 +1' },
+  { id:'maki',   name:'西木野真姬', skill:'收集音乐素材时，素材获得量 +1' },
+  { id:'hanayo', name:'小泉花阳', skill:'每圈一次机会：停留在穗村 2 格范围内时（路过不算），可直接进入穗村并获得休息区效果' },
+  { id:'rin',    name:'星空凛',   skill:'掷骰移动后，可选择行进步数 +1 或 -1' },
+  { id:'eli',    name:'绚濑绘里', skill:'收集舞蹈素材时，素材获得量 +1' },
+  { id:'nozomi', name:'东条希',   skill:'每圈第一次路过穗村后可占卜一次（原型简化：50%成功），成功获得对手 1 张随机素材' },
+  { id:'nico',   name:'矢泽妮可', skill:'LIVE检定 -2，但获得的所有素材 +1' },
+];
+const CHAR_MAP = Object.fromEntries(CHARACTERS.map(c => [c.id, c]));
+
+/* =========================================================
+ * 二、地图数据（坐标为图片上的百分比位置，可微调）
+ * ========================================================= */
+const TILES = [
+  { id:'akihabara',    name:'秋叶原',          type:'事件格',    x:9.5,  y:9.7 },
+  { id:'hokosha',      name:'步行者天国',      type:'舞蹈素材格', x:19,   y:9.7 },
+  { id:'maid',         name:'女仆咖啡屋',      type:'服装素材格', x:30.2, y:9.7 },
+  { id:'ueno',         name:'上野公园',        type:'机遇格',    x:41.6, y:9.7 },
+  { id:'hokumura',     name:'穗村',            type:'休息区',    x:52.7, y:9.7 },
+  { id:'seaside',      name:'海边',            type:'服装素材格', x:64.1, y:9.7 },
+  { id:'koishikawa',   name:'昌平桥',          type:'事件格',    x:75.4, y:9.7 },
+  { id:'committee',    name:'LoveLive大赛组委会', type:'交易格', x:89.1, y:9.7 },
+  { id:'shop',         name:'服饰店',          type:'服装素材格', x:91.5, y:30.7 },
+  { id:'manseibashi',  name:'万世桥',          type:'机遇格',    x:91.5, y:51.9 },
+  { id:'katsudou',     name:'偶像活动室',      type:'舞蹈素材格', x:91.5, y:73.3 },
+  { id:'kandamyojin',  name:'神田明神',        type:'事件格',    x:89.7, y:92 },
+  { id:'myojinzaka',   name:'明神男坂',        type:'挑战格',    x:77.9, y:92 },
+  { id:'ongaku',       name:'音乐教室',        type:'音乐素材格', x:66.7, y:92 },
+  { id:'gakudou',      name:'学校礼堂',        type:'舞蹈素材格', x:55.4, y:92 },
+  { id:'okujou',       name:'屋顶',            type:'事件格',    x:43.8, y:92 },
+  { id:'utx',          name:'UTX',             type:'机遇格',    x:32.9, y:92 },
+  { id:'lantis',       name:'Lantis录音室',    type:'音乐素材格', x:20.8, y:92 },
+  { id:'haikyo',       name:'废弃校舍',        type:'机遇格',    x:8.5,  y:92 },
+  { id:'rijichou',     name:'理事长室',        type:'事件格',    x:9.3,  y:72.9 },
+  { id:'hirobe',       name:'广播室',          type:'音乐素材格', x:9.3,  y:51.4 },
+  { id:'arcade',       name:'街机厅',          type:'挑战格',    x:9.3,  y:30.7 },
+  { id:'saitama',      name:'埼玉超级竞技场',  type:'LIVE场馆',  x:21.5, y:30.7 },
+  { id:'tokyo',        name:'东京巨蛋',        type:'特殊场馆',  x:43,   y:30 },
+  { id:'yokohama',     name:'横滨K',           type:'LIVE场馆',  x:78.6, y:30.7 },
+  { id:'nagoya',       name:'名古屋巨蛋',      type:'LIVE场馆',  x:21.8, y:73.3 },
+  { id:'otonokizaka',  name:'音乃木坂',        type:'起点',      x:49.7, y:76.1 },
+  { id:'seibu',        name:'西武巨蛋',        type:'LIVE场馆',  x:78.8, y:73.3 },
+];
+const TILE_MAP = Object.fromEntries(TILES.map(t => [t.id, t]));
+
+/* 外圈环线（按数组顺序即顺时针方向，首尾相连） */
+const RING = ['akihabara','hokosha','maid','ueno','hokumura','seaside','koishikawa','committee',
+  'shop','manseibashi','katsudou','kandamyojin','myojinzaka','ongaku','gakudou','okujou',
+  'utx','lantis','haikyo','rijichou','hirobe','arcade'];
+/* 内部支线（上野公园—东京巨蛋仅事件传送可走，普通行进不可进入） */
+const BRANCH_EDGES = [
+  ['hokosha','saitama'], ['arcade','saitama'], ['ueno','tokyo'],
+  ['koishikawa','yokohama'], ['yokohama','shop'],
+  ['rijichou','nagoya'], ['nagoya','otonokizaka'],
+  ['seibu','otonokizaka'], ['seibu','katsudou'],
+  ['otonokizaka','okujou'], ['otonokizaka','gakudou'],
+];
+
+const ADJ = {};
+TILES.forEach(t => ADJ[t.id] = []);
+const link = (a,b) => { ADJ[a].push(b); ADJ[b].push(a); };
+RING.forEach((t,i) => link(t, RING[(i+1) % RING.length]));
+BRANCH_EDGES.forEach(([a,b]) => link(a,b));
+
+/* =========================================================
+ * 三、游戏状态
+ * ========================================================= */
+function newPlayer(name){
+  return {
+    name, pos:'otonokizaka',
+    dir:null,                       // 行进方向：1=顺时针 -1=逆时针（开局选定后锁定）
+    chars:[],                       // 已获得的角色卡（id）
+    hanayoUsed:false, nozomiUsed:false,   // 「每圈一次」技能标记（经过穗村时重置）
+    mats:{ music:[], dance:[], costume:[] },
+    albums:[],
+    progress:0,                     // 胜利进度（每场LIVE成功+1）
+    mods:{ noGain:0, diceHalf:false, diceMinus:0, diceMinus2:false, gainPlus:0, liveUp:0,
+           noBuffs:false, blockChance:false, blockGather:0, nextAlbumDiscount:false,
+           skillsOff:false, blockChallenge:false },
+  };
+}
+const state = {
+  current:'red',
+  playerCount:2,
+  players:{
+    red:newPlayer('红方'), blue:newPlayer('蓝方'),
+    green:newPlayer('绿方'), yellow:newPlayer('黄方'),
+  },
+  gameOver:false,
+  single:false,            // 单机模式：红方玩家 vs AI蓝方
+  albumPool: ALBUM_POOL.map(a => ({ ...a, owner:null })),
+  charPool: CHARACTERS.map(c => c.id),   // 未被获得的角色卡（唯一性）
+  eventDeck:[], chanceDeck:[], challengeDeck:[],
+  logRing:[], lastDice:null,             // 联机同步用：日志缓冲 / 最近骰值
+  netReady:false, setupDone:false,       // 联机同步用：客人就绪 / 开局流程完成
+};
+const SEATS = ['red','blue','green','yellow'];
+const SEAT_NAMES = { red:'红方', blue:'蓝方', green:'绿方', yellow:'黄方' };
+const activeSeats = () => SEATS.slice(0, Math.max(2, Math.min(4, state.playerCount || 2)));
+/* 3-4人模式：回合传递与「对手」类效果均指向下一位玩家 */
+const other = pk => { const a = activeSeats(); return a[(a.indexOf(pk) + 1) % a.length]; };
+const rand = arr => arr[Math.floor(Math.random() * arr.length)];
+const DIR_LABEL = { 1:'顺时针', '-1':'逆时针' };
+
+/* =========================================================
+ * 四、弹窗
+ * ========================================================= */
+const modalMask = document.getElementById('modal-mask');
+
+/* ===== 联机层状态（方案C：免费公共 MQTT broker 中转，主机权威）===== */
+const NET = {
+  role:null, seat:null, roomId:'', client:null, connected:false,
+  guests:[], myId:null, pendingModal:null, remoteModal:null, gameOverShown:false, brokerIdx:0,
+  fxSteps:[], fxTimer:null, fxPlaying:false, fxPending:null, fxModal:null,   // 客人端移动动画
+  pendingCard:null,                                                      // 客人抽卡确认（主机等待中）
+};
+const BROKERS = ['wss://broker.emqx.io:8084/mqtt', 'wss://broker.hivemq.com:8884/mqtt'];
+
+let modalOptions = [];
+let modalSeq = 0;
+function showModalBase(title, bodyHTML, options, seat){
+  const ans = seat || state.current;   // 默认由当前回合方作答
+  document.getElementById('modal-title').textContent = title;
+  document.getElementById('modal-body').innerHTML = bodyHTML;
+  document.getElementById('modal-opts').innerHTML =
+    options.map((o,i) => `<button class="modal-btn" data-opt="${i}">${o.label}</button>`).join('');
+  modalOptions = options;
+  modalMask.classList.remove('hidden');
+  document.body.classList.add('modal-open');
+  /* 联机：由对方座位作答时，弹窗镜像到对方设备，本机锁定等待 */
+  if(NET.role === 'host' && NET.connected && ans !== 'red'){
+    modalSeq++;
+    NET.pendingModal = { msgId: modalSeq, options, seat: ans, title, bodyHTML };
+    send({ type:'modal', modal:{ msgId: modalSeq, title, bodyHTML, labels: options.map(o => o.label), seat: ans } });
+    document.getElementById('modal-body').innerHTML +=
+      `<div style="margin-top:8px;color:#b89ae0;">⏳ 等待${SEAT_NAMES[ans] || '对方'}选择…</div>`;
+    document.querySelectorAll('#modal-opts .modal-btn').forEach(b => { b.disabled = true; b.style.opacity = .55; });
+  }
+}
+function hideModal(){ modalMask.classList.add('hidden'); document.body.classList.remove('modal-open'); }
+document.getElementById('modal-opts').addEventListener('click', e => {
+  const btn = e.target.closest('.modal-btn');
+  if(!btn || btn.disabled) return;
+  if(NET.role === 'guest'){
+    const m = NET.remoteModal;
+    if(m && m.seat === NET.seat){
+      NET.remoteModal = null;
+      hideModal();
+      send({ type:'action', action:{ type:'modalSelect', msgId: m.msgId, index: +btn.dataset.opt, seat: NET.seat } });
+    }
+    return;
+  }
+  const opt = modalOptions[+btn.dataset.opt];
+  hideModal();
+  if(opt && opt.onSelect) opt.onSelect();
+});
+
+/* =========================================================
+ * 五、核心逻辑
+ * ========================================================= */
+function shuffle(arr){
+  for(let i = arr.length - 1; i > 0; i--){
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
+function refillDeck(deckName){
+  const src = deckName === 'eventDeck' ? EVENT_CARDS
+            : deckName === 'challengeDeck' ? CHALLENGE_CARDS : CHANCE_CARDS;
+  state[deckName] = shuffle([...src]);
+  log('卡堆已洗混，重新补充');
+}
+const totalMats = p => p.mats.music.length + p.mats.dance.length + p.mats.costume.length;
+/* 角色技能是否生效（「响彻东京巨蛋吧！」失败后 skillsOff 封印全部技能） */
+const skillActive = (pk, id) => { const p = state.players[pk]; return p.chars.includes(id) && !p.mods.skillsOff; };
+
+/* 角色卡获得（唯一性：获得后从卡池移除） */
+function grantChar(pk, id){
+  state.charPool = state.charPool.filter(x => x !== id);
+  state.players[pk].chars.push(id);
+  const c = CHAR_MAP[id];
+  log(`获得角色卡【${c.name}】！技能：${c.skill}`, pk);
+  render();
+}
+function offerCharPick(pk, after){
+  showModal('角色卡', '获得 1 张新角色（每张角色卡每局只有一人可以获得）：',
+    state.charPool.map(id => {
+      const c = CHAR_MAP[id];
+      return { label:`${c.name}<span class="req">${c.skill}</span>`,
+        onSelect(){ grantChar(pk, id); if(after) after(); endTurnStep(); } };
+    }));
+  return true;   // 弹窗流程延后结束回合
+}
+/* 「令人尊重的对手们」封印期间不能再获得增益类效果 */
+function addLiveUp(pk, n){
+  const p = state.players[pk];
+  if(p.mods.noBuffs){ log(`增益类效果被封印，检定加成无效`, pk); return; }
+  p.mods.liveUp += n;
+  log(`下一次LIVE检定 +${n}`, pk);
+}
+
+/* 角色素材加成：小鸟(服装+1) 绘里(舞蹈+1) 真姬(音乐+1) 妮可(全部+1) */
+function charGainBonus(p, cat){
+  if(p.mods.skillsOff) return 0;
+  let n = 0;
+  if(cat === 'costume' && p.chars.includes('kotori')) n++;
+  if(cat === 'dance'    && p.chars.includes('eli'))    n++;
+  if(cat === 'music'    && p.chars.includes('maki'))   n++;
+  if(p.chars.includes('nico')) n++;
+  return n;
+}
+/* 获得素材（受「无法获得素材」「素材获取+1」效果与角色加成影响） */
+function gainMaterial(pk, cat, fixedName){
+  const p = state.players[pk];
+  if(p.mods.noGain > 0){
+    log(`素材获取被封锁，无法获得素材`, pk);
+    return false;
+  }
+  let extra = 0;
+  if(p.mods.gainPlus > 0){
+    if(p.mods.noBuffs) log(`增益类效果被封印，「素材获取量+1」无效`, pk);
+    else { extra = 1; p.mods.gainPlus--; log(`触发「素材获取量+1」效果`, pk); }
+  }
+  const bonus = charGainBonus(p, cat);
+  const total = 1 + extra + bonus;
+  const first = fixedName || rand(TYPE_LIST[cat]);
+  const names = [first];
+  p.mats[cat].push(first);
+  /* 增益/角色加成的额外张数：不再复制同名素材，改为随机再获得一张同类型素材 */
+  for(let i = 1; i < total; i++){
+    const nm = rand(TYPE_LIST[cat]);
+    p.mats[cat].push(nm);
+    names.push(nm);
+  }
+  log(total > 1
+    ? `获得素材：${CAT_LABEL[cat]}「${first}」，另随机获得${CAT_LABEL[cat]}「${names.slice(1).join('」「')}」（增益/角色加成追加）`
+    : `获得素材：${CAT_LABEL[cat]}「${first}」`, pk);
+  return true;
+}
+
+/* 「选择素材获取」：穗村休息区、圣地巡礼计划等（先选类别，再选具体素材） */
+function offerMaterialPick(pk, then){
+  showModal('选择素材', '选择要获取的素材类别：', [
+    { label:'音乐素材', onSelect(){ pickMaterialType(pk, 'music', then); } },
+    { label:'舞蹈素材', onSelect(){ pickMaterialType(pk, 'dance', then); } },
+    { label:'服装素材', onSelect(){ pickMaterialType(pk, 'costume', then); } },
+  ]);
+  return true;   // 弹窗接管流程，回合由回调链延后结束（否则会双重切回合导致跳过下家）
+}
+function pickMaterialType(pk, cat, then){
+  showModal(`选择素材 · ${CAT_LABEL[cat]}`, '选择要获得的具体素材：',
+    TYPE_LIST[cat].map(name => ({ label:name, onSelect(){ gainMaterial(pk, cat, name); if(then) then(); } }))
+      .concat([{ label:'← 返回上一级', onSelect(){ offerMaterialPick(pk, then); } }]));   // 可反悔重选类别
+}
+
+/* 专辑创作（手动：素材足够时点按钮，弹窗选择）；demandMinus=三类素材可缺其一 */
+function canMake(p, a){
+  const ok = {
+    costume: a.costume.some(c => p.mats.costume.includes(c)),
+    music:   a.music.some(m => p.mats.music.includes(m)),
+    dance:   a.dance.some(d => p.mats.dance.includes(d)),
+  };
+  const need = (a.demandMinus || p.mods.nextAlbumDiscount) ? 2 : 3;
+  return Object.values(ok).filter(Boolean).length >= need;
+}
+function creatableList(pk){
+  const p = state.players[pk];
+  return state.albumPool.filter(a => !a.owner && canMake(p, a));
+}
+function albumReqText(a){
+  return `服装：${a.costume.join('/')} · 音乐：${a.music.join('/')} · 舞蹈：${a.dance.join('/')}`;
+}
+function createAlbum(pk, a){
+  const p = state.players[pk];
+  const take = (cat, opts) => {
+    const name = opts.find(o => p.mats[cat].includes(o));
+    if(!name) return null;   // demandMinus 时允许缺一类
+    p.mats[cat].splice(p.mats[cat].indexOf(name), 1);
+    return name;
+  };
+  const c = take('costume', a.costume), m = take('music', a.music), d = take('dance', a.dance);
+  const used = [[c, 'costume'], [m, 'music'], [d, 'dance']].filter(([n]) => n)
+    .map(([n, cat]) => `${CAT_LABEL[cat]}「${n}」`).join('、');
+  a.owner = pk;
+  p.albums.push(a.name);
+  p.mods.nextAlbumDiscount = false;   // 「动画化纪念」的下一张专辑优惠已消耗
+  log(`创作专辑《${a.name}》！（消耗：${used}）`, pk);
+}
+function doCreateAlbum(){
+  const pk = state.current;
+  const cands = creatableList(pk);
+  if(!cands.length) return;
+  showModal('创作专辑', '选择要创作的专辑（消耗对应素材各 1 张）：', cands.map(a => ({
+    label: `《${a.name}》<span class="req">${albumReqText(a)}</span>`,
+    onSelect(){ createAlbum(pk, a); render(); },
+  })).concat([{ label:'取消', onSelect(){} }]));
+}
+document.getElementById('create-album-btn').addEventListener('click', () => {
+  if(NET.role === 'guest'){ send({ type:'action', action:{ type:'createAlbum', seat: NET.seat } }); return; }
+  if(state.single && state.current !== 'red') return;   // AI回合不可代点
+  doCreateAlbum();
+});
+
+/* =========================================================
+ * 抽卡动画（事件/机遇/挑战卡）：卡片飞入屏幕中心 → 自动翻开 → 生效
+ *   单机：本机玩家与 AI 均自动翻卡（AI 可旁观），玩家点「生效」结算；
+ *   联机（主机权威）：主机广播 cardfx 让全员同步播动画；
+ *   客人自己抽的卡自动翻开后点「生效」确认（cardDone 回传），主机收到后才结算效果。
+ * ========================================================= */
+const cardMask = document.getElementById('card-mask');
+const drawCardEl = document.getElementById('draw-card');
+const CARD_META = {
+  event:     { label:'事件卡', sym:'♪' },
+  chance:    { label:'机遇卡', sym:'✦' },
+  challenge: { label:'挑战卡', sym:'⚡' },
+};
+let cardSeq = 0, cardTimers = [], cardDealDone = false;
+
+function resetCardFx(){
+  cardTimers.forEach(clearTimeout); cardTimers = [];
+  cardMask.classList.add('hidden');
+  cardMask.classList.remove('dealing');
+  drawCardEl.classList.remove('flipped');
+}
+/* mode: 'self'=本机玩家抽卡（自动翻开，手动生效）| 'ai'=AI自动翻卡自动生效 | 'other'=旁观（自动播放） */
+function showCardFx(card, mode, onProceed){
+  const meta = CARD_META[card.kind] || CARD_META.event;
+  cardTimers.forEach(clearTimeout); cardTimers = [];
+  drawCardEl.className = card.kind === 'chance' ? 't-chance' : card.kind === 'challenge' ? 't-challenge' : 't-event';
+  document.getElementById('card-back-type').textContent = meta.label;
+  document.getElementById('card-band').textContent = meta.label;
+  document.getElementById('card-sym').textContent = meta.sym;
+  document.getElementById('card-hint').textContent =
+    mode === 'ai' ? '🤖 AI 抽卡中…'
+    : mode === 'other' ? `等待 ${SEAT_NAMES[card.seat] || '对方'} 确认…`
+    : '翻开中…';
+  document.getElementById('card-name').textContent = card.name;
+  document.getElementById('card-desc').innerHTML = card.desc;
+  cardMask.classList.remove('hidden');
+  cardMask.classList.add('dealing');
+  void drawCardEl.offsetWidth;   // 强制重排以重启动画
+  cardDealDone = false;
+  cardTimers.push(setTimeout(() => { cardDealDone = true; cardMask.classList.remove('dealing'); }, 600));
+  const doFlip = () => { if(cardDealDone) drawCardEl.classList.add('flipped'); };
+  const doApply = () => {
+    if(!drawCardEl.classList.contains('flipped')) return;
+    resetCardFx();
+    if(onProceed) onProceed();
+  };
+  if(mode === 'self'){
+    drawCardEl.onclick = null;   // v0.29：玩家抽卡改为系统自动翻开，「生效」仍手动点击
+    document.getElementById('card-apply').onclick = e => { e.stopPropagation(); doApply(); };
+    cardTimers.push(setTimeout(doFlip, 850));
+  } else {
+    drawCardEl.onclick = null;
+    document.getElementById('card-apply').onclick = null;
+    cardTimers.push(setTimeout(doFlip, mode === 'ai' ? 1100 : 850));
+    cardTimers.push(setTimeout(doApply, mode === 'ai' ? 2500 : 2200));
+  }
+}
+/* 抽卡统一入口：播完动画并确认后，才执行 proceed（记录日志 + 结算效果） */
+function cardFxFlow(pk, kind, name, desc, proceed){
+  const payload = { msgId: ++cardSeq, seat: pk, kind, name, desc };
+  if(NET.role === 'host' && NET.connected){
+    send({ type:'cardfx', card: payload });
+    if(pk !== 'red'){   // 客人抽卡：全员播动画，效果待该客人确认后主机才结算
+      NET.pendingCard = { msgId: payload.msgId, seat: pk, kind, name, desc, proceed };
+      showCardFx(payload, 'other', null);
+      return;
+    }
+  }
+  const ai = state.single && pk === AI_SEAT;
+  showCardFx(payload, ai ? 'ai' : 'self', proceed);
+}
+
+function drawCard(pk, deckName, label){
+  if(NET.role === 'guest') return true;   // 客人端不执行抽卡：由主机结算并广播动画
+  if(!state[deckName].length) refillDeck(deckName);
+  const card = state[deckName].pop();
+  const kind = deckName === 'eventDeck' ? 'event' : 'chance';
+  cardFxFlow(pk, kind, card.name, card.desc, () => {
+    log(`抽取${label}【${card.name}】：${card.desc}`, pk);
+    if(applyCardEffect(pk, card) !== true) endTurnStep();
+  });
+  return true;   // 回合挂起：由抽卡流程（翻卡 → 生效）驱动后续
+}
+function applyCardEffect(pk, card){
+  const p = state.players[pk], foe = state.players[other(pk)];
+  switch(card.effect){
+    case 'gain':       gainMaterial(pk, card.payload.cat, card.payload.name); break;
+    case 'gainRandom': for(let i = 0; i < card.payload.n; i++) gainMaterial(pk, rand(['music','dance','costume'])); break;
+    case 'yell':
+      gainMaterial(pk, 'dance');
+      if(totalMats(p) < 3) gainMaterial(pk, rand(['music','dance','costume']));
+      break;
+    case 'foeDiceHalf':
+      if(skillActive(other(pk), 'umi')) log(`对手【园田海未】的技能：干扰效果无效！`, pk);
+      else { foe.mods.diceHalf = true; log(`对手下回合骰点减半`, pk); }
+      break;
+    case 'foeNoGain':
+      if(skillActive(other(pk), 'umi')) log(`对手【园田海未】的技能：干扰效果无效！`, pk);
+      else { foe.mods.noGain += 1; log(`对手下回合无法获得素材`, pk); }
+      break;
+    case 'gainPlus':
+      if(p.mods.noBuffs) log(`增益类效果被封印，无法获得`, pk);
+      else p.mods.gainPlus += 1;
+      break;
+    case 'umiTraining': {
+      const cats = ['music','dance','costume'];
+      const cat = rand(cats), name = rand(TYPE_LIST[cat]);
+      const got = gainMaterial(pk, cat, name);
+      const combo = state.albumPool.some(a => !a.owner && a[cat].includes(name)
+        && a.music.some(m => m === '梦想' || m === '夏天'));
+      if(got && combo){
+        log(`获得的素材可以和「梦想」/「夏天」组合成专辑！额外获得 1 张随机素材`, pk);
+        gainMaterial(pk, rand(cats));
+      }
+      break;
+    }
+    case 'spotlight': addLiveUp(pk, 1); break;
+    case 'senpai': {
+      const got = gainMaterial(pk, 'music', '友情');
+      if(got && creatableList(pk).length){
+        log(`获得「友情」后可以创作专辑！额外抽取 1 张随机素材`, pk);
+        gainMaterial(pk, rand(['music','dance','costume']));
+      }
+      break;
+    }
+    case 'encore':
+      if(!p.albums.length){ log(`没有已完成的专辑，【追加公演】无效`, pk); break; }
+      return offerEncore(pk);
+    case 'animeMem':
+      if(p.mods.noBuffs) log(`增益类效果被封印，无法获得`, pk);
+      else { p.mods.gainPlus += 1; p.mods.nextAlbumDiscount = true;
+             log(`下一次素材获取量 +1；下一张专辑创作时素材需求 -1`, pk); }
+      break;
+    case 'pilgrimage':
+      return offerMaterialPick(pk, () => {
+        p.mods.noGain += 2; log(`下回合不能获得素材`, pk);   // +2：本回合结束衰减1，下回合恰好生效
+        render(); endTurnStep();
+      });
+    case 'winter':
+      gainMaterial(pk, 'music', '冬天');
+      gainMaterial(pk, 'costume', '贝雷帽');
+      p.mods.noGain += 2; p.mods.diceMinus += 1;   // noGain+2：确保"下回合"生效（回合结束衰减1）
+      log(`下回合骰点-1 且无法获得素材`, pk);
+      break;
+    case 'gainChar':
+      if(!state.charPool.length){
+        log(`角色卡池已尽，改为获得 2 张随机素材`, pk);
+        for(let i = 0; i < 2; i++) gainMaterial(pk, rand(['music','dance','costume']));
+        break;
+      }
+      return offerCharPick(pk);
+    case 'popPoll':
+      if(state.charPool.length) return offerCharPick(pk, () => addLiveUp(pk, 1));
+      addLiveUp(pk, 1);
+      break;
+    case 'moveToTokyo':
+      p.pos = 'tokyo';
+      log(`移动至【东京巨蛋】`, pk);
+      return offerLive(pk, TILE_MAP.tokyo);
+  }
+}
+
+/* ---------- 挑战卡（挑战格触发；可发起或放弃） ---------- */
+function challengeEligible(pk, card){
+  const p = state.players[pk];
+  switch(card.effect){
+    case 'rainLive':   return state.albumPool.some(a => !a.owner
+        && a.music.some(m => p.mats.music.includes(m))
+        && a.dance.some(d => p.mats.dance.includes(d))
+        && !a.costume.some(c => p.mats.costume.includes(c)));
+    case 'denseTour':  return totalMats(p) >= 3;
+    case 'rivals':     return activeSeats().some(s => s !== pk && state.players[s].albums.length > p.albums.length);
+    case 'zeroBudget': return totalMats(p) <= 2;
+    case 'themeShow':  return true;
+    case 'tokyoDash':  return p.albums.length > 0;
+  }
+  return false;
+}
+function offerChallenge(pk){
+  if(NET.role === 'guest') return true;
+  const p = state.players[pk];
+  if(!state.challengeDeck.length) refillDeck('challengeDeck');
+  const card = state.challengeDeck.pop();
+  cardFxFlow(pk, 'challenge', card.name, card.desc, () => {
+    log(`抽取挑战卡【${card.name}】：${card.desc}`, pk);
+    const ok = challengeEligible(pk, card);
+    if(!ok) log(`不满足发起条件，只能放弃`, pk);
+    const opts = [];
+    if(ok) opts.push({ label:'发起挑战', onSelect(){ doChallenge(pk, card); } });
+    opts.push({ label:'放弃这次挑战', onSelect(){ log(`放弃挑战【${card.name}】`, pk); endTurnStep(); } });
+    showModal(`挑战 · ${card.name}`,
+      ok ? '卡片已翻开，请选择是否发起这次挑战。' : '⚠ 当前不满足发起条件，只能放弃。',
+      opts);
+  });
+  return true;   // 回合挂起：由抽卡流程驱动后续
+}
+function doChallenge(pk, card){
+  const p = state.players[pk];
+  const done = () => { render(); endTurnStep(); };
+  switch(card.effect){
+    case 'rainLive': {
+      const a = state.albumPool.find(a => !a.owner
+        && a.music.some(m => p.mats.music.includes(m))
+        && a.dance.some(d => p.mats.dance.includes(d))
+        && !a.costume.some(c => p.mats.costume.includes(c)));
+      const need = rand(a.costume);
+      p.mats.costume.push(need);
+      p.mods.diceMinus += 2;
+      log(`挑战【雨中追加公演】成功！获得所需服装素材「${need}」；接下来 2 回合骰点 -1`, pk);
+      done();
+      break;
+    }
+    case 'denseTour': {
+      const cands = state.albumPool.filter(a => !a.owner);
+      if(!cands.length){ log(`没有可指定的未完成专辑，挑战失效`, pk); done(); break; }
+      showModal('超密集巡演 · 指定专辑',
+        '选择 1 张未完成专辑，其素材需求 -1（之后创作它时三类素材可缺其一）：',
+        cands.map(a => ({
+          label:`《${a.name}》<span class="req">${albumReqText(a)}</span>`,
+          onSelect(){
+            a.demandMinus = true;
+            log(`《${a.name}》素材需求 -1！`, pk);
+            for(let i = 0; i < 2; i++){
+              const cats = ['music','dance','costume'].filter(c => p.mats[c].length);
+              if(!cats.length) break;
+              const cat = rand(cats), arr = p.mats[cat], name = rand(arr);
+              arr.splice(arr.indexOf(name), 1);
+              log(`弃置素材「${name}」`, pk);
+            }
+            done();
+          } })));
+      break;
+    }
+    case 'rivals': {
+      const rivals = activeSeats().filter(s => s !== pk && state.players[s].albums.length > p.albums.length);
+      if(!rivals.length){ log(`没有已完成专辑数领先于你的对手，挑战失效`, pk); done(); break; }
+      showModal('令人尊重的对手们 · 指定对手',
+        '选择 1 名已完成专辑数领先于你的对手，向 TA 发起挑战：',
+        rivals.map(s => ({
+          label:`${state.players[s].name}（已完成专辑 ${state.players[s].albums.length} 张）`,
+          onSelect(){
+            log(`向【${state.players[s].name}】宣战！`, pk);
+            addLiveUp(pk, 2);
+            p.mods.noBuffs = true;
+            log(`本局剩余时间内不能再获得增益类效果`, pk);
+            if(state.charPool.length){ offerCharPick(pk); }
+            else { log(`角色卡池已尽，跳过角色获得`, pk); done(); }
+          } })));
+      break;
+    }
+    case 'zeroBudget': {
+      const cands = state.albumPool.filter(a => !a.owner);
+      if(!cands.length){ log(`没有可指定的未完成专辑，挑战失效`, pk); done(); break; }
+      showModal('零预算LIVE · 指定专辑', '选择 1 张专辑立即完成（无需任何素材）：',
+        cands.map(a => ({
+          label:`《${a.name}》`,
+          onSelect(){
+            a.owner = pk; p.albums.push(a.name);
+            p.mods.blockChance = true;
+            log(`零预算奇迹！《${a.name}》直接完成；本局剩余时间内不能触发机遇格`, pk);
+            done();
+          } })));
+      break;
+    }
+    case 'themeShow': {
+      showModal('主题公演 · 二选一', '选择你的公演主题：', [
+        { label:'A：获得 1 张「梦想」或「奇迹」素材，下回合骰点 -2', onSelect(){
+            showModal('选择素材', '获得哪一张？', [
+              { label:'梦想（音乐）', onSelect(){ p.mats.music.push('梦想'); p.mods.diceMinus2 = true; log(`获得音乐素材「梦想」；下回合骰点 -2`, pk); done(); } },
+              { label:'奇迹（音乐）', onSelect(){ p.mats.music.push('奇迹'); p.mods.diceMinus2 = true; log(`获得音乐素材「奇迹」；下回合骰点 -2`, pk); done(); } },
+            ]);
+          } },
+        { label:'B：下一次LIVE检定 +2，接下来 2 回合不能触发素材格', onSelect(){
+            addLiveUp(pk, 2);
+            p.mods.blockGather += 2;
+            log(`接下来 2 回合素材格无效`, pk);
+            done();
+          } },
+      ]);
+      break;
+    }
+    case 'tokyoDash': {
+      const mine = state.albumPool.filter(a => a.owner === pk);
+      if(!mine.length){ log(`没有已完成的专辑，无法演出`, pk); done(); break; }
+      p.pos = 'tokyo';
+      setPieceTo(pk, 'tokyo');
+      log(`响彻东京巨蛋吧！立即传送至【东京巨蛋】进行LIVE检定`, pk);
+      showModal('东京巨蛋 · 紧急LIVE',
+        '选择要演出的专辑（2骰 > 11；失败则本局角色技能失效，且无法触发挑战格）：',
+        mine.map(a => ({ label:`《${a.name}》`, onSelect(){ doLiveCheck(pk, a, TILE_MAP.tokyo, { dash:true }); } })));
+      break;
+    }
+  }
+}
+
+/* ---------- 追加公演（机遇卡）：在当前位置立即检定 ---------- */
+function offerEncore(pk){
+  const p = state.players[pk];
+  showModal('追加公演', '在当前位置立即进行LIVE检定（本次检定 -2，失败专辑回到专辑池）。选择要演出的专辑：',
+    p.albums.map(name => ({ label:`《${name}》`, onSelect(){
+      const a = state.albumPool.find(x => x.owner === pk && x.name === name);
+      doLiveCheck(pk, a, { name:TILE_MAP[p.pos].name, type:'LIVE场馆' }, { modifier:-2 });
+    } })).concat([{ label:'取消，不演出', onSelect(){ endTurnStep(); } }]));
+  return true;
+}
+
+/* ---------- 素材交易（LoveLive大赛组委会 / 交易格） ---------- */
+function uniqMats(p){
+  const out = [];
+  ['music','dance','costume'].forEach(cat => [...new Set(p.mats[cat])].forEach(n => out.push({ cat, name:n })));
+  return out;
+}
+function offerTrade(pk){
+  const p = state.players[pk], foe = state.players[other(pk)];
+  const dupes = [];
+  ['music','dance','costume'].forEach(cat => {
+    const counts = {};
+    p.mats[cat].forEach(n => counts[n] = (counts[n] || 0) + 1);
+    Object.keys(counts).forEach(n => { if(counts[n] >= 2) dupes.push({ cat, name:n }); });
+  });
+  const canFoe = foe.pos === 'committee' && totalMats(p) > 0 && totalMats(foe) > 0 && p.mods.noGain === 0;
+  const opts = [];
+  if(dupes.length) opts.push({ label:'同素材兑换：2 张同名素材 → 1 张任意素材', onSelect(){ tradeDupe(pk, dupes); } });
+  if(canFoe) opts.push({ label:`与${foe.name}交换素材（双方各给出 1 张，1:1）`, onSelect(){ tradeFoe(pk); } });
+  opts.push({ label:'不交易，结束', onSelect(){ endTurnStep(); } });
+  if(opts.length === 1){ log(`在【${TILE_MAP[p.pos].name}】没有可进行的交易`, pk); endTurnStep(); return true; }
+  showModal('素材交易 · LoveLive大赛组委会',
+    '两个同素材可以交换任意素材 1 张' + (canFoe ? '；同地块有对手棋子，可发起素材交换（单次 1:1）' : '') + '：', opts);
+  return true;
+}
+function tradeDupe(pk, dupes){
+  showModal('同素材兑换 · 选择消耗', '选择 1 组同名素材（2 张）进行兑换：',
+    dupes.map(d => ({ label:`${CAT_LABEL[d.cat]}「${d.name}」×2`, onSelect(){
+      const arr = state.players[pk].mats[d.cat];
+      arr.splice(arr.indexOf(d.name), 1);
+      arr.splice(arr.indexOf(d.name), 1);
+      log(`消耗 ${CAT_LABEL[d.cat]}「${d.name}」×2 进行兑换`, pk);
+      offerMaterialPick(pk, () => endTurnStep());
+    } })));
+}
+function tradeFoe(pk){
+  const p = state.players[pk], foe = state.players[other(pk)];
+  showModal('素材交换 · 第 1 步', '选择你给出的素材（1 张）：',
+    uniqMats(p).map(m => ({ label:`${CAT_LABEL[m.cat]}「${m.name}」`, onSelect(){
+      showModal('素材交换 · 第 2 步', `选择要向${foe.name}换取的素材（1:1）：`,
+        uniqMats(foe).map(t => ({ label:`${CAT_LABEL[t.cat]}「${t.name}」`, onSelect(){ confirmTradeFoe(pk, m, t); } })));
+    } })));
+}
+function confirmTradeFoe(pk, give, take){
+  const p = state.players[pk], foe = state.players[other(pk)];
+  showModal(`素材交换 · 请${foe.name}确认`,
+    `${p.name} 提议：给出 ${CAT_LABEL[give.cat]}「${give.name}」 ⇄ 换取 ${CAT_LABEL[take.cat]}「${take.name}」（1:1）。请${foe.name}玩家选择：`, [
+    { label:'同意交换', onSelect(){
+        if(foe.mods.noGain > 0){ log(`${foe.name}当前无法获得素材，交换取消`, pk); endTurnStep(); return; }
+        p.mats[give.cat].splice(p.mats[give.cat].indexOf(give.name), 1);
+        foe.mats[take.cat].splice(foe.mats[take.cat].indexOf(take.name), 1);
+        foe.mats[give.cat].push(give.name);
+        gainMaterial(pk, take.cat, take.name);
+        log(`素材交换达成：${p.name} 的「${give.name}」 ⇄ ${foe.name} 的「${take.name}」`, pk);
+        render();
+        endTurnStep();
+      } },
+    { label:'拒绝交换', onSelect(){ log(`${foe.name}拒绝了交换请求`, pk); endTurnStep(); } },
+  ], other(pk));
+}
+
+/* 掷骰 */
+function rollDice(p){
+  let base = 1 + Math.floor(Math.random() * 6);
+  let final = base;
+  const notes = [];
+  if(p.mods.diceHalf){ p.mods.diceHalf = false; final = Math.ceil(final / 2); notes.push('骰点减半'); }
+  if(p.mods.diceMinus > 0){ p.mods.diceMinus--; final = Math.max(1, final - 1); notes.push('骰点-1'); }
+  if(p.mods.diceMinus2){ p.mods.diceMinus2 = false; final = Math.max(1, final - 2); notes.push('骰点-2'); }
+  return { base, final, notes };
+}
+
+/* ---------- 行进：方向锁定 + 岔路自选 ---------- */
+let moving = null;   // { pk, remaining, prev, cur, route }
+/* 音乃木坂出门：顺时针→屋顶，逆时针→学校礼堂（按行进方向自动出门，不选向） */
+const START_EXIT = { 1:'okujou', '-1':'gakudou' };
+/* 场馆岔路可选的场馆格（东京巨蛋仅事件可进） */
+const VENUE_IDS = ['saitama','yokohama','nagoya','seibu'];
+function forwardOptions(cur, prev, dir, usedVenues){
+  if(cur === 'otonokizaka') return [START_EXIT[dir]];
+  /* 音乃木坂出发后视为不可通行（不能经过/返回）；东京巨蛋仅事件可进 */
+  let cands = ADJ[cur].filter(n => n !== prev && n !== 'tokyo' && n !== 'otonokizaka');
+  const inRing = RING.indexOf(cur);
+  if(inRing >= 0){
+    const ringNext = RING[(inRing + dir + RING.length) % RING.length];   // 沿锁定方向的外圈下一格
+    /* 仅场馆岔路可选，其余自动前进；同一移动内每个场馆支线最多穿越一次（防在场馆四格反复横跳） */
+    cands = cands.filter(n => n === ringNext || (VENUE_IDS.includes(n) && !(usedVenues || []).includes(n)));
+  }
+  if(!cands.length) cands = ADJ[cur].filter(n => n !== 'tokyo' && n !== 'otonokizaka' && !(usedVenues || []).includes(n));
+  if(!cands.length) cands = ADJ[cur].filter(n => n !== 'otonokizaka');
+  return cands;
+}
+function startMove(pk, steps){
+  const p = state.players[pk];
+  moving = { pk, remaining: steps, prev: null, cur: p.pos, route: [p.pos], usedVenues: [] };
+  rollBtn.disabled = true;
+  stepMove();
+}
+function stepMove(){
+  const m = moving;
+  if(m.remaining <= 0) return finishMove();
+  const cands = forwardOptions(m.cur, m.prev, state.players[m.pk].dir, m.usedVenues);
+  if(cands.length === 1){ advance(cands[0]); return; }
+  showModal(
+    `场馆岔路 · 还剩 ${m.remaining} 步`,
+    `当前在【${TILE_MAP[m.cur].name}】，是否进入场馆支线（不能回头，每场馆每次移动限穿行一次）：`,
+    cands.map(id => ({ label: '→ ' + TILE_MAP[id].name + `（${TILE_MAP[id].type}）`, onSelect(){ advance(id); } }))
+  );
+}
+function advance(id){
+  const m = moving;
+  if(VENUE_IDS.includes(id) && !m.usedVenues.includes(id)) m.usedVenues.push(id);
+  m.route.push(id); m.prev = m.cur; m.cur = id; m.remaining--;
+  setPieceTo(m.pk, m.cur);
+  if(NET.role === 'host' && NET.connected) send({ type:'fx', fx:{ kind:'step', pk: m.pk, tile: id } });
+  setTimeout(afterArrive, 280);
+}
+/* 图上距离（音乃木坂出发后不可通行） */
+function distTo(a, b){
+  if(a === b) return 0;
+  const q = [[a, 0]], seen = new Set([a]);
+  while(q.length){
+    const [x, d] = q.shift();
+    for(const n of ADJ[x]){
+      if(n === 'otonokizaka') continue;
+      if(n === b) return d + 1;
+      if(!seen.has(n)){ seen.add(n); q.push([n, d + 1]); }
+    }
+  }
+  return 99;
+}
+function afterArrive(){
+  stepMove();
+}
+function finishMove(){
+  const m = moving;
+  state.players[m.pk].pos = m.cur;
+  log(`移动${m.route.length - 1}格：${m.route.map(id => TILE_MAP[id].name).join(' → ')}`, m.pk);
+  const passedRest = m.route.slice(0, -1).includes('hokumura');   // 路过（非停留）穗村
+  if(m.route.includes('hokumura')){   // 经过休息区视为新的一圈：重置每圈一次的技能标记
+    state.players[m.pk].hanayoUsed = false;
+    state.players[m.pk].nozomiUsed = false;
+  }
+  moving = null;
+  const p = state.players[m.pk];
+  /* 小泉花阳：每圈一次，停留在穗村 2 格范围内时可直接进入（路过不触发） */
+  if(skillActive(m.pk, 'hanayo') && !p.hanayoUsed && m.cur !== 'hokumura' && distTo(m.cur, 'hokumura') <= 2){
+    p.hanayoUsed = true;
+    showModal('小泉花阳的技能',
+      `停留在【${TILE_MAP[m.cur].name}】，距【穗村】仅 2 格以内。每圈一次机会，直接移动到穗村休息？`, [
+      { label:'直接进入穗村（获得休息区效果）', onSelect(){
+          state.players[m.pk].pos = 'hokumura';
+          setPieceTo(m.pk, 'hokumura');
+          if(NET.role === 'host' && NET.connected) send({ type:'fx', fx:{ kind:'step', pk: m.pk, tile: 'hokumura' } });
+          log(`花阳的实感！从【${TILE_MAP[m.cur].name}】直接进入【穗村】`, m.pk);
+          log(`在【穗村】休息，可选择获得 1 张素材`, m.pk);
+          offerMaterialPick(m.pk, () => {
+            if(passedRest && skillActive(m.pk, 'nozomi') && !p.nozomiUsed){
+              p.nozomiUsed = true;
+              offerDivination(m.pk);
+              return;
+            }
+            endTurnStep();
+          });
+        } },
+      { label:'原地继续结算', onSelect(){ resumeTileFlow(m.pk, passedRest); } },
+    ]);
+    return;
+  }
+  resumeTileFlow(m.pk, passedRest);
+}
+/* 移动结束后的常规结算：希占卜 → 地块触发 → 结束回合 */
+function resumeTileFlow(pk, passedRest){
+  const p = state.players[pk];
+  if(passedRest && skillActive(pk, 'nozomi') && !p.nozomiUsed){   // 东条希：路过休息区后占卜
+    p.nozomiUsed = true;
+    offerDivination(pk);
+    return;
+  }
+  const deferred = triggerTile(pk);   // LIVE/挑战/角色弹窗流程会自行结束回合
+  if(!deferred) endTurnStep();
+}
+/* 东条希占卜（原型简化：50%成功率，成功获得对手1张随机素材） */
+/* 占卜结束后继续结算当前停留格（修复占卜与 LIVE 场馆等地块触发的冲突） */
+function afterDivination(pk){
+  const deferred = triggerTile(pk);
+  if(!deferred) endTurnStep();
+}
+function offerDivination(pk){
+  const foe = other(pk);
+  showModal('东条希的占卜', '路过【穗村】后进行占卜（原型简化：50%成功率）。是否指定对手占卜？', [
+    { label:`对 ${state.players[foe].name} 占卜`, onSelect(){
+        if(Math.random() < 0.5){
+          const cats = ['music','dance','costume'].filter(c => state.players[foe].mats[c].length);
+          if(!cats.length){ log(`占卜成功！但对手身上没有素材，一无所获`, pk); }
+          else{
+            const cat = rand(cats), arr = state.players[foe].mats[cat];
+            const name = rand(arr);
+            arr.splice(arr.indexOf(name), 1);
+            state.players[pk].mats[cat].push(name);
+            log(`占卜成功！夺得了对手的素材「${name}」`, pk);
+          }
+        } else log(`占卜失败……什么都没有发生`, pk);
+        render();
+        afterDivination(pk);
+      } },
+    { label:'不占卜', onSelect(){ afterDivination(pk); } },
+  ]);
+}
+function endTurnStep(){
+  if(state.gameOver){ render(); return; }
+  rollBtn.disabled = false;
+  switchTurn();
+}
+
+/* 停留地块触发（返回 true 表示弹窗流程未结束，回合稍后自行结束） */
+function triggerTile(pk){
+  const t = TILE_MAP[state.players[pk].pos];
+  switch(t.type){
+    case '音乐素材格':
+    case '舞蹈素材格':
+    case '服装素材格':
+      if(state.players[pk].mods.blockGather > 0){ log(`素材格效果被封印（还剩 ${state.players[pk].mods.blockGather} 回合）`, pk); return false; }
+      gainMaterial(pk, { '音乐素材格':'music', '舞蹈素材格':'dance', '服装素材格':'costume' }[t.type]);
+      return false;
+    case '休息区':
+      log(`在【${t.name}】休息，可选择获得 1 张素材`, pk);
+      offerMaterialPick(pk, () => endTurnStep());
+      return true;
+    case '事件格':
+      return drawCard(pk, 'eventDeck',  '事件卡');
+    case '机遇格':
+      if(state.players[pk].mods.blockChance){ log(`被【零预算LIVE】封印，本局不能触发机遇格`, pk); return false; }
+      return drawCard(pk, 'chanceDeck', '机遇卡');
+    case '挑战格':
+      if(state.players[pk].mods.blockChallenge){ log(`被【响彻东京巨蛋吧！】封印，本局不能触发挑战格`, pk); return false; }
+      return offerChallenge(pk);
+    case '交易格': return offerTrade(pk);
+    case 'LIVE场馆':
+    case '特殊场馆': return offerLive(pk, t);
+    case '起点': log(`回到【${t.name}】，稍作整备`, pk); return false;
+  }
+  return false;
+}
+
+/* ---------- LIVE检定与胜利进度 ---------- */
+function offerLive(pk, t){
+  const myAlbums = state.albumPool.filter(a => a.owner === pk);
+  if(!myAlbums.length){
+    log(`到达【${t.name}】，但没有已完成的专辑，无法开办LIVE`, pk);
+    return false;
+  }
+  const isTokyo = t.type === '特殊场馆';
+  showModal('开办LIVE',
+    `当前在【${t.name}】：2骰 > ${isTokyo ? 11 : 6} 判定；成功胜利进度 +${isTokyo ? 2 : 1}${isTokyo ? '（东京巨蛋额外+1）' : ''}，失败则专辑回到专辑池。选择要演出的专辑：`,
+    myAlbums.map(a => ({ label:`《${a.name}》`, onSelect(){ doLiveCheck(pk, a, t); } }))
+    .concat([{ label:'取消，不开办', onSelect(){ endTurnStep(); } }]));
+  return true;
+}
+function doLiveCheck(pk, a, t, opts = {}){
+  const isTokyo = t.type === '特殊场馆';
+  const target = isTokyo ? 11 : 6;
+  const d1 = 1 + Math.floor(Math.random() * 6);
+  const d2 = 1 + Math.floor(Math.random() * 6);
+  const sum = d1 + d2;
+  const p = state.players[pk];
+  let adj = 0; const notes = [];
+  if(skillActive(pk, 'honoka')){ adj += 1; notes.push('穗乃果检定+1'); }   // 高坂穗乃果
+  if(skillActive(pk, 'nico'))  { adj -= 2; notes.push('妮可检定-2'); }     // 矢泽妮可
+  if(p.mods.liveUp > 0){ adj += p.mods.liveUp; notes.push(`加成+${p.mods.liveUp}`); p.mods.liveUp = 0; }
+  if(opts.modifier){ adj += opts.modifier; notes.push(`临时${opts.modifier > 0 ? '+' : ''}${opts.modifier}`); }
+  const check = sum + adj;
+  diceEl.textContent = sum;
+  state.lastDice = sum;
+  log(`LIVE检定《${a.name}》（${isTokyo ? '东京巨蛋' : '普通场馆'}，2骰 > ${target}）：骰出 ${d1} + ${d2} = ${sum}`
+      + (notes.length ? `（${notes.join('，')}）→ 有效检定 ${check}` : ''), pk);
+  if(check > target){
+    a.owner = 'done';                                    // 专辑随LIVE成功而消失
+    p.albums = p.albums.filter(n => n !== a.name);
+    p.progress += isTokyo ? 2 : 1;
+    log(`LIVE大成功！胜利进度 +${isTokyo ? 2 : 1}，当前 ${p.progress}/${WIN_TARGET}`, pk);
+    playLiveBgm(a.name);                                 // v0.31：专属曲片段淡入播放（联机时各端同步）
+    if(NET.role === 'host' && NET.connected) send({ type:'fx', fx:{ kind:'liveBgm', album: a.name } });
+    checkWin(pk);
+  } else {
+    a.owner = null;                                      // 失败则专辑回到专辑池
+    p.albums = p.albums.filter(n => n !== a.name);
+    log(`LIVE检定失败……《${a.name}》回到专辑池，可重新创作`, pk);
+    if(opts.dash){                                       // 挑战「响彻东京巨蛋吧！」的失败代价
+      p.mods.skillsOff = true;
+      p.mods.blockChallenge = true;
+      log(`【响彻东京巨蛋吧！】代价：本局角色技能全部失效，且无法再触发挑战格！`, pk);
+    }
+  }
+  render();
+  endTurnStep();
+}
+function checkWin(pk){
+  if(state.players[pk].progress < WIN_TARGET) return;
+  state.gameOver = true;
+  log(`🏆 ${state.players[pk].name}成功开办${WIN_TARGET}场LIVE，获得LoveLive大赛冠军！`);
+  showModal('比赛结束',
+    `🏆 ${state.players[pk].name} 成功开办 ${WIN_TARGET} 场LIVE，获得LoveLive大赛冠军！`,
+    [{ label:'再来一局', onSelect(){ location.reload(); } }], 'red');
+}
+
+/* 回合切换 */
+function switchTurn(){
+  const cur = state.current;
+  const p = state.players[cur];
+  p.mods.noGain = Math.max(0, p.mods.noGain - 1);
+  if(p.mods.blockGather > 0) p.mods.blockGather--;
+  const nxt = other(cur);
+  state.current = nxt;
+  if(state.players[nxt].mods.noGain > 0) log(`效果持续：本回合无法获得素材`, nxt);
+  log(`轮到 ${state.players[nxt].name} 行动`, null, true);
+  render();
+}
+
+/* =========================================================
+ * 六、渲染与日志
+ * ========================================================= */
+const logEl = document.getElementById('log');
+function appendLogEntry(e){
+  const el = document.createElement('div');
+  el.className = 'entry' + (e.isTurn ? ' turn' : '');
+  el.innerHTML = (e.pk ? `<span class="tag ${e.pk}">${state.players[e.pk].name}</span>` : '') + e.text;
+  logEl.appendChild(el);
+  while(logEl.children.length > 200) logEl.removeChild(logEl.firstChild);
+  logEl.scrollTop = logEl.scrollHeight;
+}
+function log(text, pk, isTurn){
+  const e = { text, pk: pk || null, isTurn: !!isTurn };
+  state.logRing.push(e);
+  if(state.logRing.length > 150) state.logRing.shift();
+  appendLogEntry(e);
+}
+function rebuildLog(){   // 联机客人端：由快照重建日志
+  logEl.innerHTML = '';
+  state.logRing.forEach(appendLogEntry);
+}
+function placePiece(id, tileId, dx){
+  const t = TILE_MAP[tileId];
+  const el = document.getElementById(id);
+  el.style.left = (t.x + dx) + '%';
+  el.style.top  = t.y + '%';
+}
+function setPieceTo(pk, tileId){
+  const act = activeSeats();
+  const same = act.some(x => x !== pk && state.players[x].pos === tileId)
+    || (!!moving && moving.pk !== pk && act.includes(moving.pk) && moving.cur === tileId);
+  placePiece('piece-' + pk, tileId, same ? (act.indexOf(pk) % 2 === 0 ? -2.4 : 2.4) : 0);
+  const el = document.getElementById('piece-' + pk);
+  const p = state.players[pk];
+  el.title = `${p.name} · ${TILE_MAP[tileId].name}（${TILE_MAP[tileId].type}）· 行进：${DIR_LABEL[p.dir] || '未选择'}`;
+}
+function updatePieces(){
+  const act = activeSeats();
+  SEATS.forEach(pk => {
+    document.getElementById('piece-' + pk).style.display = act.includes(pk) ? 'flex' : 'none';
+  });
+  const posCount = {};
+  act.forEach(pk => { const pos = state.players[pk].pos; posCount[pos] = (posCount[pos] || 0) + 1; });
+  act.forEach((pk, i) => {
+    const same = posCount[state.players[pk].pos] > 1;
+    placePiece('piece-' + pk, state.players[pk].pos, same ? (i % 2 === 0 ? -2.4 : 2.4) : 0);
+    const p = state.players[pk];
+    document.getElementById('piece-' + pk).title =
+      `${p.name} · ${TILE_MAP[p.pos].name}（${TILE_MAP[p.pos].type}）· 行进：${DIR_LABEL[p.dir] || '未选择'}`;
+  });
+}
+function matSectionHTML(pk){
+  const p = state.players[pk];
+  const rows = ['music','dance','costume'].map(cat => {
+    const counts = {};
+    p.mats[cat].forEach(n => counts[n] = (counts[n] || 0) + 1);
+    const chips = Object.entries(counts).map(([n,c]) => `<span class="chip-mat">${n}×${c}</span>`).join('')
+      || '<span class="empty-note">暂无</span>';
+    return `<div class="mat-row"><span class="mat-cat ${cat}">${CAT_LABEL[cat]}</span><div class="chips">${chips}</div></div>`;
+  }).join('');
+  return `<div class="psec ${pk}"><span class="tag ${pk}">${p.name}</span>${rows}</div>`;
+}
+function renderMats(){
+  /* 素材区按玩家数量动态生成对应块数：每人独占一块，宽度自动均分，免滚动 */
+  const act = activeSeats();
+  act.forEach((pk, i) => {
+    const blk = document.getElementById('mat-block-' + i);
+    blk.style.display = '';
+    blk.style.flexGrow = (1.8 / act.length).toFixed(2);
+    document.getElementById('mat-title-' + i).textContent = '素材 · ' + SEAT_NAMES[pk];
+    document.getElementById('mat-body-' + i).innerHTML = matSectionHTML(pk);
+  });
+  for(let i = act.length; i < 4; i++) document.getElementById('mat-block-' + i).style.display = 'none';
+}
+function albumSectionHTML(pk){
+  const p = state.players[pk];
+  const cards = p.albums.map(n => `<div class="album-card">《${n}》</div>`).join('')
+    || '<span class="empty-note">暂未创作专辑</span>';
+  return `<div class="psec ${pk}"><span class="tag ${pk}">${p.name}</span><div class="sec-wrap">${cards}</div></div>`;
+}
+function renderAlbums(){
+  document.getElementById('album-body').innerHTML = activeSeats().map(albumSectionHTML).join('');
+}
+function charSectionHTML(pk){
+  const p = state.players[pk];
+  const cards = p.chars.map(id => {
+    const c = CHAR_MAP[id];
+    return `<div class="char-card" title="${c.name}：${c.skill}">${c.name}</div>`;
+  }).join('') || '<span class="empty-note">暂无角色</span>';
+  return `<div class="psec ${pk}"><span class="tag ${pk}">${p.name}</span><div class="sec-wrap">${cards}</div></div>`;
+}
+function renderChars(){
+  document.getElementById('char-body').innerHTML = activeSeats().map(charSectionHTML).join('');
+}
+/* 增益/减益状态（绿色=增益，红色=减益） */
+function buffList(p){
+  const out = [];
+  if(p.mods.gainPlus > 0) out.push(['素材获取+1×' + p.mods.gainPlus, 1]);
+  if(p.mods.liveUp > 0) out.push(['LIVE检定+' + p.mods.liveUp, 1]);
+  if(p.mods.nextAlbumDiscount) out.push(['下一张专辑需求-1', 1]);
+  if(p.mods.diceHalf) out.push(['下回合骰点减半', 0]);
+  if(p.mods.diceMinus > 0) out.push(['骰点-1×' + p.mods.diceMinus, 0]);
+  if(p.mods.diceMinus2) out.push(['下回合骰点-2', 0]);
+  if(p.mods.noGain > 0) out.push(['禁止获得素材×' + p.mods.noGain, 0]);
+  if(p.mods.blockGather > 0) out.push(['禁止素材格×' + p.mods.blockGather, 0]);
+  if(p.mods.blockChance) out.push(['禁止机遇格', 0]);
+  if(p.mods.blockChallenge) out.push(['禁止挑战格', 0]);
+  if(p.mods.skillsOff) out.push(['角色技能失效', 0]);
+  if(p.mods.noBuffs) out.push(['增益封印', 0]);
+  return out;
+}
+function renderBuffs(pk){
+  document.getElementById('buffs-' + pk).innerHTML = buffList(state.players[pk])
+    .map(([t, good]) => `<span class="buff${good ? '' : ' bad'}">${t}</span>`).join('');
+}
+function renderPool(pk){
+  const p = state.players[pk];
+  /* 按当前玩家的素材缺口排序：可创作(缺口0)置顶 → 缺口少在前 → 已被锁定 → 已完成沉底 */
+  const rankOf = a => {
+    if(a.owner === 'done') return 99;
+    if(a.owner) return 98;
+    return ['costume','music','dance'].reduce((s, cat) =>
+      s + a[cat].filter(n => !p.mats[cat].includes(n)).length, 0);
+  };
+  const items = state.albumPool.map((a, i) => ({ a, i }))
+    .sort((x, y) => rankOf(x.a) - rankOf(y.a) || x.i - y.i);
+  document.getElementById('pool-list').innerHTML = items.map(({ a }) => {
+    let cls = '';
+    if(a.owner === 'done') cls = 'done';
+    else if(a.owner) cls = 'owned-' + a.owner;
+    else if(canMake(p, a)) cls = 'creatable';
+    const req = [['costume','服'],['music','音'],['dance','舞']].map(([cat, lab]) => {
+      const opts = a[cat].map(n =>
+        `<span class="${p.mats[cat].includes(n) ? 'have' : ''}">${n}</span>`).join('/');
+      return `${lab}:${opts}`;
+    }).join(' · ');
+    const mark = a.owner && a.owner !== 'done'
+      ? `<span class="tag ${a.owner}" style="font-size:10px;margin-left:4px;">${state.players[a.owner].name}</span>` : '';
+    return `<div class="pool-item ${cls}"><div class="p-name">《${a.name}》${mark}</div><div class="p-req">${req}</div></div>`;
+  }).join('');
+}
+/* 角色一览：显示全部角色与技能，未被获取的高亮，已获取的淡化并标注归属 */
+function renderRoster(){
+  const act = activeSeats();
+  document.getElementById('roster-list').innerHTML = CHARACTERS.map(c => {
+    let owner = null;
+    act.forEach(pk => { if(state.players[pk].chars.includes(c.id)) owner = pk; });
+    const tag = owner ? `<span class="tag ${owner}">${state.players[owner].name}</span>` : '';
+    return `<div class="roster-item${owner ? ' taken' : ''}">
+      <div class="r-name">${c.name}${tag}</div>
+      <div class="r-skill">${c.skill}</div></div>`;
+  }).join('');
+}
+function render(){
+  const cur = state.current;
+  const act = activeSeats();
+  SEATS.forEach(pk => document.getElementById('pc-' + pk).style.display = act.includes(pk) ? '' : 'none');
+  act.forEach(pk => {
+    const p = state.players[pk];
+    document.getElementById('pos-' + pk).textContent = TILE_MAP[p.pos].name;
+    document.getElementById('dir-' + pk).textContent = DIR_LABEL[p.dir] || '未选择';
+    document.getElementById('matcount-' + pk).textContent = totalMats(p);
+    document.getElementById('albumcount-' + pk).textContent = p.albums.length;
+    document.getElementById('charcount-' + pk).textContent = p.chars.length;
+    document.getElementById('stars-' + pk).textContent = '⭐'.repeat(p.progress);
+    document.getElementById('pc-' + pk).classList.toggle('active', cur === pk);
+  });
+  document.getElementById('turn-chip').className = 'tag ' + cur;
+  document.getElementById('turn-chip').textContent = state.players[cur].name + '⭐'.repeat(state.players[cur].progress);
+  renderMats();
+  renderChars();
+  renderAlbums();
+  act.forEach(pk => renderBuffs(pk));
+  renderPool(cur);
+  renderRoster();
+  const cands = creatableList(cur);
+  const createBtn = document.getElementById('create-album-btn');
+  createBtn.disabled = !cands.length;
+  createBtn.textContent = `＋ 创作专辑（${state.players[cur].name}）`;
+  createBtn.title = cands.length ? '素材足够，点击选择专辑创作' : '素材不足，无法创作专辑';
+  diceEl.textContent = (state.lastDice != null) ? state.lastDice : '?';
+  if(NET.role){   // 联机：只允许本座位在无弹窗时行动
+    const myTurn = state.current === NET.seat && state.setupDone;
+    rollBtn.disabled = state.gameOver || !myTurn || moving || rolling
+      || !modalMask.classList.contains('hidden');
+  } else if(state.single){   // 单机：AI回合锁定骰子按钮
+    const myTurn = state.current === 'red' && state.setupDone;
+    rollBtn.disabled = state.gameOver || !myTurn || moving || rolling
+      || !modalMask.classList.contains('hidden');
+  }
+  if(NET.role === 'host' && NET.connected) publishState();
+  updatePieces();
+  maybeAiTurn();
+}
+
+/* =========================================================
+ * 七、事件绑定与开局
+ * ========================================================= */
+const diceEl = document.getElementById('dice');
+const rollBtn = document.getElementById('roll-btn');
+let rolling = false;
+function doRoll(){
+  if(rolling || moving || state.gameOver) return;
+  rolling = true;
+  rollBtn.disabled = true;
+  diceEl.textContent = '?';
+  const pk = state.current;
+  let ticks = 0;
+  const iv = setInterval(() => {
+    diceEl.textContent = 1 + Math.floor(Math.random() * 6);
+    if(++ticks < 6) return;
+    clearInterval(iv);
+    const p = state.players[pk];
+    const { base, final, notes } = rollDice(p);
+    diceEl.textContent = final;
+    state.lastDice = final;
+    if(NET.role === 'host' && NET.connected) send({ type:'fx', fx:{ kind:'roll', dice: final } });
+    if(notes.length) log(`掷出 ${base} 点（${notes.join('，')}）`, pk);
+    else log(`掷出 ${final} 点`, pk);
+    rolling = false;
+    if(skillActive(pk, 'rin')){   // 星空凛：骰后可 +1 / -1
+      showModal('星空凛的技能',
+        `掷出 ${final} 点，是否调整行进步数？（最少移动 1 格）`, [
+        { label:`+1 → 移动 ${final + 1} 格`, onSelect(){ diceEl.textContent = final + 1; state.lastDice = final + 1; startMove(pk, final + 1); } },
+        { label:`-1 → 移动 ${Math.max(1, final - 1)} 格`, onSelect(){ const s = Math.max(1, final - 1); diceEl.textContent = s; state.lastDice = s; startMove(pk, s); } },
+        { label:'保持不变', onSelect(){ startMove(pk, final); } },
+      ]);
+      return;
+    }
+    startMove(pk, final);
+  }, 70);
+}
+rollBtn.addEventListener('click', () => {
+  if(NET.role === 'guest'){ send({ type:'action', action:{ type:'roll', seat: NET.seat } }); return; }
+  doRoll();
+});
+
+/* 开局：系统随机发放角色，玩家选择行进方向 */
+function randomCharacter(pk, then){
+  log(`等待系统随机分配角色…`, pk);
+  const id = state.charPool.splice(Math.floor(Math.random() * state.charPool.length), 1)[0];
+  if(state.single && pk === AI_SEAT) state.players[pk].name = 'AI·' + CHAR_MAP[id].name;
+  grantChar(pk, id);
+  then();
+}
+function askDirection(pk, then){
+  showModal(`行进方向 · ${state.players[pk].name}`,
+    '选择你的固定行进方向（沿外圈环线绕行，开局后不可更改）：', [
+    { label:'↻ 顺时针', onSelect(){ state.players[pk].dir = 1;  log(`选择顺时针行进`, pk); then(); } },
+    { label:'↺ 逆时针', onSelect(){ state.players[pk].dir = -1; log(`选择逆时针行进`, pk); then(); } },
+  ], pk);
+}
+function startGameFlow(){
+  state.eventDeck = shuffle([...EVENT_CARDS]);
+  state.chanceDeck = shuffle([...CHANCE_CARDS]);
+  state.challengeDeck = shuffle([...CHALLENGE_CARDS]);
+  const act = activeSeats();
+  log('游戏开始！各方棋子停在【音乃木坂】。');
+  log('系统将为每方随机发放 1 名角色（角色卡唯一）' + (act.length >= 3 ? '，行进方向由系统随机分配。' : '，请依次选择行进方向（选定后不可更改）。'));
+  const setupStep = i => {
+    if(i >= act.length){
+      state.setupDone = true;
+      log('准备完毕！从音乃木坂出门按行进方向自动前进（顺时针→屋顶，逆时针→学校礼堂），仅在场馆岔路可选向进入（不能回头）；音乃木坂出发后不可再进入；路过不触发、停留才触发；素材凑齐后点「创作专辑」手动创作。');
+      log('到达LIVE场馆且有已完成专辑时，可选择开办演唱会：2骰>6成功，胜利进度+1；东京巨蛋2骰>11，成功+2。率先达成3场获胜！');
+      log('在【LoveLive大赛组委会】可进行素材交易：2张同名素材兑换任意素材1张；与同格对手可发起1:1素材交换。');
+      log('挑战格可抽取挑战卡，完成可获丰厚奖励（也可放弃）；角色技能效果详见角色卡提示（悬停查看）。');
+      if(act.length > 2) log('多人模式：「对手」类效果（干扰、占卜、交换等）作用于你的下一位玩家。', null, true);
+      if(!NET.role) rollBtn.disabled = false;
+      render();
+      return;
+    }
+    const pk = act[i];
+    randomCharacter(pk, () => {
+      if(act.length >= 3){   // 3-4人局：系统随机出门方向，不再手动选择
+        const d = Math.random() < .5 ? 1 : -1;
+        state.players[pk].dir = d;
+        log(`系统随机分配行进方向：${DIR_LABEL[d]}（多人局自动随机，选定后不可更改）`, pk);
+        setTimeout(() => setupStep(i + 1), 60);
+      }else askDirection(pk, () => setupStep(i + 1));
+    });
+  };
+  setupStep(0);
+}
+
+/* =========================================================
+ * 八、联机层（方案C：免费公共 MQTT broker 中转，主机权威）
+ *   主机执行全部逻辑并广播 state 快照；
+ *   客人只发送操作意图（掷骰/弹窗选项），收到快照后渲染。
+ * ========================================================= */
+function randRoomCode(){
+  const chars = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+  let s = '';
+  for(let i = 0; i < 5; i++) s += chars[Math.floor(Math.random() * chars.length)];
+  return s;
+}
+const topic = () => 'lovelive-game/room/' + NET.roomId;
+function send(msg){
+  if(NET.client && NET.connected) NET.client.publish(topic(), JSON.stringify(msg));
+}
+function snapshotState(){
+  return {
+    current:state.current, playerCount:state.playerCount, players:state.players, gameOver:state.gameOver,
+    albumPool:state.albumPool, charPool:state.charPool,
+    eventDeck:state.eventDeck, chanceDeck:state.chanceDeck, challengeDeck:state.challengeDeck,
+    logRing:state.logRing, lastDice:state.lastDice,
+    setupDone:state.setupDone,          // netReady 为客人本机标记，不入快照（避免覆盖客人端状态）
+  };
+}
+function publishState(){
+  if(NET.role !== 'host' || !NET.connected) return;
+  NET.client.publish(topic(), JSON.stringify({ type:'state', state: snapshotState() }), { retain:true });
+}
+function setNetStatus(t){ document.getElementById('lb-status').textContent = t; }
+function hideLobby(){ document.getElementById('lobby').style.display = 'none'; }
+function showNetBadge(){
+  const b = document.getElementById('net-badge');
+  b.style.display = 'inline-block';
+  b.textContent = '联机 · ' + (NET.role === 'host' ? '房主(红)' : '客人(' + (SEAT_NAMES[NET.seat] || '…') + ')') + ' · ' + NET.roomId;
+}
+function netConnect(idx, onOk, onFail){
+  const url = BROKERS[idx % BROKERS.length];
+  let settled = false;
+  const c = mqtt.connect(url, {
+    clientId: 'llgame-' + Math.random().toString(16).slice(2, 10),
+    keepalive: 30, reconnectPeriod: 3000, connectTimeout: 7000,   // 公共 broker 可能掉线：开启自动重连
+  });
+  c.on('connect', () => {
+    if(!settled){ settled = true; NET.myId = c.options.clientId; onOk(c); return; }
+    NET.connected = true; setNetStatus('');                        // 断线后重连成功：恢复正常收发
+    if(NET.role === 'host'){                                       // 主机：重发最新快照 + 未决弹窗/抽卡（客人离线期间的确认可能丢失）
+      publishState();
+      if(NET.pendingCard) send({ type:'cardfx', card:{ msgId: NET.pendingCard.msgId, seat: NET.pendingCard.seat, kind: NET.pendingCard.kind, name: NET.pendingCard.name, desc: NET.pendingCard.desc } });
+      if(NET.pendingModal) send({ type:'modal', modal:{ msgId: NET.pendingModal.msgId, title: NET.pendingModal.title, bodyHTML: NET.pendingModal.bodyHTML, labels: NET.pendingModal.options.map(o => o.label), seat: NET.pendingModal.seat } });
+    }
+    else if(NET.role === 'guest') send({ type:'hello', from: NET.myId, nick: NET.nick || '' });   // 客人：重新报到，主机补发状态与未决弹窗/抽卡
+  });
+  c.on('error', e => {
+    if(!settled){
+      settled = true; c.end(true);
+      if(idx + 1 < BROKERS.length) netConnect(idx + 1, onOk, onFail);   // 自动换备用服务器重试
+      else onFail('无法连接信令服务器');
+    }
+  });
+  c.on('message', (t, m) => handleNetMessage(m.toString()));
+  c.on('close', () => {
+    if(NET.role && NET.connected){ NET.connected = false; setNetStatus('与信令服务器断开，正在自动重连…'); }
+  });
+}
+function updateHostWaiting(){
+  document.querySelector('#lb-status').innerHTML =
+    `房间已创建，房间码：<span class="lb-code-big">${NET.roomId}</span><br>请把这个房间码告诉其他玩家，等待加入…（${NET.guests.length + 1}/${state.playerCount}）`;
+}
+function hostCreateRoom(nick){
+  NET.roomId = randRoomCode();
+  NET.guests = [];
+  NET.fxSteps = []; NET.fxTimer = null; NET.fxPlaying = false; NET.fxPending = null; NET.fxModal = null;
+  state.playerCount = lobbyCount;
+  state.players.red.name = nick ? '红方（' + nick + '）' : '红方';
+  netConnect(0, c => {
+    NET.role = 'host'; NET.seat = 'red'; NET.client = c; NET.connected = true;
+    c.subscribe(topic());
+    setNetStatus('');
+    updateHostWaiting();
+    publishState();   // retain：加入者订阅后立刻拿到初始状态
+  }, err => setNetStatus('创建失败：' + err + '，请重试'));
+}
+function guestJoinRoom(code, nick){
+  NET.roomId = code;
+  NET.nick = nick;
+  NET.fxSteps = []; NET.fxTimer = null; NET.fxPlaying = false; NET.fxPending = null; NET.fxModal = null;
+  netConnect(0, c => {
+    NET.role = 'guest'; NET.seat = null; NET.client = c; NET.connected = true;
+    c.subscribe(topic(), () => send({ type:'hello', from: NET.myId, nick }));
+    setNetStatus('已连接，等待主机同步…');
+    setTimeout(() => { if(!state.netReady) setNetStatus('未找到房间 ' + code + '，请检查房间码'); }, 10000);
+  }, err => setNetStatus('加入失败：' + err + '，请重试'));
+}
+function adoptState(s){
+  Object.assign(state, JSON.parse(JSON.stringify(s)));
+  if(state.gameOver) showGuestGameOver();
+  rebuildLog();
+  render();
+}
+function showNetModal(m){   // 客人端：显示主机镜像来的弹窗
+  NET.remoteModal = m;
+  const mine = m.seat === NET.seat;
+  document.getElementById('modal-title').textContent = m.title;
+  document.getElementById('modal-body').innerHTML = m.bodyHTML
+    + (mine ? '' : `<div style="margin-top:8px;color:#b89ae0;">⏳ 等待${SEAT_NAMES[m.seat] || '对方'}选择…</div>`);
+  document.getElementById('modal-opts').innerHTML =
+    m.labels.map((l,i) => `<button class="modal-btn" data-opt="${i}" ${mine ? '' : 'disabled style="opacity:.55;"'}>${l}</button>`).join('');
+  modalMask.classList.remove('hidden');
+  document.body.classList.add('modal-open');
+}
+/* 客人端：按主机事件流播放骰子滚动与逐格移动动画 */
+function guestFx(fx){
+  if(fx.kind === 'roll'){
+    NET.fxPlaying = true;
+    let ticks = 0;
+    const iv = setInterval(() => {
+      diceEl.textContent = 1 + Math.floor(Math.random() * 6);
+      if(++ticks < 6) return;
+      clearInterval(iv);
+      diceEl.textContent = fx.dice;
+      NET.fxPlaying = false;
+      flushPendingFx();
+    }, 70);
+  } else if(fx.kind === 'step'){
+    NET.fxSteps.push(fx);
+    NET.fxPlaying = true;
+    pumpFxSteps();
+  } else if(fx.kind === 'liveBgm'){   // v0.31：LIVE 成功专属曲，各端本机播放（不占用 fx 队列）
+    playLiveBgm(fx.album);
+  }
+}
+function pumpFxSteps(){
+  if(NET.fxTimer) return;
+  NET.fxTimer = setTimeout(() => {
+    NET.fxTimer = null;
+    const fx = NET.fxSteps.shift();
+    if(fx){
+      setPieceTo(fx.pk, fx.tile);
+      pumpFxSteps();
+    } else {
+      NET.fxPlaying = false;
+      flushPendingFx();
+    }
+  }, 260);
+}
+function flushPendingFx(){
+  const st = NET.fxPending; NET.fxPending = null;
+  const md = NET.fxModal; NET.fxModal = null;
+  if(st) adoptState(st);
+  if(md) showNetModal(md);
+}
+function showGuestGameOver(){
+  if(NET.gameOverShown) return;
+  NET.gameOverShown = true;
+  const w = activeSeats().find(pk => state.players[pk].progress >= WIN_TARGET);
+  showNetModal({ msgId:0, seat:'red', title:'比赛结束',
+    bodyHTML:`🏆 ${w ? state.players[w].name : ''} 成功开办 ${WIN_TARGET} 场LIVE，获得LoveLive大赛冠军！（主机点击「再来一局」可重新开始）`,
+    labels:['再来一局（仅主机可点击）'] });
+}
+function handleNetMessage(raw){
+  let msg; try{ msg = JSON.parse(raw); }catch(e){ return; }
+  if(NET.role === 'host'){
+    if(msg.type === 'hello'){
+      const known = NET.guests.find(g => g.id === msg.from);
+      if(known){
+        send({ type:'welcome', to: msg.from, seat: known.seat });
+        publishState();                              // 重连报到：补发最新快照
+        if(NET.pendingCard) send({ type:'cardfx', card:{ msgId: NET.pendingCard.msgId, seat: NET.pendingCard.seat, kind: NET.pendingCard.kind, name: NET.pendingCard.name, desc: NET.pendingCard.desc } });   // 补发未决抽卡动画
+        if(NET.pendingModal) send({ type:'modal', modal:{ msgId: NET.pendingModal.msgId, title: NET.pendingModal.title, bodyHTML: NET.pendingModal.bodyHTML, labels: NET.pendingModal.options.map(o => o.label), seat: NET.pendingModal.seat } });   // 补发未决弹窗
+        return;
+      }
+      if(state.setupDone || NET.guests.length >= state.playerCount - 1){ send({ type:'roomfull', to: msg.from }); return; }
+      const seat = SEATS[NET.guests.length + 1];
+      NET.guests.push({ id: msg.from, seat });
+      state.players[seat].name = msg.nick ? SEAT_NAMES[seat] + '（' + msg.nick + '）' : SEAT_NAMES[seat];
+      send({ type:'welcome', to: msg.from, seat });
+      log(state.players[seat].name + '玩家已加入房间！', null, true);
+      if(NET.guests.length >= state.playerCount - 1){
+        hideLobby(); showNetBadge();
+        startGameFlow();
+      } else updateHostWaiting();
+      publishState();
+    } else if(msg.type === 'action'){
+      const a = msg.action || {};
+      if(a.type === 'modalSelect'){
+        const pm = NET.pendingModal;
+        if(pm && pm.msgId === a.msgId && a.seat === pm.seat){
+          NET.pendingModal = null;
+          hideModal();
+          const opt = pm.options[a.index];
+          if(opt && opt.onSelect) opt.onSelect();
+        }
+      } else if(a.type === 'cardDone'){          // 客人翻卡确认：主机结算该卡效果
+        const pc = NET.pendingCard;
+        if(pc && pc.msgId === a.msgId && a.seat === pc.seat){
+          NET.pendingCard = null;
+          resetCardFx();                         // 关闭主机端的旁观动画层
+          pc.proceed();
+        }
+      } else if(a.type === 'roll' && a.seat === state.current && state.setupDone){
+        doRoll();
+      } else if(a.type === 'createAlbum' && a.seat === state.current && state.setupDone){
+        doCreateAlbum();
+      }
+    }
+  } else if(NET.role === 'guest'){
+    if(msg.type === 'welcome' && msg.to === NET.myId){
+      NET.seat = msg.seat;
+      NET.remoteModal = null; hideModal(); resetCardFx();   // 重连场景：清掉本机残留的旧弹窗/旧抽卡层，未决内容会由主机紧接着补发
+      setNetStatus('座位已分配：' + SEAT_NAMES[msg.seat]);
+      showNetBadge();
+    } else if(msg.type === 'fx'){
+      guestFx(msg.fx);
+    } else if(msg.type === 'cardfx'){   // 抽卡动画镜像：自动翻开，自己的卡点「生效」确认后回传 cardDone
+      const c = msg.card || {};
+      if(c.seat === NET.seat){
+        showCardFx(c, 'self', () => {
+          send({ type:'action', action:{ type:'cardDone', msgId: c.msgId, seat: NET.seat } });
+        });
+      } else showCardFx(c, 'other', null);
+    } else if(msg.type === 'state'){
+      if(!state.netReady){
+        state.netReady = true; hideLobby(); showNetBadge();
+        log('已同步主机状态，等待开局…', null, true);
+      }
+      if(NET.fxPlaying) NET.fxPending = msg.state;   // 移动动画播放中：暂存，播完再应用
+      else adoptState(msg.state);
+    } else if(msg.type === 'modal'){
+      if(NET.fxPlaying) NET.fxModal = msg.modal;
+      else showNetModal(msg.modal);
+    } else if(msg.type === 'roomfull' && !NET.seat){
+      setNetStatus('房间已满或已开局，无法加入，请换一个房间');
+      NET.client.end(true); NET.connected = false; NET.role = null;
+    }
+  }
+}
+
+/* =========================================================
+ * 九、单机模式 AI 对手（蓝方）
+ *   回合驱动：AI 回合开始自动创作专辑（可连创）→ 自动掷骰；
+ *   决策方式：AI 回合内所有弹窗自动选择（人类可见其决策过程）。
+ *   策略：素材按「最接近可完成的专辑」挑选；有专辑必开LIVE；
+ *   挑战必发起；交易只做同名兑换；1:1交换请求爽快同意。
+ * ========================================================= */
+const AI_SEAT = 'blue';
+const _showModalBase = showModalBase;
+function showModal(title, bodyHTML, options, seat){
+  const ans = seat || state.current;
+  if(state.single && !state.gameOver && ans === AI_SEAT && options && options.length){
+    _showModalBase(title, bodyHTML, options, seat);
+    document.getElementById('modal-body').innerHTML += '<div style="margin-top:8px;color:#7a5fa8;">🤖 AI 思考中…</div>';
+    setTimeout(() => {
+      if(state.gameOver || (!seat && state.setupDone && state.current !== ans)) return;
+      const opt = options[aiChooseOption(title, options)];
+      hideModal();
+      if(opt && opt.onSelect) opt.onSelect();
+    }, 900 + Math.random() * 800);
+    return;
+  }
+  _showModalBase(title, bodyHTML, options, seat);
+}
+/* AI 弹窗决策：返回选中的选项下标（基于选项文本的启发式策略） */
+function aiChooseOption(title, options){
+  const strip = s => String(s).replace(/<[^>]*>/g, '');
+  const labels = options.map(o => strip(o.label));
+  const idxOf = re => labels.findIndex(l => re.test(l));
+  let i;
+  if((i = idxOf(/^发起挑战/)) >= 0) return i;                        // 挑战必发起
+  if((i = idxOf(/^同意交换/)) >= 0) return i;                        // 人类发起的1:1交换：同意
+  if(labels.includes('不占卜')) return labels.findIndex(l => l !== '不占卜');   // 占卜必做
+  if(title === '星空凛的技能') return Math.floor(Math.random() * options.length);
+  if(title.startsWith('行进方向')) return Math.random() < .5 ? 0 : 1;
+  if(title === '主题公演 · 二选一') return Math.random() < .5 ? 0 : 1;
+  if(title.startsWith('场馆岔路')){                                  // 有专辑进场馆开LIVE，否则走外圈
+    const p = state.players[AI_SEAT];
+    const v = options.findIndex(o => /LIVE场馆|特殊场馆/.test(o.label));
+    if(p.albums.length && v >= 0) return v;
+    const plain = options.findIndex(o => !/LIVE场馆|特殊场馆/.test(o.label));
+    return plain >= 0 ? plain : 0;
+  }
+  const CAT_OPT = { music:'音乐素材', dance:'舞蹈素材', costume:'服装素材' };
+  const catIdx = options.findIndex(o => Object.values(CAT_OPT).includes(o.label));
+  if(catIdx >= 0){                                                   // 素材类别三选一：选最优类别
+    const want = CAT_OPT[aiBestMaterial(AI_SEAT).cat];
+    const j = options.findIndex(o => o.label === want);
+    return j >= 0 ? j : 0;
+  }
+  if((i = idxOf(/^← 返回/)) >= 0){                                   // 具体素材清单：选最优素材
+    const want = aiBestMaterial(AI_SEAT).name;
+    const j = options.findIndex(o => strip(o.label) === want);
+    return j >= 0 ? j : 0;
+  }
+  if((i = idxOf(/^同素材兑换/)) >= 0) return i;                      // 交易：只做同名兑换
+  if((i = idxOf(/^不交易/)) >= 0) return i;                          // 不与玩家换牌
+  const skip = /^(取消|不演出|放弃|保持不变|←)/;                      // 其余：选第一个非放弃项
+  i = options.findIndex(o => !skip.test(o.label));
+  return i >= 0 ? i : 0;
+}
+/* 素材价值评估：优先挑能让专辑凑齐/少缺一类的素材 */
+function aiMaterialScore(pk, cat, name){
+  const p = state.players[pk];
+  let score = 0;
+  state.albumPool.forEach(a => {
+    if(a.owner) return;
+    if(!a[cat].includes(name)) return;
+    const missOther = oc => (oc === cat || a[oc].some(n => p.mats[oc].includes(n))) ? 0 : 1;
+    const missing = (cat === 'music' ? 0 : missOther('music'))
+                  + (cat === 'dance' ? 0 : missOther('dance'))
+                  + (cat === 'costume' ? 0 : missOther('costume'));
+    if(missing === 0) score += 100;        // 得到即可创作
+    else score += (3 - missing) * 10;      // 缺口越小越优先
+  });
+  if(p.mats[cat].includes(name)) score += 2;   // 同名素材可用于兑换
+  return score;
+}
+function aiBestMaterial(pk){
+  let best = { cat:'music', name:TYPE_LIST.music[0] }, bestScore = -1;
+  Object.keys(TYPE_LIST).forEach(cat => TYPE_LIST[cat].forEach(name => {
+    const s = aiMaterialScore(pk, cat, name);
+    if(s > bestScore){ bestScore = s; best = { cat, name }; }
+  }));
+  return best;
+}
+/* AI 回合驱动：轮到 AI 且空闲时，自动创作专辑并掷骰 */
+let aiTimer = null;
+function maybeAiTurn(){
+  if(!state.single || state.gameOver || !state.setupDone) return;
+  if(state.current !== AI_SEAT || rolling || moving) return;
+  if(!modalMask.classList.contains('hidden')) return;
+  if(!cardMask.classList.contains('hidden')) return;   // AI 抽卡动画播放中不重复驱动
+  if(aiTimer) return;
+  aiTimer = setTimeout(() => {
+    aiTimer = null;
+    if(state.gameOver || state.current !== AI_SEAT || rolling || moving) return;
+    if(!modalMask.classList.contains('hidden')) return;
+    let made = 0;   // 回合开始先创作专辑（最多连创2张）
+    while(made < 2 && creatableList(AI_SEAT).length){
+      createAlbum(AI_SEAT, creatableList(AI_SEAT)[0]);
+      made++;
+    }
+    if(made) render();
+    setTimeout(() => {
+      if(state.gameOver || state.current !== AI_SEAT || rolling || moving) return;
+      if(!modalMask.classList.contains('hidden')) return;
+      doRoll();
+    }, made ? 700 : 200);
+  }, 900);
+}
+
+/* 大厅事件绑定 */
+let lobbyCount = 2;
+document.querySelectorAll('#lb-count button').forEach(btn => {
+  btn.addEventListener('click', () => {
+    lobbyCount = +btn.dataset.n;
+    document.querySelectorAll('#lb-count button').forEach(b => b.classList.toggle('on', b === btn));
+  });
+});
+document.getElementById('lb-nick').addEventListener('input', function(){
+  this.value = this.value.replace(/[^A-Za-z\u4e00-\u9fa5]/g, '').slice(0, 6);
+});
+document.getElementById('lb-single').addEventListener('click', () => {
+  state.single = true;
+  state.playerCount = 2;
+  const nick = document.getElementById('lb-nick').value.trim();
+  state.players.red.name = nick ? '红方（' + nick + '）' : '红方';
+  state.players.blue.name = '蓝方（AI）';
+  hideLobby();
+  log('单机模式：你执红方，蓝方由 AI 自动行动（其决策会以弹窗和日志展示）。', null, true);
+  startGameFlow();
+});
+document.getElementById('lb-host').addEventListener('click', () => {
+  if(typeof mqtt === 'undefined'){ setNetStatus('联机组件 mqtt.js 加载失败，请检查网络后刷新页面'); return; }
+  setNetStatus('正在连接免费信令服务器…');
+  hostCreateRoom(document.getElementById('lb-nick').value.trim());
+});
+document.getElementById('lb-join').addEventListener('click', () => {
+  const code = document.getElementById('lb-code').value.trim().toUpperCase();
+  if(code.length < 4){ setNetStatus('请输入主机显示的 5 位房间码'); return; }
+  if(typeof mqtt === 'undefined'){ setNetStatus('联机组件 mqtt.js 加载失败，请检查网络后刷新页面'); return; }
+  setNetStatus('正在加入房间 ' + code + '…');
+  guestJoinRoom(code, document.getElementById('lb-nick').value.trim());
+});
+
+/* =========================================================
+ * 十、开局公告（发布更新时：编辑 HTML 中 #notice-box 内容，并把 NOTICE_VERSION 调大，全员重新可见）
+ * ========================================================= */
+const NOTICE_VERSION = 'v0.32';
+const noticeMask = document.getElementById('notice-mask');
+try{ if(localStorage.getItem('ll-notice-read') === NOTICE_VERSION) noticeMask.classList.add('hidden'); }catch(e){}
+document.getElementById('notice-close').addEventListener('click', () => {
+  noticeMask.classList.add('hidden');
+  try{ localStorage.setItem('ll-notice-read', NOTICE_VERSION); }catch(e){}
+});
+document.getElementById('notice-btn').addEventListener('click', () => noticeMask.classList.remove('hidden'));
+
+/* =========================================================
+ * 十一、背景音乐：三首LoveLive歌曲顺序循环（v0.30）+ LIVE成功专属曲（v0.31）
+ *   - audio/bgm1-3.mp3（文件重命名规避特殊字符路径问题）
+ *   - 浏览器限制：音频必须在用户手势后启动，故监听全局首次
+ *     pointerdown 自动开播；顶栏按钮可开关，localStorage 记忆
+ *   - 桌面化对应：播放设备循环播放三首曲目
+ * ========================================================= */
+const BGM_TRACKS = [
+  { src:'audio/bgm1.mp3', name:'君のこころは輝いてるかい？' },
+  { src:'audio/bgm2.mp3', name:'ミはμ\'sicのミ' },
+  { src:'audio/bgm3.mp3', name:'Happy maker!' },
+];
+let bgmAudio = null, bgmIdx = 0, bgmOn = true;
+try{ bgmOn = localStorage.getItem('ll-bgm') !== '0'; }catch(e){}
+function bgmSyncBtn(){
+  const b = document.getElementById('bgm-btn');
+  if(b) b.textContent = '音乐:' + (bgmOn ? '开' : '关');
+}
+bgmSyncBtn();
+const _bgmWarned = {};
+function bgmWarnOnce(text){   /* 同类提示只写一条游戏日志，避免刷屏 */
+  if(_bgmWarned[text]) return;
+  _bgmWarned[text] = 1;
+  log('♪ ' + text, null, false);
+}
+function bgmPlayFail(err){   /* 播放被拦截/失败：诊断输出；持久手势监听会在用户下次点击时自动重试 */
+  if(!err) return;
+  const name = (err && err.name) || 'Error';
+  console.warn('[BGM] 播放失败(' + name + ')，将在用户下次点击页面时自动重试');
+  if(name === 'NotAllowedError') bgmWarnOnce('背景音乐被浏览器拦截自动播放，点击页面任意位置即可开始');
+}
+function bgmInit(){   /* 需在用户手势内调用（自动播放限制）；幂等，失败后可反复重试 */
+  if(!bgmOn || liveAudio) return;   /* LIVE 专属曲播放中不启 BGM（结束后 bgmResume 续播） */
+  if(bgmAudio){
+    if(bgmAudio.paused){
+      try{ bgmAudio.play().then(() => fadeTo(bgmAudio, 0.35, 900)).catch(bgmPlayFail); }catch(e){ bgmPlayFail(e); }
+    }
+    return;
+  }
+  try{
+    const a = new Audio(BGM_TRACKS[bgmIdx].src);
+    a.volume = 0.35;
+    a.addEventListener('ended', () => {   /* 播完切下一首，三首顺序循环 */
+      bgmIdx = (bgmIdx + 1) % BGM_TRACKS.length;
+      bgmAudio.src = BGM_TRACKS[bgmIdx].src;
+      bgmAudio.play().catch(bgmPlayFail);
+    });
+    a.addEventListener('error', () => {   /* 加载失败（如部署缺 audio/ 文件）：置空允许重试并提示 */
+      if(bgmAudio === a) bgmAudio = null;
+      console.warn('[BGM] 音频加载失败:', a.src, '（部署站点可能缺少 audio/ 文件）');
+      bgmWarnOnce('背景音乐加载失败：部署可能缺少 audio/ 音频文件（详见浏览器控制台）');
+    });
+    bgmAudio = a;
+    bgmAudio.play().catch(bgmPlayFail);
+  }catch(e){ bgmPlayFail(e); }
+}
+function bgmToggle(){
+  bgmOn = !bgmOn;
+  try{ localStorage.setItem('ll-bgm', bgmOn ? '1' : '0'); }catch(e){}
+  if(bgmOn) bgmInit();   /* LIVE 曲播放中 bgmInit 内部会跳过，LIVE 结束后自动续播 */
+  else if(bgmAudio){ bgmAudio.pause(); bgmAudio = null; }   /* 关闭后再次开启从头播放 */
+  bgmSyncBtn();
+}
+document.getElementById('bgm-btn').addEventListener('click', bgmToggle);
+/* 持久监听：首次启动与失败重试共用，bgmInit 幂等；mousedown 兜底无 PointerEvent 的旧浏览器 */
+document.addEventListener('pointerdown', () => { bgmInit(); });
+document.addEventListener('mousedown', () => { bgmInit(); });
+
+/* ---- LIVE 成功专属曲（v0.31）：四张专辑对应曲目片段，淡入淡出 ----
+   start/end 为指定的原曲播放区间（秒）；其余专辑无专属曲，背景音乐不受影响；
+   联机时主机在 LIVE 成功处广播 fx(kind:liveBgm)，各端本机同步播放 */
+const LIVE_BGM = {
+  'No brand girls':     { src:'audio/live-nobrand.mp3', start:54, end:75 },
+  '辉夜の城で踊りたい': { src:'audio/live-kaguya.mp3',  start:65, end:98 },
+  'Snow halation':      { src:'audio/live-snow.mp3',    start:50, end:85 },
+  '仆らは今のなかで':   { src:'audio/live-imanaka.mp3', start:60, end:92 },
+};
+let liveAudio = null;
+function fadeTo(audio, target, ms, done){   /* 音量线性渐变；target=0 时结束后自动暂停 */
+  if(!audio){ if(done) done(); return; }
+  clearInterval(audio._fade);
+  const start = audio.volume, t0 = Date.now();
+  audio._fade = setInterval(() => {
+    const k = Math.min(1, (Date.now() - t0) / ms);
+    try{ audio.volume = start + (target - start) * k; }catch(e){}
+    if(k >= 1){
+      clearInterval(audio._fade); audio._fade = null;
+      if(target === 0){ try{ audio.pause(); }catch(e){} }
+      if(done) done();
+    }
+  }, 50);
+}
+function bgmDuck(){   /* LIVE 演出开始：背景音乐快速淡出暂停（结束后续播） */
+  if(bgmAudio && !bgmAudio.paused) fadeTo(bgmAudio, 0, 400);
+}
+function bgmResume(){ /* LIVE 结束：背景音乐淡入续播（未初始化/被暂停/不存在均由 bgmInit 统一处理） */
+  if(!bgmOn) return;
+  bgmInit();
+}
+function stopLiveBgm(fadeMs, done){   /* 停止当前 LIVE 曲（冲突切换/播完收尾共用） */
+  if(!liveAudio){ if(done) done(); return; }
+  const a = liveAudio; liveAudio = null;
+  fadeTo(a, 0, fadeMs, done);
+}
+function playLiveBgm(albumName){
+  const cfg = LIVE_BGM[albumName];
+  if(!cfg) return;                      /* 其余专辑无专属曲 */
+  try{
+    stopLiveBgm(300, () => {            /* 冲突场景：上一首 LIVE 曲快速淡出后接续新曲 */
+      bgmDuck();
+      const a = new Audio(cfg.src);
+      a.volume = 0;
+      liveAudio = a;
+      a.addEventListener('error', () => {   /* 加载失败（如部署缺文件）：清理占位并恢复背景音乐 */
+        if(liveAudio === a) liveAudio = null;
+        console.warn('[LIVE-BGM] 音频加载失败:', cfg.src, '（部署站点可能缺少 audio/ 文件）');
+        bgmWarnOnce('LIVE 专属曲加载失败：部署可能缺少 audio/ 音频文件（详见浏览器控制台）');
+        bgmResume();
+      });
+      a.addEventListener('timeupdate', () => {   /* 播到指定段尾：淡出并恢复背景音乐 */
+        if(liveAudio === a && a.currentTime >= cfg.end - 0.05) stopLiveBgm(900, bgmResume);
+      });
+      a.play().then(() => {
+        const seek = () => { try{ a.currentTime = cfg.start; }catch(e){} };
+        if(a.readyState >= 1) seek(); else a.addEventListener('loadedmetadata', seek, { once:true });
+        fadeTo(a, 0.45, 900);           /* 淡入 */
+      }).catch(err => {                 /* 播放被拦截/失败：清理占位并恢复背景音乐 */
+        console.warn('[LIVE-BGM] 播放失败(' + ((err && err.name) || 'Error') + '):', cfg.src);
+        if(liveAudio === a) liveAudio = null;
+        bgmWarnOnce('LIVE 专属曲播放失败，已恢复背景音乐（详见浏览器控制台）');
+        bgmResume();
+      });
+    });
+  }catch(e){}
+}
+
+/* =========================================================
+ * 十二、手机适配：竖屏自动横屏（整体旋转90°）+ 横屏紧凑布局
+ *   判定以「窗口尺寸 + 横竖比例」为主，不依赖触摸信号上报
+ *   （部分手机浏览器如夸克会误报 pointer/touch，导致此前未旋转）；
+ *   桌面设备用「鼠标指针 + 较大窗口」反向排除。
+ *   画布尺寸用 visualViewport 像素级设定（兜底 100vh/dvh 在部分
+ *   浏览器因地址栏/工具栏产生的偏差）；顶栏「横屏」按钮与大厅入口
+ *   可手动强制切换并记忆。桌面调试：网址加 ?landscape=1
+ * ========================================================= */
+let oriManual = null;   // null=自动；'on'=强制横屏；'off'=强制竖屏
+try{ oriManual = localStorage.getItem('ll-ori-manual') || null; }catch(e){}
+
+function oriVpSize(){
+  const vv = window.visualViewport;
+  const w = Math.round((vv && vv.width)  || innerWidth  || document.documentElement.clientWidth  || 0);
+  const h = Math.round((vv && vv.height) || innerHeight || document.documentElement.clientHeight || 0);
+  return { w: Math.max(w, 1), h: Math.max(h, 1) };
+}
+
+function updateOrientationMode(){
+  const forced = new URLSearchParams(location.search).get('landscape') === '1';
+  const { w, h } = oriVpSize();
+  const minDim = Math.min(w, h);
+  const desktopLike = matchMedia('(hover: hover) and (pointer: fine)').matches && minDim > 480;
+  const phone = minDim <= 560 && !desktopLike;
+  const portrait = h > w;
+  let rot, compact;
+  if(forced){ rot = true; compact = true; }
+  else if(oriManual === 'on'){ rot = true; compact = phone; }
+  else if(oriManual === 'off'){ rot = false; compact = phone; }
+  else { rot = phone && portrait; compact = phone; }
+  document.documentElement.classList.toggle('force-landscape', rot);
+  document.documentElement.classList.toggle('phone-land', compact);
+  /* 像素级精确画布：旋转后 body 的布局宽高 = 视口的高/宽 */
+  const b = document.body;
+  if(rot){ b.style.width = h + 'px'; b.style.height = w + 'px'; }
+  else { b.style.width = ''; b.style.height = ''; }
+  const ob = document.getElementById('ori-btn');
+  if(ob) ob.textContent = '横屏:' + (rot ? '开' : '关');
+}
+
+function toggleOri(){
+  oriManual = document.documentElement.classList.contains('force-landscape') ? 'off' : 'on';
+  try{ localStorage.setItem('ll-ori-manual', oriManual); }catch(e){}
+  updateOrientationMode();
+  log('显示方向已切换为「' + (oriManual === 'on' ? '横屏' : '竖屏') + '」' +
+      (oriManual === 'on' ? '，请横持手机' : '') + '。', null, true);
+}
+document.getElementById('ori-btn').addEventListener('click', toggleOri);
+document.getElementById('lb-ori').addEventListener('click', toggleOri);
+
+addEventListener('resize', updateOrientationMode);
+addEventListener('orientationchange', () => { updateOrientationMode(); setTimeout(updateOrientationMode, 300); });
+if(window.visualViewport) visualViewport.addEventListener('resize', updateOrientationMode);
+addEventListener('load', updateOrientationMode);
+updateOrientationMode();
+
+render();
+</script>
+</body>
+</html>
