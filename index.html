@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>学园偶像大进击！· 单机原型 v0.32</title>
+<title>学园偶像大进击！· 单机原型 v0.33</title>
 <style>
   :root{
     --red:#e94f6a; --blue:#4f8fe9; --bg:#f5f0fa; --panel:#ffffff;
@@ -402,7 +402,7 @@
 <body>
 
 <header>
-  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.32 · 单机/联机</span></div>
+  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.33 · 单机/联机</span></div>
   <div id="turn-banner"><button id="ori-btn" title="手机横竖屏显示异常时可手动切换">横屏:关</button><button id="notice-btn">公告</button><button id="bgm-btn" title="背景音乐开关（三首LoveLive歌曲循环）">音乐:开</button><span id="net-badge" class="tag" style="display:none;background:#8a7aa8;margin-right:10px;"></span>当前回合：<span id="turn-chip" class="tag red">红方</span></div>
 </header>
 
@@ -514,7 +514,7 @@
 <div id="notice-mask">
   <div id="notice-box">
     <div class="n-title">学园偶像大进击！</div>
-    <div class="n-ver">当前版本 v0.32 · 2026-11-02</div>
+    <div class="n-ver">当前版本 v0.33 · 2026-11-03</div>
     <div class="n-sec">
       <span class="n-sec-t">【玩法速览 · 30秒上手】</span>
       <ul>
@@ -526,6 +526,7 @@
       </ul>
       <span class="n-sec-t">【更新公告】</span>
       <ul>
+        <li>v0.33 掷骰音效：点击「掷骰移动」后<b>实时播放骰子碰撞音效</b>（WebAudio 合成，无需加载音频文件，离线可用）——翻滚碰撞声随骰面数字跳动渐次落定，末尾附带落桌闷响；单机 AI 回合与联机各端（含客人端）掷骰同样发声；音效不干扰背景音乐，浏览器自动播放策略限制下首次点击页面后即生效。</li>
         <li>v0.32 音乐播放健壮性修复：修复背景音乐/LIVE专属曲因<b>浏览器拦截播放或音频文件缺失</b>而全程静默无提示的问题——播放失败后<b>自动重试</b>（点击页面任意位置即可触发），并在游戏日志与控制台给出明确诊断；LIVE专属曲失败时自动恢复背景音乐播放。</li>
         <li>v0.31 LIVE成功专属音乐：为《Snow halation》《辉夜の城で踊りたい》《No brand girls》《仆らは今のなかで》四张专辑收录对应歌曲的高潮片段（约20-35秒），LIVE开办成功时<b>专属曲淡入播放</b>，播完（或被下一场LIVE切换）后背景音乐自动淡入续播；联机时全员同步播放；其余专辑无专属曲，背景音乐不受影响。</li>
         <li>v0.30 新增背景音乐：收录三首LoveLive歌曲《君のこころは輝いてるかい？》《ミはμ'sicのミ》《Happy maker!》<b>顺序循环播放</b>；顶栏「音乐」按钮可随时开关并自动记忆偏好（受浏览器播放策略影响，点击页面任意位置后开始播放）。</li>
@@ -1785,11 +1786,63 @@ function render(){
  * ========================================================= */
 const diceEl = document.getElementById('dice');
 const rollBtn = document.getElementById('roll-btn');
+/* ---- 掷骰音效（v0.33）：WebAudio 现场合成骰子翻滚声，无需音频文件，离线可用 ---- */
+let diceAudioCtx = null;
+function ensureDiceCtx(){
+  if(diceAudioCtx && diceAudioCtx.state === 'running') return diceAudioCtx;
+  try{
+    if(!diceAudioCtx){
+      const AC = window.AudioContext || window.webkitAudioContext;
+      if(!AC) return null;
+      diceAudioCtx = new AC();
+    }
+    if(diceAudioCtx.state === 'suspended') diceAudioCtx.resume().catch(()=>{});
+    return diceAudioCtx;
+  }catch(e){ return null; }
+}
+document.addEventListener('pointerdown', ensureDiceCtx);   // 预解锁：满足浏览器自动播放策略
+function playDiceSfx(){
+  const ctx = ensureDiceCtx();
+  if(!ctx || ctx.state !== 'running') return;
+  try{
+    const t0 = ctx.currentTime + 0.02;
+    const master = ctx.createGain(); master.gain.value = 0.5;
+    const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 6000;
+    master.connect(lp); lp.connect(ctx.destination);
+    /* 一串碰撞瞬时声：起始密集、逐渐稀疏（翻滚→落定），最后一声最响 */
+    const hits = [0, 0.05, 0.09, 0.14, 0.20, 0.27, 0.34, 0.40];
+    hits.forEach((dt, i) => {
+      const t = t0 + dt + (Math.random() * 0.02 - 0.01);
+      const dur = 0.045 + Math.random() * 0.03;
+      const buf = ctx.createBuffer(1, Math.ceil(dur * ctx.sampleRate), ctx.sampleRate);
+      const d = buf.getChannelData(0);
+      for(let j = 0; j < d.length; j++) d[j] = (Math.random() * 2 - 1) * Math.pow(1 - j / d.length, 2.2);
+      const src = ctx.createBufferSource(); src.buffer = buf;
+      const bp = ctx.createBiquadFilter(); bp.type = 'bandpass';
+      bp.frequency.value = 2200 + Math.random() * 1800; bp.Q.value = 1.1;
+      const g = ctx.createGain();
+      g.gain.value = (i === hits.length - 1 ? 0.85 : 0.5) + Math.random() * 0.2;
+      src.connect(bp); bp.connect(g); g.connect(master);
+      src.start(t);
+    });
+    /* 末尾低频落桌闷响 */
+    const o = ctx.createOscillator(); o.type = 'sine';
+    o.frequency.setValueAtTime(190, t0 + 0.44);
+    o.frequency.exponentialRampToValueAtTime(85, t0 + 0.54);
+    const og = ctx.createGain();
+    og.gain.setValueAtTime(0.001, t0 + 0.44);
+    og.gain.exponentialRampToValueAtTime(0.5, t0 + 0.47);
+    og.gain.exponentialRampToValueAtTime(0.001, t0 + 0.58);
+    o.connect(og); og.connect(master);
+    o.start(t0 + 0.44); o.stop(t0 + 0.6);
+  }catch(e){ console.warn('[DICE-SFX] 播放失败:', e); }
+}
 let rolling = false;
 function doRoll(){
   if(rolling || moving || state.gameOver) return;
   rolling = true;
   rollBtn.disabled = true;
+  playDiceSfx();
   diceEl.textContent = '?';
   const pk = state.current;
   let ticks = 0;
@@ -1983,6 +2036,7 @@ function showNetModal(m){   // 客人端：显示主机镜像来的弹窗
 function guestFx(fx){
   if(fx.kind === 'roll'){
     NET.fxPlaying = true;
+    playDiceSfx();
     let ticks = 0;
     const iv = setInterval(() => {
       diceEl.textContent = 1 + Math.floor(Math.random() * 6);
@@ -2255,7 +2309,7 @@ document.getElementById('lb-join').addEventListener('click', () => {
 /* =========================================================
  * 十、开局公告（发布更新时：编辑 HTML 中 #notice-box 内容，并把 NOTICE_VERSION 调大，全员重新可见）
  * ========================================================= */
-const NOTICE_VERSION = 'v0.32';
+const NOTICE_VERSION = 'v0.33';
 const noticeMask = document.getElementById('notice-mask');
 try{ if(localStorage.getItem('ll-notice-read') === NOTICE_VERSION) noticeMask.classList.add('hidden'); }catch(e){}
 document.getElementById('notice-close').addEventListener('click', () => {
