@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>学园偶像大进击！· 单机原型 v0.33</title>
+<title>学园偶像大进击！· 单机原型 v0.34</title>
 <style>
   :root{
     --red:#e94f6a; --blue:#4f8fe9; --bg:#f5f0fa; --panel:#ffffff;
@@ -402,7 +402,7 @@
 <body>
 
 <header>
-  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.33 · 单机/联机</span></div>
+  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.34 · 单机/联机</span></div>
   <div id="turn-banner"><button id="ori-btn" title="手机横竖屏显示异常时可手动切换">横屏:关</button><button id="notice-btn">公告</button><button id="bgm-btn" title="背景音乐开关（三首LoveLive歌曲循环）">音乐:开</button><span id="net-badge" class="tag" style="display:none;background:#8a7aa8;margin-right:10px;"></span>当前回合：<span id="turn-chip" class="tag red">红方</span></div>
 </header>
 
@@ -514,7 +514,7 @@
 <div id="notice-mask">
   <div id="notice-box">
     <div class="n-title">学园偶像大进击！</div>
-    <div class="n-ver">当前版本 v0.33 · 2026-11-03</div>
+    <div class="n-ver">当前版本 v0.34 · 2026-11-04</div>
     <div class="n-sec">
       <span class="n-sec-t">【玩法速览 · 30秒上手】</span>
       <ul>
@@ -526,6 +526,7 @@
       </ul>
       <span class="n-sec-t">【更新公告】</span>
       <ul>
+        <li>v0.34 规则修订：起点<b>音乃木坂</b>仅供出发使用，游戏中再也<b>不能被路径经过或返回</b>——已取消其与名古屋巨蛋、西武巨蛋、屋顶、学校礼堂的所有内部支线连接；玩家从起点出发后，整条移动路径（含场馆支线）只能在外圈与场馆之间穿行。</li>
         <li>v0.33 掷骰音效：点击「掷骰移动」后<b>实时播放骰子碰撞音效</b>（WebAudio 合成，无需加载音频文件，离线可用）——翻滚碰撞声随骰面数字跳动渐次落定，末尾附带落桌闷响；单机 AI 回合与联机各端（含客人端）掷骰同样发声；音效不干扰背景音乐，浏览器自动播放策略限制下首次点击页面后即生效。</li>
         <li>v0.32 音乐播放健壮性修复：修复背景音乐/LIVE专属曲因<b>浏览器拦截播放或音频文件缺失</b>而全程静默无提示的问题——播放失败后<b>自动重试</b>（点击页面任意位置即可触发），并在游戏日志与控制台给出明确诊断；LIVE专属曲失败时自动恢复背景音乐播放。</li>
         <li>v0.31 LIVE成功专属音乐：为《Snow halation》《辉夜の城で踊りたい》《No brand girls》《仆らは今のなかで》四张专辑收录对应歌曲的高潮片段（约20-35秒），LIVE开办成功时<b>专属曲淡入播放</b>，播完（或被下一场LIVE切换）后背景音乐自动淡入续播；联机时全员同步播放；其余专辑无专属曲，背景音乐不受影响。</li>
@@ -710,9 +711,10 @@ const RING = ['akihabara','hokosha','maid','ueno','hokumura','seaside','koishika
 const BRANCH_EDGES = [
   ['hokosha','saitama'], ['arcade','saitama'], ['ueno','tokyo'],
   ['koishikawa','yokohama'], ['yokohama','shop'],
-  ['rijichou','nagoya'], ['nagoya','otonokizaka'],
-  ['seibu','otonokizaka'], ['seibu','katsudou'],
-  ['otonokizaka','okujou'], ['otonokizaka','gakudou'],
+  ['rijichou','nagoya'],
+  ['seibu','katsudou'],
+  /* 2026-11-04 v0.34：起点「音乃木坂」仅供出发使用，不再作为通行点；
+     已删除 4 条起点边——取消其与名古屋巨蛋、西武巨蛋、屋顶、学校礼堂的内部支线连接 */
 ];
 
 const ADJ = {};
@@ -2309,7 +2311,7 @@ document.getElementById('lb-join').addEventListener('click', () => {
 /* =========================================================
  * 十、开局公告（发布更新时：编辑 HTML 中 #notice-box 内容，并把 NOTICE_VERSION 调大，全员重新可见）
  * ========================================================= */
-const NOTICE_VERSION = 'v0.33';
+const NOTICE_VERSION = 'v0.34';
 const noticeMask = document.getElementById('notice-mask');
 try{ if(localStorage.getItem('ll-notice-read') === NOTICE_VERSION) noticeMask.classList.add('hidden'); }catch(e){}
 document.getElementById('notice-close').addEventListener('click', () => {
