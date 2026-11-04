@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>学园偶像大进击！· 单机原型 v0.35</title>
+<title>学园偶像大进击！· 单机原型 v0.36</title>
 <style>
   :root{
     --red:#e94f6a; --blue:#4f8fe9; --bg:#f5f0fa; --panel:#ffffff;
@@ -402,7 +402,7 @@
 <body>
 
 <header>
-  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.35 · 单机/联机</span></div>
+  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.36 · 单机/联机</span></div>
   <div id="turn-banner"><button id="ori-btn" title="手机横竖屏显示异常时可手动切换">横屏:关</button><button id="notice-btn">公告</button><button id="bgm-btn" title="背景音乐开关（三首LoveLive歌曲循环）">音乐:开</button><span id="net-badge" class="tag" style="display:none;background:#8a7aa8;margin-right:10px;"></span>当前回合：<span id="turn-chip" class="tag red">红方</span></div>
 </header>
 
@@ -514,7 +514,7 @@
 <div id="notice-mask">
   <div id="notice-box">
     <div class="n-title">学园偶像大进击！</div>
-    <div class="n-ver">当前版本 v0.35 · 2026-11-04</div>
+    <div class="n-ver">当前版本 v0.36 · 2026-11-04</div>
     <div class="n-sec">
       <span class="n-sec-t">【玩法速览 · 30秒上手】</span>
       <ul>
@@ -526,21 +526,9 @@
       </ul>
       <span class="n-sec-t">【更新公告】</span>
       <ul>
+        <li>v0.36 玩法优化：① 更新公告改为<b>只显示最近 3 个版本</b>的更新内容；② <b>东条希</b>占卜加强——占卜成功时获得指定玩家 <b>2 张随机素材</b>，失败时也能从系统<b>随机获得 1 张素材</b>（不再空手而归）；③ 修复<b>西武巨蛋 ↔ 明神男坂</b>的支线连接（两格在地图上相邻，此前无法互相通行，现已接通）。</li>
         <li>v0.35 花阳技能重复触发修复：<b>小泉花阳</b>「每圈一次」技能原本存在<b>同次 finishMove 重置后立即触发</b>的顺序 bug——绕圈经过穗村（重置 hanayoUsed=false）后若停在 2 格内会立即触发花阳，单圈可用多次。修复：花阳触发条件加 <code>!justPassedRest</code> 保护，确保绕圈后必须等下一次移动才能用新圈的花阳。</li>
         <li>v0.34 规则修订：起点<b>音乃木坂</b>仅供出发使用，游戏中再也<b>不能被路径经过或返回</b>——已取消其与名古屋巨蛋、西武巨蛋、屋顶、学校礼堂的所有内部支线连接；玩家从起点出发后，整条移动路径（含场馆支线）只能在外圈与场馆之间穿行。</li>
-        <li>v0.33 掷骰音效：点击「掷骰移动」后<b>实时播放骰子碰撞音效</b>（WebAudio 合成，无需加载音频文件，离线可用）——翻滚碰撞声随骰面数字跳动渐次落定，末尾附带落桌闷响；单机 AI 回合与联机各端（含客人端）掷骰同样发声；音效不干扰背景音乐，浏览器自动播放策略限制下首次点击页面后即生效。</li>
-        <li>v0.32 音乐播放健壮性修复：修复背景音乐/LIVE专属曲因<b>浏览器拦截播放或音频文件缺失</b>而全程静默无提示的问题——播放失败后<b>自动重试</b>（点击页面任意位置即可触发），并在游戏日志与控制台给出明确诊断；LIVE专属曲失败时自动恢复背景音乐播放。</li>
-        <li>v0.31 LIVE成功专属音乐：为《Snow halation》《辉夜の城で踊りたい》《No brand girls》《仆らは今のなかで》四张专辑收录对应歌曲的高潮片段（约20-35秒），LIVE开办成功时<b>专属曲淡入播放</b>，播完（或被下一场LIVE切换）后背景音乐自动淡入续播；联机时全员同步播放；其余专辑无专属曲，背景音乐不受影响。</li>
-        <li>v0.30 新增背景音乐：收录三首LoveLive歌曲《君のこころは輝いてるかい？》《ミはμ'sicのミ》《Happy maker!》<b>顺序循环播放</b>；顶栏「音乐」按钮可随时开关并自动记忆偏好（受浏览器播放策略影响，点击页面任意位置后开始播放）。</li>
-        <li>v0.29 抽卡动画优化：卡片飞入屏幕中央后<b>自动翻开</b>，无需再手动点击翻面（点「生效」结算不变）；联机时客人抽的卡同样自动翻开，点「生效」确认后主机结算。</li>
-        <li>v0.28 玩法优化：① 3-4 人局开局行进方向改为<b>系统随机分配</b>（单机/2人联机仍可自选）；② 「素材获取量+1」等获取量增益（含角色加成）不再复制同名素材，改为<b>额外随机获得一张同类型素材</b>；③ 行进规则修复：同一次移动内<b>每个场馆支线最多穿行一次</b>，杜绝在场馆四格反复横跳刷步。</li>
-        <li>v0.27 联机稳定性强化：公共信令服务器掉线后自动重连（约3秒一次），重连成功后自动补发最新棋局状态与未决的弹窗/抽卡，客人翻卡确认不再因网络抖动丢失；本次已完成联机双端抽卡动画同步实测与挑战卡 AI 全路径回归测试。</li>
-        <li>v0.26 新增抽卡动画：抽到事件/机遇/挑战卡时，卡片会飞到屏幕中央，点击翻面查看效果再「生效」（AI 自动翻卡可旁观；联机全员同步播放动画，客人翻卡确认后才会结算）；同时修复单机开局 AI 方向选择卡死的问题。</li>
-        <li>v0.25 手机横屏适配强化：画布尺寸按实际可视区域像素级校准，修复部分浏览器（地址栏/工具栏）导致的显示不全；弹窗与大厅高度改为按可视区自适应，长选项列表不再被裁切；新增「横屏」手动切换按钮（顶栏与大厅），画面方向异常时可一键纠正。</li>
-        <li>v0.24 「单机热座」升级为「单机模式」：你执红方，与 AI 蓝方 1v1 对战，AI 自动完成掷骰、创作专辑、开办LIVE、挑战与交易等全部行动。</li>
-        <li>v0.23 修复部分手机浏览器（如夸克）竖屏不自动横屏的问题：适配判定不再依赖浏览器的触摸信号上报。</li>
-        <li>v0.22 新增开局公告与顶栏「公告」入口；手机竖屏打开自动横屏显示，并优化横屏紧凑布局。</li>
-        <li>v0.21 「令人尊重的对手们」可指定任意领先对手；规则文档与原型完全对齐。</li>
       </ul>
     </div>
     <button id="notice-close">我知道了，开始游戏</button>
@@ -664,7 +652,7 @@ const CHARACTERS = [
   { id:'hanayo', name:'小泉花阳', skill:'每圈一次机会：停留在穗村 2 格范围内时（路过不算），可直接进入穗村并获得休息区效果' },
   { id:'rin',    name:'星空凛',   skill:'掷骰移动后，可选择行进步数 +1 或 -1' },
   { id:'eli',    name:'绚濑绘里', skill:'收集舞蹈素材时，素材获得量 +1' },
-  { id:'nozomi', name:'东条希',   skill:'每圈第一次路过穗村后可占卜一次（原型简化：50%成功），成功获得对手 1 张随机素材' },
+  { id:'nozomi', name:'东条希',   skill:'每圈第一次路过穗村后可占卜一次（原型简化：50%成功），成功获得指定玩家 2 张随机素材，失败则从系统随机获得 1 张素材' },
   { id:'nico',   name:'矢泽妮可', skill:'LIVE检定 -2，但获得的所有素材 +1' },
 ];
 const CHAR_MAP = Object.fromEntries(CHARACTERS.map(c => [c.id, c]));
@@ -713,9 +701,10 @@ const BRANCH_EDGES = [
   ['hokosha','saitama'], ['arcade','saitama'], ['ueno','tokyo'],
   ['koishikawa','yokohama'], ['yokohama','shop'],
   ['rijichou','nagoya'],
-  ['seibu','katsudou'],
+  ['seibu','katsudou'], ['seibu','myojinzaka'],
   /* 2026-11-04 v0.34：起点「音乃木坂」仅供出发使用，不再作为通行点；
-     已删除 4 条起点边——取消其与名古屋巨蛋、西武巨蛋、屋顶、学校礼堂的内部支线连接 */
+     已删除 4 条起点边——取消其与名古屋巨蛋、西武巨蛋、屋顶、学校礼堂的内部支线连接
+     2026-11-04 v0.36：补上西武巨蛋—明神男坂支线（两格地图相邻，修复连接断开） */
 ];
 
 const ADJ = {};
@@ -1459,7 +1448,7 @@ function resumeTileFlow(pk, passedRest){
   const deferred = triggerTile(pk);   // LIVE/挑战/角色弹窗流程会自行结束回合
   if(!deferred) endTurnStep();
 }
-/* 东条希占卜（原型简化：50%成功率，成功获得对手1张随机素材） */
+/* 东条希占卜（v0.36 加强：50%成功率，成功获得指定玩家 2 张随机素材，失败从系统随机获得 1 张素材） */
 /* 占卜结束后继续结算当前停留格（修复占卜与 LIVE 场馆等地块触发的冲突） */
 function afterDivination(pk){
   const deferred = triggerTile(pk);
@@ -1467,19 +1456,28 @@ function afterDivination(pk){
 }
 function offerDivination(pk){
   const foe = other(pk);
-  showModal('东条希的占卜', '路过【穗村】后进行占卜（原型简化：50%成功率）。是否指定对手占卜？', [
+  showModal('东条希的占卜', '路过【穗村】后进行占卜（原型简化：50%成功率）：成功获得指定玩家 2 张随机素材，失败则从系统随机获得 1 张素材。是否占卜？', [
     { label:`对 ${state.players[foe].name} 占卜`, onSelect(){
         if(Math.random() < 0.5){
-          const cats = ['music','dance','costume'].filter(c => state.players[foe].mats[c].length);
-          if(!cats.length){ log(`占卜成功！但对手身上没有素材，一无所获`, pk); }
-          else{
+          let taken = [];
+          for(let i = 0; i < 2; i++){
+            const cats = ['music','dance','costume'].filter(c => state.players[foe].mats[c].length);
+            if(!cats.length) break;
             const cat = rand(cats), arr = state.players[foe].mats[cat];
             const name = rand(arr);
             arr.splice(arr.indexOf(name), 1);
             state.players[pk].mats[cat].push(name);
-            log(`占卜成功！夺得了对手的素材「${name}」`, pk);
+            taken.push(CAT_LABEL[cat] + '「' + name + '」');
           }
-        } else log(`占卜失败……什么都没有发生`, pk);
+          log(taken.length
+            ? `占卜成功！夺得了${state.players[foe].name}的素材：${taken.join('、')}`
+            : `占卜成功！但${state.players[foe].name}身上没有素材，一无所获`, pk);
+        } else {
+          const cat = rand(['music','dance','costume']);
+          const name = rand(TYPE_LIST[cat]);
+          state.players[pk].mats[cat].push(name);
+          log(`占卜失败……从系统随机获得补偿素材：${CAT_LABEL[cat]}「${name}」`, pk);
+        }
         render();
         afterDivination(pk);
       } },
@@ -2320,7 +2318,7 @@ document.getElementById('lb-join').addEventListener('click', () => {
 /* =========================================================
  * 十、开局公告（发布更新时：编辑 HTML 中 #notice-box 内容，并把 NOTICE_VERSION 调大，全员重新可见）
  * ========================================================= */
-const NOTICE_VERSION = 'v0.35';
+const NOTICE_VERSION = 'v0.36';
 const noticeMask = document.getElementById('notice-mask');
 try{ if(localStorage.getItem('ll-notice-read') === NOTICE_VERSION) noticeMask.classList.add('hidden'); }catch(e){}
 document.getElementById('notice-close').addEventListener('click', () => {
