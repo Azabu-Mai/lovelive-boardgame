@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>学园偶像大进击！· 单机原型 v0.38</title>
+<title>学园偶像大进击！· 单机原型 v0.39</title>
 <style>
   :root{
     --red:#e94f6a; --blue:#4f8fe9; --bg:#f5f0fa; --panel:#ffffff;
@@ -402,7 +402,7 @@
 <body>
 
 <header>
-  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.38 · 单机/联机</span></div>
+  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.39 · 单机/联机</span></div>
   <div id="turn-banner"><button id="ori-btn" title="手机横竖屏显示异常时可手动切换">横屏:关</button><button id="notice-btn">公告</button><button id="bgm-btn" title="背景音乐开关（三首LoveLive歌曲循环）">音乐:开</button><span id="net-badge" class="tag" style="display:none;background:#8a7aa8;margin-right:10px;"></span>当前回合：<span id="turn-chip" class="tag red">红方</span></div>
 </header>
 
@@ -514,7 +514,7 @@
 <div id="notice-mask">
   <div id="notice-box">
     <div class="n-title">学园偶像大进击！</div>
-    <div class="n-ver">当前版本 v0.38 · 2026-11-05</div>
+    <div class="n-ver">当前版本 v0.39 · 2026-11-05</div>
     <div class="n-sec">
       <span class="n-sec-t">【玩法速览 · 30秒上手】</span>
       <ul>
@@ -526,9 +526,9 @@
       </ul>
       <span class="n-sec-t">【更新公告】</span>
       <ul>
+        <li>v0.39 卡牌与技能平衡：① <b>响彻东京巨蛋吧！</b>挑战时 LIVE 检定 <b>+1</b>（失败惩罚不变，风险收益更合理）；② <b>雨中追加公演</b>重写——缺少服装素材时可选择立即完成该专辑（正常消耗已有素材），随后进行一次 LIVE 检定（<b>2骰 > 7</b>），成功累计胜利进度，失败扣除身上全部服装素材且下回合无法获得素材；③ <b>东条希</b>占卜平衡：成功改为夺取指定玩家 <b>1 张指定素材</b>（原为 2 张随机），失败效果不变。</li>
         <li>v0.38 玩法与体验优化：① 大厅新增<b>音量设置</b>——BGM / LIVE 专属曲 / 掷骰音效三通道独立滑块，0-100% 自由调节，localStorage 记忆；② 修复<b>东条希占卜后跳过下一玩家回合</b>的 BUG：占卜弹窗显式指定归属玩家，避免 AI 自动决策计时器因座位不匹配而挂起；③ <b>西武巨蛋支线</b>改为每圈一次机会：每圈第一次在偶像活动室/明神男坂可选择进入西武巨蛋，若选择后绕圈（顺时针过屋顶/逆时针过学校礼堂）则重置机会，同圈再次路过不再触发路线选择。</li>
         <li>v0.37 音量优化：游戏音量整体调低——<b>背景音乐</b>默认音量由 35% 降至 <b>15%</b>，<b>掷骰音效</b>与 <b>LIVE 成功专属曲</b>同步按比例调低（保持音效略突出于背景音乐的层次感），减少声音对游戏的干扰；音乐开关记忆不受影响。</li>
-        <li>v0.36 玩法优化：① 更新公告改为<b>只显示最近 3 个版本</b>的更新内容；② <b>东条希</b>占卜加强——占卜成功时获得指定玩家 <b>2 张随机素材</b>，失败时也能从系统<b>随机获得 1 张素材</b>（不再空手而归）；③ 修复<b>西武巨蛋 ↔ 明神男坂</b>的支线连接（两格在地图上相邻，此前无法互相通行，现已接通）。</li>
       </ul>
     </div>
     <button id="notice-close">我知道了，开始游戏</button>
@@ -653,12 +653,12 @@ const CHANCE_CARDS = [
 
 /* 挑战卡（许愿类奖励，挑战格触发；翻开后可选择发起或放弃） */
 const CHALLENGE_CARDS = [
-  { name:'雨中追加公演',     effect:'rainLive',   desc:'条件：你缺少完成任意专辑所需的「服装」素材。立即获得 1 张所需服装素材；但接下来 2 回合移动骰点 -1' },
+  { name:'雨中追加公演',     effect:'rainLive',   desc:'条件：你缺少完成任意专辑所需的「服装」素材。立即完成该专辑（消耗已有素材），随后进行一次LIVE检定（2骰 > 7）。成功正常累计胜利进度；失败扣除身上所有服装素材，且下回合无法获得素材' },
   { name:'超密集巡演',       effect:'denseTour',  desc:'条件：你的素材总数 ≥ 3。指定 1 张未完成专辑，其素材需求 -1（之后创作它时三类素材可缺其一）；立即弃置 2 张随机素材' },
   { name:'令人尊重的对手们', effect:'rivals',     desc:'条件：存在已完成专辑数领先于你的对手。指定 1 名领先对手发起挑战，获得 1 张角色卡，且下一次LIVE检定 +2；但本局剩余时间内不能再获得增益类效果' },
   { name:'零预算LIVE',       effect:'zeroBudget', desc:'条件：你的素材总数 ≤ 2。指定 1 张专辑立即完成（无需素材）；但本局剩余时间内不能触发机遇格' },
   { name:'主题公演',         effect:'themeShow',  desc:'无条件，二选一：A 获得 1 张「梦想」或「奇迹」素材，下回合骰点 -2；B 下一次LIVE检定 +2，接下来 2 回合不能触发素材格' },
-  { name:'响彻东京巨蛋吧！', effect:'tokyoDash',  desc:'条件：拥有已完成专辑。立即传送东京巨蛋进行LIVE检定（2骰 > 11，成功 +2）；若失败，本局角色技能失效且无法触发挑战格' },
+  { name:'响彻东京巨蛋吧！', effect:'tokyoDash',  desc:'条件：拥有已完成专辑。立即传送东京巨蛋进行LIVE检定（本次检定 +1，2骰 > 11，成功 +2）；若失败，本局角色技能失效且无法触发挑战格' },
 ];
 
 /* 角色卡（9 名 μ's 成员，开局各选 1 名，游戏中可额外获得；每张卡每局唯一） */
@@ -670,7 +670,7 @@ const CHARACTERS = [
   { id:'hanayo', name:'小泉花阳', skill:'每圈一次机会：停留在穗村 2 格范围内时（路过不算），可直接进入穗村并获得休息区效果' },
   { id:'rin',    name:'星空凛',   skill:'掷骰移动后，可选择行进步数 +1 或 -1' },
   { id:'eli',    name:'绚濑绘里', skill:'收集舞蹈素材时，素材获得量 +1' },
-  { id:'nozomi', name:'东条希',   skill:'每圈第一次路过穗村后可占卜一次（原型简化：50%成功），成功获得指定玩家 2 张随机素材，失败则从系统随机获得 1 张素材' },
+  { id:'nozomi', name:'东条希',   skill:'每圈第一次路过穗村后可占卜一次（原型简化：50%成功），成功夺取指定玩家 1 张指定素材，失败则从系统随机获得 1 张素材' },
   { id:'nico',   name:'矢泽妮可', skill:'LIVE检定 -2，但获得的所有素材 +1' },
 ];
 const CHAR_MAP = Object.fromEntries(CHARACTERS.map(c => [c.id, c]));
@@ -1173,15 +1173,34 @@ function doChallenge(pk, card){
   const done = () => { render(); endTurnStep(); };
   switch(card.effect){
     case 'rainLive': {
-      const a = state.albumPool.find(a => !a.owner
+      /* v0.39：雨中追加公演重写——
+         条件：你缺少完成任意专辑所需的「服装」素材（即音乐/舞蹈已齐、服装不足）。
+         效果：立即完成该专辑（消耗已有素材），随后进行一次LIVE检定（2骰 > 7）。
+         成功：正常累计胜利进度（+1，专辑视为已演出）。
+         失败：扣除身上所有服装素材，且下回合无法获得素材。 */
+      const cands = state.albumPool.filter(a => !a.owner
         && a.music.some(m => p.mats.music.includes(m))
         && a.dance.some(d => p.mats.dance.includes(d))
         && !a.costume.some(c => p.mats.costume.includes(c)));
-      const need = rand(a.costume);
-      p.mats.costume.push(need);
-      p.mods.diceMinus += 2;
-      log(`挑战【雨中追加公演】成功！获得所需服装素材「${need}」；接下来 2 回合骰点 -1`, pk);
-      done();
+      if(!cands.length){ log(`没有可立即完成的专辑（需音乐/舞蹈已齐、服装不足），只能放弃`, pk); done(); break; }
+      showModal('雨中追加公演', '选择要立即完成的专辑（消耗已有素材，随后进行 LIVE 检定，2骰 > 7）：',
+        cands.map(a => ({ label:`《${a.name}》`, onSelect(){
+          /* 立即完成专辑：消耗已有素材 */
+          const take = (cat, opts) => {
+            const name = opts.find(o => p.mats[cat].includes(o));
+            if(name) p.mats[cat].splice(p.mats[cat].indexOf(name), 1);
+            return name;
+          };
+          const c = take('costume', a.costume), m = take('music', a.music), d = take('dance', a.dance);
+          const used = [[c,'costume'],[m,'music'],[d,'dance']].filter(([n]) => n)
+            .map(([n,cat]) => `${CAT_LABEL[cat]}「${n}」`).join('、');
+          a.owner = pk;
+          p.albums.push(a.name);
+          log(`雨中追加公演：立即完成专辑《${a.name}》（消耗：${used}），开始紧急 LIVE 检定`, pk);
+          render();
+          doLiveCheck(pk, a, { name: TILE_MAP[p.pos].name, type: 'LIVE场馆' },
+            { target:7, label:'雨中追加公演', rainPenalty:true });
+        } })));
       break;
     }
     case 'denseTour': {
@@ -1260,8 +1279,8 @@ function doChallenge(pk, card){
       setPieceTo(pk, 'tokyo');
       log(`响彻东京巨蛋吧！立即传送至【东京巨蛋】进行LIVE检定`, pk);
       showModal('东京巨蛋 · 紧急LIVE',
-        '选择要演出的专辑（2骰 > 11；失败则本局角色技能失效，且无法触发挑战格）：',
-        mine.map(a => ({ label:`《${a.name}》`, onSelect(){ doLiveCheck(pk, a, TILE_MAP.tokyo, { dash:true }); } })));
+        '选择要演出的专辑（2骰 > 11，本次检定 +1；失败则本局角色技能失效，且无法触发挑战格）：',
+        mine.map(a => ({ label:`《${a.name}》`, onSelect(){ doLiveCheck(pk, a, TILE_MAP.tokyo, { dash:true, modifier:1 }); } })));
       break;
     }
   }
@@ -1486,7 +1505,7 @@ function resumeTileFlow(pk, passedRest){
   const deferred = triggerTile(pk);   // LIVE/挑战/角色弹窗流程会自行结束回合
   if(!deferred) endTurnStep();
 }
-/* 东条希占卜（v0.36 加强：50%成功率，成功获得指定玩家 2 张随机素材，失败从系统随机获得 1 张素材） */
+/* 东条希占卜（v0.39 平衡：50%成功率，成功夺取指定玩家 1 张「指定」素材，失败从系统随机获得 1 张素材） */
 /* 占卜结束后继续结算当前停留格（修复占卜与 LIVE 场馆等地块触发的冲突） */
 function afterDivination(pk){
   /* v0.37 修复：占卜结算后必须继续结算当前停留格。
@@ -1498,32 +1517,34 @@ function afterDivination(pk){
 }
 function offerDivination(pk){
   const foe = other(pk);
-  /* v0.37 修复：显式传 seat 参数，确保弹窗归属到占卜玩家而非当前回合玩家。
-     原代码未传 seat，showModal 默认取 state.current，若占卜发生在回合切换边缘
-     （state.current 已变），AI 自动决策的计时器会因 seat 不匹配而直接 return，
-     导致弹窗挂着不点、endTurnStep 永不调用、跳过下家。 */
-  showModal('东条希的占卜', '路过【穗村】后进行占卜（原型简化：50%成功率）：成功获得指定玩家 2 张随机素材，失败则从系统随机获得 1 张素材。是否占卜？', [
+  /* v0.37 修复：显式传 seat 参数，确保弹窗归属到占卜玩家而非当前回合玩家。 */
+  showModal('东条希的占卜', '路过【穗村】后进行占卜（原型简化：50%成功率）：成功夺取指定玩家 1 张指定素材，失败则从系统随机获得 1 张素材。是否占卜？', [
     { label:`对 ${state.players[foe].name} 占卜`, onSelect(){
         if(Math.random() < 0.5){
-          let taken = [];
-          for(let i = 0; i < 2; i++){
-            const cats = ['music','dance','costume'].filter(c => state.players[foe].mats[c].length);
-            if(!cats.length) break;
-            const cat = rand(cats), arr = state.players[foe].mats[cat];
-            const name = rand(arr);
-            arr.splice(arr.indexOf(name), 1);
-            state.players[pk].mats[cat].push(name);
-            taken.push(CAT_LABEL[cat] + '「' + name + '」');
+          /* v0.39：成功改为夺取指定玩家 1 张「指定」素材（由占卜者选择） */
+          const uniq = uniqMats(state.players[foe]);
+          if(!uniq.length){
+            log(`占卜成功！但${state.players[foe].name}身上没有素材，一无所获`, pk);
+            render();
+            afterDivination(pk);
+            return;
           }
-          log(taken.length
-            ? `占卜成功！夺得了${state.players[foe].name}的素材：${taken.join('、')}`
-            : `占卜成功！但${state.players[foe].name}身上没有素材，一无所获`, pk);
-        } else {
-          const cat = rand(['music','dance','costume']);
-          const name = rand(TYPE_LIST[cat]);
-          state.players[pk].mats[cat].push(name);
-          log(`占卜失败……从系统随机获得补偿素材：${CAT_LABEL[cat]}「${name}」`, pk);
+          showModal('东条希的占卜 · 指定素材',
+            `占卜成功！选择要从 ${state.players[foe].name} 身上夺取的 1 张素材：`,
+            uniq.map(m => ({ label:`${CAT_LABEL[m.cat]}「${m.name}」`, onSelect(){
+              const arr = state.players[foe].mats[m.cat];
+              arr.splice(arr.indexOf(m.name), 1);
+              state.players[pk].mats[m.cat].push(m.name);   // 技能效果：不受「无法获得素材」封锁影响
+              log(`占卜成功！夺得了${state.players[foe].name}的${CAT_LABEL[m.cat]}「${m.name}」`, pk);
+              render();
+              afterDivination(pk);
+            } })), pk);
+          return;
         }
+        const cat = rand(['music','dance','costume']);
+        const name = rand(TYPE_LIST[cat]);
+        state.players[pk].mats[cat].push(name);
+        log(`占卜失败……从系统随机获得补偿素材：${CAT_LABEL[cat]}「${name}」`, pk);
         render();
         afterDivination(pk);
       } },
@@ -1582,7 +1603,7 @@ function offerLive(pk, t){
 }
 function doLiveCheck(pk, a, t, opts = {}){
   const isTokyo = t.type === '特殊场馆';
-  const target = isTokyo ? 11 : 6;
+  const target = (opts.target != null) ? opts.target : (isTokyo ? 11 : 6);
   const d1 = 1 + Math.floor(Math.random() * 6);
   const d2 = 1 + Math.floor(Math.random() * 6);
   const sum = d1 + d2;
@@ -1595,7 +1616,7 @@ function doLiveCheck(pk, a, t, opts = {}){
   const check = sum + adj;
   diceEl.textContent = sum;
   state.lastDice = sum;
-  log(`LIVE检定《${a.name}》（${isTokyo ? '东京巨蛋' : '普通场馆'}，2骰 > ${target}）：骰出 ${d1} + ${d2} = ${sum}`
+  log(`LIVE检定《${a.name}》（${opts.label || (isTokyo ? '东京巨蛋' : '普通场馆')}，2骰 > ${target}）：骰出 ${d1} + ${d2} = ${sum}`
       + (notes.length ? `（${notes.join('，')}）→ 有效检定 ${check}` : ''), pk);
   if(check > target){
     a.owner = 'done';                                    // 专辑随LIVE成功而消失
@@ -1605,6 +1626,13 @@ function doLiveCheck(pk, a, t, opts = {}){
     playLiveBgm(a.name);                                 // v0.31：专属曲片段淡入播放（联机时各端同步）
     if(NET.role === 'host' && NET.connected) send({ type:'fx', fx:{ kind:'liveBgm', album: a.name } });
     checkWin(pk);
+  } else if(opts.rainPenalty){                           // 雨中追加公演失败代价（v0.39）
+    const lost = p.mats.costume.slice();
+    p.mats.costume = [];
+    p.mods.noGain += 2;                                  // +2：本回合结束衰减 1，下回合恰好生效
+    log(`LIVE检定失败！《${a.name}》保留为已完成专辑`
+        + (lost.length ? `；扣除全部服装素材（${lost.length} 张）：${lost.map(n => '「' + n + '」').join('、')}` : '；身上没有服装素材可扣')
+        + `，且下回合无法获得素材`, pk);
   } else {
     a.owner = null;                                      // 失败则专辑回到专辑池
     p.albums = p.albums.filter(n => n !== a.name);
@@ -2365,7 +2393,7 @@ document.getElementById('lb-join').addEventListener('click', () => {
 /* =========================================================
  * 十、开局公告（发布更新时：编辑 HTML 中 #notice-box 内容，并把 NOTICE_VERSION 调大，全员重新可见）
  * ========================================================= */
-const NOTICE_VERSION = 'v0.38';
+const NOTICE_VERSION = 'v0.39';
 const noticeMask = document.getElementById('notice-mask');
 try{ if(localStorage.getItem('ll-notice-read') === NOTICE_VERSION) noticeMask.classList.add('hidden'); }catch(e){}
 document.getElementById('notice-close').addEventListener('click', () => {
