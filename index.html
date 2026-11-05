@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>学园偶像大进击！· 单机原型 v0.37</title>
+<title>学园偶像大进击！· 单机原型 v0.38</title>
 <style>
   :root{
     --red:#e94f6a; --blue:#4f8fe9; --bg:#f5f0fa; --panel:#ffffff;
@@ -402,7 +402,7 @@
 <body>
 
 <header>
-  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.37 · 单机/联机</span></div>
+  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.38 · 单机/联机</span></div>
   <div id="turn-banner"><button id="ori-btn" title="手机横竖屏显示异常时可手动切换">横屏:关</button><button id="notice-btn">公告</button><button id="bgm-btn" title="背景音乐开关（三首LoveLive歌曲循环）">音乐:开</button><span id="net-badge" class="tag" style="display:none;background:#8a7aa8;margin-right:10px;"></span>当前回合：<span id="turn-chip" class="tag red">红方</span></div>
 </header>
 
@@ -514,7 +514,7 @@
 <div id="notice-mask">
   <div id="notice-box">
     <div class="n-title">学园偶像大进击！</div>
-    <div class="n-ver">当前版本 v0.37 · 2026-11-05</div>
+    <div class="n-ver">当前版本 v0.38 · 2026-11-05</div>
     <div class="n-sec">
       <span class="n-sec-t">【玩法速览 · 30秒上手】</span>
       <ul>
@@ -526,9 +526,9 @@
       </ul>
       <span class="n-sec-t">【更新公告】</span>
       <ul>
+        <li>v0.38 玩法与体验优化：① 大厅新增<b>音量设置</b>——BGM / LIVE 专属曲 / 掷骰音效三通道独立滑块，0-100% 自由调节，localStorage 记忆；② 修复<b>东条希占卜后跳过下一玩家回合</b>的 BUG：占卜弹窗显式指定归属玩家，避免 AI 自动决策计时器因座位不匹配而挂起；③ <b>西武巨蛋支线</b>改为每圈一次机会：每圈第一次在偶像活动室/明神男坂可选择进入西武巨蛋，若选择后绕圈（顺时针过屋顶/逆时针过学校礼堂）则重置机会，同圈再次路过不再触发路线选择。</li>
         <li>v0.37 音量优化：游戏音量整体调低——<b>背景音乐</b>默认音量由 35% 降至 <b>15%</b>，<b>掷骰音效</b>与 <b>LIVE 成功专属曲</b>同步按比例调低（保持音效略突出于背景音乐的层次感），减少声音对游戏的干扰；音乐开关记忆不受影响。</li>
         <li>v0.36 玩法优化：① 更新公告改为<b>只显示最近 3 个版本</b>的更新内容；② <b>东条希</b>占卜加强——占卜成功时获得指定玩家 <b>2 张随机素材</b>，失败时也能从系统<b>随机获得 1 张素材</b>（不再空手而归）；③ 修复<b>西武巨蛋 ↔ 明神男坂</b>的支线连接（两格在地图上相邻，此前无法互相通行，现已接通）。</li>
-        <li>v0.35 花阳技能重复触发修复：<b>小泉花阳</b>「每圈一次」技能原本存在<b>同次 finishMove 重置后立即触发</b>的顺序 bug——绕圈经过穗村（重置 hanayoUsed=false）后若停在 2 格内会立即触发花阳，单圈可用多次。修复：花阳触发条件加 <code>!justPassedRest</code> 保护，确保绕圈后必须等下一次移动才能用新圈的花阳。</li>
       </ul>
     </div>
     <button id="notice-close">我知道了，开始游戏</button>
@@ -570,6 +570,24 @@
       <button id="lb-join">加入房间</button>
     </div>
     <div id="lb-status"></div>
+    <div class="vol-panel" style="margin-top:14px;padding:10px;background:rgba(255,255,255,.5);border-radius:8px;">
+      <div style="font-size:12px;font-weight:bold;margin-bottom:8px;color:#666;">🎵 音量设置</div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="font-size:11px;width:60px;">BGM</span>
+        <input type="range" id="vol-bgm" min="0" max="100" value="15" style="flex:1;">
+        <span id="vol-bgm-val" style="font-size:11px;width:30px;text-align:right;">15%</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+        <span style="font-size:11px;width:60px;">LIVE</span>
+        <input type="range" id="vol-live" min="0" max="100" value="20" style="flex:1;">
+        <span id="vol-live-val" style="font-size:11px;width:30px;text-align:right;">20%</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;">
+        <span style="font-size:11px;width:60px;">骰子</span>
+        <input type="range" id="vol-dice" min="0" max="100" value="20" style="flex:1;">
+        <span id="vol-dice-val" style="font-size:11px;width:30px;text-align:right;">20%</span>
+      </div>
+    </div>
     <div id="lb-ori" title="若手机上画面方向不对，点此切换横/竖屏">手机画面方向不对？点此切换横/竖屏</div>
   </div>
 </div>
@@ -722,6 +740,7 @@ function newPlayer(name){
     dir:null,                       // 行进方向：1=顺时针 -1=逆时针（开局选定后锁定）
     chars:[],                       // 已获得的角色卡（id）
     hanayoUsed:false, nozomiUsed:false,   // 「每圈一次」技能标记（经过穗村时重置）
+    seibuUsedThisLap:false,           // v0.37：本圈是否已在偶像活动室/明神男坂获得过西武巨蛋选择机会
     mats:{ music:[], dance:[], costume:[] },
     albums:[],
     progress:0,                     // 胜利进度（每场LIVE成功+1）
@@ -1346,6 +1365,14 @@ function forwardOptions(cur, prev, dir, usedVenues){
     /* 仅场馆岔路可选，其余自动前进；同一移动内每个场馆支线最多穿越一次（防在场馆四格反复横跳） */
     cands = cands.filter(n => n === ringNext || (VENUE_IDS.includes(n) && !(usedVenues || []).includes(n)));
   }
+  /* v0.37：西武巨蛋支线圈次限制——
+     每圈第一次在偶像活动室/明神男坂获得选择进入西武巨蛋的机会；
+     若已用过（seibuUsedThisLap），则过滤掉西武巨蛋，只能走外圈。
+     圈次以路过屋顶（顺时针）/学校礼堂（逆时针）为界，在 finishMove 中重置。 */
+  const p = state.players[state.current];
+  if(p.seibuUsedThisLap && (cur === 'katsudou' || cur === 'myojinzaka')){
+    cands = cands.filter(n => n !== 'seibu');
+  }
   if(!cands.length) cands = ADJ[cur].filter(n => n !== 'tokyo' && n !== 'otonokizaka' && !(usedVenues || []).includes(n));
   if(!cands.length) cands = ADJ[cur].filter(n => n !== 'otonokizaka');
   return cands;
@@ -1370,6 +1397,10 @@ function stepMove(){
 function advance(id){
   const m = moving;
   if(VENUE_IDS.includes(id) && !m.usedVenues.includes(id)) m.usedVenues.push(id);
+  /* v0.37：从偶像活动室/明神男坂进入西武巨蛋时，标记本圈已用掉选择机会 */
+  if(id === 'seibu' && (m.cur === 'katsudou' || m.cur === 'myojinzaka')){
+    state.players[m.pk].seibuUsedThisLap = true;
+  }
   m.route.push(id); m.prev = m.cur; m.cur = id; m.remaining--;
   setPieceTo(m.pk, m.cur);
   if(NET.role === 'host' && NET.connected) send({ type:'fx', fx:{ kind:'step', pk: m.pk, tile: id } });
@@ -1405,6 +1436,13 @@ function finishMove(){
   if(justPassedRest){
     state.players[m.pk].hanayoUsed = false;
     state.players[m.pk].nozomiUsed = false;
+  }
+  /* v0.37：西武巨蛋支线圈次重置——
+     顺时针玩家路过屋顶(okujou)、逆时针玩家路过学校礼堂(gakudou)时，
+     重置本圈西武巨蛋选择机会标记。 */
+  const lapMark = state.players[m.pk].dir === 1 ? 'okujou' : 'gakudou';
+  if(m.route.includes(lapMark)){
+    state.players[m.pk].seibuUsedThisLap = false;
   }
   moving = null;
   const p = state.players[m.pk];
@@ -1451,11 +1489,19 @@ function resumeTileFlow(pk, passedRest){
 /* 东条希占卜（v0.36 加强：50%成功率，成功获得指定玩家 2 张随机素材，失败从系统随机获得 1 张素材） */
 /* 占卜结束后继续结算当前停留格（修复占卜与 LIVE 场馆等地块触发的冲突） */
 function afterDivination(pk){
+  /* v0.37 修复：占卜结算后必须继续结算当前停留格。
+     原代码在 moving 非空时调用 triggerTile，若 triggerTile 返回 true（弹窗流程），
+     弹窗可能因 AI 决策或网络延迟未正确回调 endTurnStep，导致回合挂起、跳过下家。
+     修复：占卜后无论 moving 状态如何，先结算当前停留格，再结束回合。 */
   const deferred = triggerTile(pk);
   if(!deferred) endTurnStep();
 }
 function offerDivination(pk){
   const foe = other(pk);
+  /* v0.37 修复：显式传 seat 参数，确保弹窗归属到占卜玩家而非当前回合玩家。
+     原代码未传 seat，showModal 默认取 state.current，若占卜发生在回合切换边缘
+     （state.current 已变），AI 自动决策的计时器会因 seat 不匹配而直接 return，
+     导致弹窗挂着不点、endTurnStep 永不调用、跳过下家。 */
   showModal('东条希的占卜', '路过【穗村】后进行占卜（原型简化：50%成功率）：成功获得指定玩家 2 张随机素材，失败则从系统随机获得 1 张素材。是否占卜？', [
     { label:`对 ${state.players[foe].name} 占卜`, onSelect(){
         if(Math.random() < 0.5){
@@ -1482,7 +1528,7 @@ function offerDivination(pk){
         afterDivination(pk);
       } },
     { label:'不占卜', onSelect(){ afterDivination(pk); } },
-  ]);
+  ], pk);   /* ← 显式传 seat，确保 AI 自动决策计时器归属正确 */
 }
 function endTurnStep(){
   if(state.gameOver){ render(); return; }
@@ -1815,7 +1861,8 @@ function playDiceSfx(){
   if(!ctx || ctx.state !== 'running') return;
   try{
     const t0 = ctx.currentTime + 0.02;
-    const master = ctx.createGain(); master.gain.value = 0.2;   /* v0.37：主增益 0.5→0.2，整体调低掷骰音效 */
+    const master = ctx.createGain(); master.gain.value = volumes.dice;   /* v0.37：玩家可调音量 */
+    ctx._masterGain = master;   /* 挂到 ctx 上供滑块实时调节 */
     const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 6000;
     master.connect(lp); lp.connect(ctx.destination);
     /* 一串碰撞瞬时声：起始密集、逐渐稀疏（翻滚→落定），最后一声最响 */
@@ -2318,7 +2365,7 @@ document.getElementById('lb-join').addEventListener('click', () => {
 /* =========================================================
  * 十、开局公告（发布更新时：编辑 HTML 中 #notice-box 内容，并把 NOTICE_VERSION 调大，全员重新可见）
  * ========================================================= */
-const NOTICE_VERSION = 'v0.37';
+const NOTICE_VERSION = 'v0.38';
 const noticeMask = document.getElementById('notice-mask');
 try{ if(localStorage.getItem('ll-notice-read') === NOTICE_VERSION) noticeMask.classList.add('hidden'); }catch(e){}
 document.getElementById('notice-close').addEventListener('click', () => {
@@ -2341,6 +2388,39 @@ const BGM_TRACKS = [
 ];
 let bgmAudio = null, bgmIdx = 0, bgmOn = true;
 try{ bgmOn = localStorage.getItem('ll-bgm') !== '0'; }catch(e){}
+/* v0.37：玩家可调音量（BGM / LIVE / 骰子），localStorage 记忆 */
+const VOLUME_DEFAULTS = { bgm: 0.15, live: 0.2, dice: 0.2 };
+let volumes = { ...VOLUME_DEFAULTS };
+try{
+  const saved = JSON.parse(localStorage.getItem('ll-volumes') || '{}');
+  if(typeof saved.bgm === 'number') volumes.bgm = saved.bgm;
+  if(typeof saved.live === 'number') volumes.live = saved.live;
+  if(typeof saved.dice === 'number') volumes.dice = saved.dice;
+}catch(e){}
+function saveVolumes(){ try{ localStorage.setItem('ll-volumes', JSON.stringify(volumes)); }catch(e){} }
+function updateVolumeUI(){
+  document.getElementById('vol-bgm').value = Math.round(volumes.bgm * 100);
+  document.getElementById('vol-bgm-val').textContent = Math.round(volumes.bgm * 100) + '%';
+  document.getElementById('vol-live').value = Math.round(volumes.live * 100);
+  document.getElementById('vol-live-val').textContent = Math.round(volumes.live * 100) + '%';
+  document.getElementById('vol-dice').value = Math.round(volumes.dice * 100);
+  document.getElementById('vol-dice-val').textContent = Math.round(volumes.dice * 100) + '%';
+}
+function bindVolumeSlider(id, key){
+  const el = document.getElementById(id);
+  el.addEventListener('input', () => {
+    volumes[key] = el.value / 100;
+    document.getElementById(id + '-val').textContent = el.value + '%';
+    saveVolumes();
+    if(key === 'bgm' && bgmAudio) bgmAudio.volume = volumes.bgm;
+    if(key === 'live' && liveAudio) liveAudio.volume = volumes.live;
+    if(key === 'dice' && diceAudioCtx && diceAudioCtx._masterGain) diceAudioCtx._masterGain.gain.value = volumes.dice;
+  });
+}
+updateVolumeUI();
+bindVolumeSlider('vol-bgm', 'bgm');
+bindVolumeSlider('vol-live', 'live');
+bindVolumeSlider('vol-dice', 'dice');
 function bgmSyncBtn(){
   const b = document.getElementById('bgm-btn');
   if(b) b.textContent = '音乐:' + (bgmOn ? '开' : '关');
@@ -2362,13 +2442,13 @@ function bgmInit(){   /* 需在用户手势内调用（自动播放限制）；�
   if(!bgmOn || liveAudio) return;   /* LIVE 专属曲播放中不启 BGM（结束后 bgmResume 续播） */
   if(bgmAudio){
     if(bgmAudio.paused){
-      try{ bgmAudio.play().then(() => fadeTo(bgmAudio, 0.15, 900)).catch(bgmPlayFail); }catch(e){ bgmPlayFail(e); }
+      try{ bgmAudio.play().then(() => fadeTo(bgmAudio, volumes.bgm, 900)).catch(bgmPlayFail); }catch(e){ bgmPlayFail(e); }
     }
     return;
   }
   try{
     const a = new Audio(BGM_TRACKS[bgmIdx].src);
-    a.volume = 0.15;   /* v0.37：背景音乐音量降至系统最大音量的 15% */
+    a.volume = volumes.bgm;   /* v0.37：玩家可调音量 */
     a.addEventListener('ended', () => {   /* 播完切下一首，三首顺序循环 */
       bgmIdx = (bgmIdx + 1) % BGM_TRACKS.length;
       bgmAudio.src = BGM_TRACKS[bgmIdx].src;
@@ -2452,7 +2532,7 @@ function playLiveBgm(albumName){
       a.play().then(() => {
         const seek = () => { try{ a.currentTime = cfg.start; }catch(e){} };
         if(a.readyState >= 1) seek(); else a.addEventListener('loadedmetadata', seek, { once:true });
-        fadeTo(a, 0.2, 900);            /* 淡入（v0.37：0.45→0.2，与背景音乐保持约1.3:1突出比例） */
+        fadeTo(a, volumes.live, 900);            /* 淡入（v0.37：玩家可调音量） */
       }).catch(err => {                 /* 播放被拦截/失败：清理占位并恢复背景音乐 */
         console.warn('[LIVE-BGM] 播放失败(' + ((err && err.name) || 'Error') + '):', cfg.src);
         if(liveAudio === a) liveAudio = null;
