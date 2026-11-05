@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>学园偶像大进击！· 单机原型 v0.36</title>
+<title>学园偶像大进击！· 单机原型 v0.37</title>
 <style>
   :root{
     --red:#e94f6a; --blue:#4f8fe9; --bg:#f5f0fa; --panel:#ffffff;
@@ -402,7 +402,7 @@
 <body>
 
 <header>
-  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.36 · 单机/联机</span></div>
+  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.37 · 单机/联机</span></div>
   <div id="turn-banner"><button id="ori-btn" title="手机横竖屏显示异常时可手动切换">横屏:关</button><button id="notice-btn">公告</button><button id="bgm-btn" title="背景音乐开关（三首LoveLive歌曲循环）">音乐:开</button><span id="net-badge" class="tag" style="display:none;background:#8a7aa8;margin-right:10px;"></span>当前回合：<span id="turn-chip" class="tag red">红方</span></div>
 </header>
 
@@ -514,7 +514,7 @@
 <div id="notice-mask">
   <div id="notice-box">
     <div class="n-title">学园偶像大进击！</div>
-    <div class="n-ver">当前版本 v0.36 · 2026-11-04</div>
+    <div class="n-ver">当前版本 v0.37 · 2026-11-05</div>
     <div class="n-sec">
       <span class="n-sec-t">【玩法速览 · 30秒上手】</span>
       <ul>
@@ -526,9 +526,9 @@
       </ul>
       <span class="n-sec-t">【更新公告】</span>
       <ul>
+        <li>v0.37 音量优化：游戏音量整体调低——<b>背景音乐</b>默认音量由 35% 降至 <b>15%</b>，<b>掷骰音效</b>与 <b>LIVE 成功专属曲</b>同步按比例调低（保持音效略突出于背景音乐的层次感），减少声音对游戏的干扰；音乐开关记忆不受影响。</li>
         <li>v0.36 玩法优化：① 更新公告改为<b>只显示最近 3 个版本</b>的更新内容；② <b>东条希</b>占卜加强——占卜成功时获得指定玩家 <b>2 张随机素材</b>，失败时也能从系统<b>随机获得 1 张素材</b>（不再空手而归）；③ 修复<b>西武巨蛋 ↔ 明神男坂</b>的支线连接（两格在地图上相邻，此前无法互相通行，现已接通）。</li>
         <li>v0.35 花阳技能重复触发修复：<b>小泉花阳</b>「每圈一次」技能原本存在<b>同次 finishMove 重置后立即触发</b>的顺序 bug——绕圈经过穗村（重置 hanayoUsed=false）后若停在 2 格内会立即触发花阳，单圈可用多次。修复：花阳触发条件加 <code>!justPassedRest</code> 保护，确保绕圈后必须等下一次移动才能用新圈的花阳。</li>
-        <li>v0.34 规则修订：起点<b>音乃木坂</b>仅供出发使用，游戏中再也<b>不能被路径经过或返回</b>——已取消其与名古屋巨蛋、西武巨蛋、屋顶、学校礼堂的所有内部支线连接；玩家从起点出发后，整条移动路径（含场馆支线）只能在外圈与场馆之间穿行。</li>
       </ul>
     </div>
     <button id="notice-close">我知道了，开始游戏</button>
@@ -1815,7 +1815,7 @@ function playDiceSfx(){
   if(!ctx || ctx.state !== 'running') return;
   try{
     const t0 = ctx.currentTime + 0.02;
-    const master = ctx.createGain(); master.gain.value = 0.5;
+    const master = ctx.createGain(); master.gain.value = 0.2;   /* v0.37：主增益 0.5→0.2，整体调低掷骰音效 */
     const lp = ctx.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 6000;
     master.connect(lp); lp.connect(ctx.destination);
     /* 一串碰撞瞬时声：起始密集、逐渐稀疏（翻滚→落定），最后一声最响 */
@@ -2318,7 +2318,7 @@ document.getElementById('lb-join').addEventListener('click', () => {
 /* =========================================================
  * 十、开局公告（发布更新时：编辑 HTML 中 #notice-box 内容，并把 NOTICE_VERSION 调大，全员重新可见）
  * ========================================================= */
-const NOTICE_VERSION = 'v0.36';
+const NOTICE_VERSION = 'v0.37';
 const noticeMask = document.getElementById('notice-mask');
 try{ if(localStorage.getItem('ll-notice-read') === NOTICE_VERSION) noticeMask.classList.add('hidden'); }catch(e){}
 document.getElementById('notice-close').addEventListener('click', () => {
@@ -2362,13 +2362,13 @@ function bgmInit(){   /* 需在用户手势内调用（自动播放限制）；�
   if(!bgmOn || liveAudio) return;   /* LIVE 专属曲播放中不启 BGM（结束后 bgmResume 续播） */
   if(bgmAudio){
     if(bgmAudio.paused){
-      try{ bgmAudio.play().then(() => fadeTo(bgmAudio, 0.35, 900)).catch(bgmPlayFail); }catch(e){ bgmPlayFail(e); }
+      try{ bgmAudio.play().then(() => fadeTo(bgmAudio, 0.15, 900)).catch(bgmPlayFail); }catch(e){ bgmPlayFail(e); }
     }
     return;
   }
   try{
     const a = new Audio(BGM_TRACKS[bgmIdx].src);
-    a.volume = 0.35;
+    a.volume = 0.15;   /* v0.37：背景音乐音量降至系统最大音量的 15% */
     a.addEventListener('ended', () => {   /* 播完切下一首，三首顺序循环 */
       bgmIdx = (bgmIdx + 1) % BGM_TRACKS.length;
       bgmAudio.src = BGM_TRACKS[bgmIdx].src;
@@ -2452,7 +2452,7 @@ function playLiveBgm(albumName){
       a.play().then(() => {
         const seek = () => { try{ a.currentTime = cfg.start; }catch(e){} };
         if(a.readyState >= 1) seek(); else a.addEventListener('loadedmetadata', seek, { once:true });
-        fadeTo(a, 0.45, 900);           /* 淡入 */
+        fadeTo(a, 0.2, 900);            /* 淡入（v0.37：0.45→0.2，与背景音乐保持约1.3:1突出比例） */
       }).catch(err => {                 /* 播放被拦截/失败：清理占位并恢复背景音乐 */
         console.warn('[LIVE-BGM] 播放失败(' + ((err && err.name) || 'Error') + '):', cfg.src);
         if(liveAudio === a) liveAudio = null;
