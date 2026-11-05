@@ -132,6 +132,7 @@
     ringEdge('横滨K', '服饰店');
     ringEdge('理事长室', '名古屋巨蛋');
     ringEdge('西武巨蛋', '偶像活动室');
+    ringEdge('西武巨蛋', '明神男坂');
 
     var map = echarts.init(elMap, null, { renderer: 'svg' });
     map.setOption({
