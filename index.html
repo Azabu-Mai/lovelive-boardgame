@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>学园偶像大进击！· 单机原型 v0.39</title>
+<title>学园偶像大进击！· 单机原型 v0.40</title>
 <style>
   :root{
     --red:#e94f6a; --blue:#4f8fe9; --bg:#f5f0fa; --panel:#ffffff;
@@ -402,7 +402,7 @@
 <body>
 
 <header>
-  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.39 · 单机/联机</span></div>
+  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.40 · 单机/联机</span></div>
   <div id="turn-banner"><button id="ori-btn" title="手机横竖屏显示异常时可手动切换">横屏:关</button><button id="notice-btn">公告</button><button id="bgm-btn" title="背景音乐开关（三首LoveLive歌曲循环）">音乐:开</button><span id="net-badge" class="tag" style="display:none;background:#8a7aa8;margin-right:10px;"></span>当前回合：<span id="turn-chip" class="tag red">红方</span></div>
 </header>
 
@@ -514,7 +514,7 @@
 <div id="notice-mask">
   <div id="notice-box">
     <div class="n-title">学园偶像大进击！</div>
-    <div class="n-ver">当前版本 v0.39 · 2026-11-05</div>
+    <div class="n-ver">当前版本 v0.40 · 2026-11-06</div>
     <div class="n-sec">
       <span class="n-sec-t">【玩法速览 · 30秒上手】</span>
       <ul>
@@ -526,9 +526,9 @@
       </ul>
       <span class="n-sec-t">【更新公告】</span>
       <ul>
+        <li>v0.40 新机制与新卡：① <b>安可机制</b>——LIVE 检定失败后，下次 LIVE 检定 +1；连续两次失败后第三次起 +3（上限 +3，成功兑现后清零；为独立增益，不受任何增益封印/无效化影响）；② <b>跑圈奖励</b>——顺时针玩家经过穗村后再次经过屋顶、逆时针玩家经过穗村后再次经过学校礼堂视为完成一圈，可自选 1 张音乐素材（不受任何增益加成）；③ <b>干扰卡加强</b>——「抢镜」改为指定玩家：下回合不能获得素材且随机丢弃 1 张素材；「对手的背影」改为指定玩家：下回合骰点减半且无法触发格子效果；④ 新事件卡「<b>来自对手的宣战</b>」（对手专辑领先时，其下次 LIVE 检定减去双方专辑差）与「<b>学生会长的否定</b>」（弃 2 抽 2）；⑤ 新机遇卡「<b>学园偶像部成立！</b>」（全员角色卡回池，按落后者优先原则依次重选）。</li>
         <li>v0.39 卡牌与技能平衡：① <b>响彻东京巨蛋吧！</b>挑战时 LIVE 检定 <b>+1</b>（失败惩罚不变，风险收益更合理）；② <b>雨中追加公演</b>重写——缺少服装素材时可选择立即完成该专辑（正常消耗已有素材），随后进行一次 LIVE 检定（<b>2骰 > 7</b>），成功累计胜利进度，失败扣除身上全部服装素材且下回合无法获得素材；③ <b>东条希</b>占卜平衡：成功改为夺取指定玩家 <b>1 张指定素材</b>（原为 2 张随机），失败效果不变。</li>
         <li>v0.38 玩法与体验优化：① 大厅新增<b>音量设置</b>——BGM / LIVE 专属曲 / 掷骰音效三通道独立滑块，0-100% 自由调节，localStorage 记忆；② 修复<b>东条希占卜后跳过下一玩家回合</b>的 BUG：占卜弹窗显式指定归属玩家，避免 AI 自动决策计时器因座位不匹配而挂起；③ <b>西武巨蛋支线</b>改为每圈一次机会：每圈第一次在偶像活动室/明神男坂可选择进入西武巨蛋，若选择后绕圈（顺时针过屋顶/逆时针过学校礼堂）则重置机会，同圈再次路过不再触发路线选择。</li>
-        <li>v0.37 音量优化：游戏音量整体调低——<b>背景音乐</b>默认音量由 35% 降至 <b>15%</b>，<b>掷骰音效</b>与 <b>LIVE 成功专属曲</b>同步按比例调低（保持音效略突出于背景音乐的层次感），减少声音对游戏的干扰；音乐开关记忆不受影响。</li>
       </ul>
     </div>
     <button id="notice-close">我知道了，开始游戏</button>
@@ -633,11 +633,13 @@ const EVENT_CARDS = [
   { name:'偶像专访',       effect:'gain',       payload:{ cat:'costume' }, desc:'获得 1 张服装素材' },
   { name:'海未的训练课',   effect:'umiTraining',payload:{},                desc:'抽取 1 张素材卡；若获得的素材可以和「梦想」或「夏天」组合，额外获得 1 张随机素材' },
   { name:'应援的呐喊',     effect:'yell',       payload:{},                desc:'获得 1 张舞蹈素材；若合计素材少于 3 张，额外获得 1 张随机素材' },
-  { name:'对手的背影',     effect:'foeDiceHalf',payload:{},                desc:'对手下回合移动骰点数减半（向上取整）' },
-  { name:'抢镜',           effect:'foeNoGain',  payload:{},                desc:'对手下回合不能获得任何素材' },
+  { name:'对手的背影',     effect:'foeDiceHalf',payload:{},                desc:'指定 1 名玩家（双人局默认对手）：其下回合移动骰点数减半（向上取整），并且无法触发格子效果' },
+  { name:'抢镜',           effect:'foeNoGain',  payload:{},                desc:'指定 1 名玩家（双人局默认对手）：其下回合不能获得任何素材，并且随机丢弃 1 张素材' },
   { name:'闪亮追加公演',   effect:'moveToTokyo',payload:{},                desc:'移动至东京巨蛋，若满足条件可立即进行LIVE检定（2骰>11，成功进度+2）' },
   { name:'舞台聚光灯',     effect:'spotlight',  payload:{},                desc:'你的下一次LIVE检定 +1' },
   { name:'成员加入',       effect:'gainChar',   payload:{},                desc:'获得 1 张角色卡（角色具有唯一性）；若角色卡池已尽，改为获得 2 张随机素材' },
+  { name:'来自对手的宣战', effect:'declareWar', payload:{},                desc:'指定 1 名玩家（双人局默认对手）：若其当前拥有的已完成专辑领先你，其下次 LIVE 检定结果减去双方专辑差' },
+  { name:'学生会长的否定', effect:'studentCouncil', payload:{},            desc:'随机丢弃 2 张素材卡，然后随机抽取 2 张素材卡（拥有素材少于 2 张时，丢弃全部素材后抽取 2 张）' },
 ];
 
 /* 机遇卡（依托三次元梗，机遇格触发） */
@@ -649,6 +651,7 @@ const CHANCE_CARDS = [
   { name:'冬季演唱会',     effect:'winter',    payload:{},                                  desc:'获得「冬天」与「贝雷帽」素材；但下回合骰点 -1 且无法获得素材' },
   { name:'追加公演',       effect:'encore',    payload:{},                                  desc:'若你已拥有完成专辑且未举办LIVE，可立即在当前位置进行LIVE检定，但本次检定 -2' },
   { name:'动画化纪念',     effect:'animeMem',  payload:{},                                  desc:'你的下一次素材获取量 +1；下一张专辑创作时素材需求 -1（三类素材可缺其一）' },
+  { name:'学园偶像部成立！', effect:'idolClub', payload:{},                                 desc:'所有玩家的角色卡回到角色卡池，然后各自选择 1 名角色加入（选择优先级：胜利进度越低越优先；同级比已完成专辑，少者优先；再同级比素材数量，少者优先）' },
 ];
 
 /* 挑战卡（许愿类奖励，挑战格触发；翻开后可选择发起或放弃） */
@@ -741,12 +744,15 @@ function newPlayer(name){
     chars:[],                       // 已获得的角色卡（id）
     hanayoUsed:false, nozomiUsed:false,   // 「每圈一次」技能标记（经过穗村时重置）
     seibuUsedThisLap:false,           // v0.37：本圈是否已在偶像活动室/明神男坂获得过西武巨蛋选择机会
+    encore:0,                         // v0.40：安可增益（LIVE 连败累进：1→下次+1，2→+3，上限+3，成功清零）
+    lapRest:false,                    // v0.40：本圈是否已经过穗村（跑圈奖励判定用：穗村→圈标=完成一圈）
+    lapRewardPending:false,           // v0.40：是否有待领取的跑圈奖励（自选 1 张音乐素材）
     mats:{ music:[], dance:[], costume:[] },
     albums:[],
     progress:0,                     // 胜利进度（每场LIVE成功+1）
     mods:{ noGain:0, diceHalf:false, diceMinus:0, diceMinus2:false, gainPlus:0, liveUp:0,
            noBuffs:false, blockChance:false, blockGather:0, nextAlbumDiscount:false,
-           skillsOff:false, blockChallenge:false },
+           skillsOff:false, blockChallenge:false, liveDown:0, noTile:false },
   };
 }
 const state = {
@@ -842,8 +848,49 @@ function refillDeck(deckName){
   log('卡堆已洗混，重新补充');
 }
 const totalMats = p => p.mats.music.length + p.mats.dance.length + p.mats.costume.length;
+/* 全部素材（含重复）平铺列表，v0.40 起供「随机丢弃」类效果使用 */
+function allMats(p){
+  const out = [];
+  ['music','dance','costume'].forEach(cat => p.mats[cat].forEach(n => out.push({ cat, name:n })));
+  return out;
+}
 /* 角色技能是否生效（「响彻东京巨蛋吧！」失败后 skillsOff 封印全部技能） */
 const skillActive = (pk, id) => { const p = state.players[pk]; return p.chars.includes(id) && !p.mods.skillsOff; };
+
+/* ---------- v0.40：干扰类效果目标选择 ----------
+   2 人局自动取唯一下家，3-4 人局弹窗由发动玩家自选（弹窗归属发动玩家）。
+   cands 可传入候选列表（如宣战仅限专辑领先者），默认全部其他玩家。 */
+function offerTargetPick(pk, title, bodyHTML, onPick, cands){
+  const list = cands || activeSeats().filter(s => s !== pk);
+  if(list.length === 1){ onPick(list[0]); return true; }
+  showModal(title, bodyHTML,
+    list.map(s => ({ label: state.players[s].name, onSelect(){ onPick(s); } })), pk);
+  return true;   // 弹窗接管回合
+}
+
+/* ---------- v0.40 机遇卡「学园偶像部成立！」：全员角色卡回池重选 ----------
+   选择优先级：胜利进度越低越优先；同级比已完成专辑数，少者优先；再同级比素材数，少者优先。 */
+function offerIdolClub(pk){
+  const act = activeSeats();
+  const returned = [];
+  act.forEach(s => { returned.push(...state.players[s].chars); state.players[s].chars = []; });
+  state.charPool.push(...returned);
+  state.charPool = CHARACTERS.map(c => c.id).filter(id => state.charPool.includes(id));   // 恢复原始顺序并去重
+  log(`学园偶像部成立！所有角色卡回到卡池（共 ${returned.length} 张），按优先度依次重新选择角色`, pk);
+  /* 单机模式：AI 失去了冠名角色，恢复通用名（重新选择后再冠名） */
+  if(state.single && state.players[AI_SEAT].name.startsWith('AI·')) state.players[AI_SEAT].name = '蓝方（AI）';
+  const order = [...act].sort((a, b) => {
+    const A = state.players[a], B = state.players[b];
+    return (A.progress - B.progress) || (A.albums.length - B.albums.length) || (totalMats(A) - totalMats(B));
+  });
+  log(`选择顺序：${order.map(s => state.players[s].name).join(' → ')}`, pk);
+  const step = i => {
+    if(i >= order.length){ render(); endTurnStep(); return; }
+    offerCharPick(order[i], () => step(i + 1));
+  };
+  step(0);
+  return true;
+}
 
 /* 角色卡获得（唯一性：获得后从卡池移除） */
 function grantChar(pk, id){
@@ -858,8 +905,8 @@ function offerCharPick(pk, after){
     state.charPool.map(id => {
       const c = CHAR_MAP[id];
       return { label:`${c.name}<span class="req">${c.skill}</span>`,
-        onSelect(){ grantChar(pk, id); if(after) after(); endTurnStep(); } };
-    }));
+        onSelect(){ grantChar(pk, id); if(after) after(); else endTurnStep(); } };
+    }), pk);   /* v0.40：显式归属选择者（学园偶像部成立！链式选择时各玩家轮流作答） */
   return true;   // 弹窗流程延后结束回合
 }
 /* 「令人尊重的对手们」封印期间不能再获得增益类效果 */
@@ -1065,13 +1112,60 @@ function applyCardEffect(pk, card){
       if(totalMats(p) < 3) gainMaterial(pk, rand(['music','dance','costume']));
       break;
     case 'foeDiceHalf':
-      if(skillActive(other(pk), 'umi')) log(`对手【园田海未】的技能：干扰效果无效！`, pk);
-      else { foe.mods.diceHalf = true; log(`对手下回合骰点减半`, pk); }
-      break;
+      /* v0.40：改为自选目标（双人局默认对手），追加「无法触发格子效果」 */
+      return offerTargetPick(pk, '对手的背影 · 选择目标',
+        '选择 1 名玩家：其下回合移动骰点数减半（向上取整），并且无法触发格子效果。', seat => {
+        const t = state.players[seat];
+        if(skillActive(seat, 'umi')) log(`${t.name}【园田海未】的技能：干扰效果无效！`, pk);
+        else { t.mods.diceHalf = true; t.mods.noTile = true; log(`${t.name}下回合骰点减半，且无法触发格子效果`, pk); }
+        render(); endTurnStep();
+      });
     case 'foeNoGain':
-      if(skillActive(other(pk), 'umi')) log(`对手【园田海未】的技能：干扰效果无效！`, pk);
-      else { foe.mods.noGain += 1; log(`对手下回合无法获得素材`, pk); }
+      /* v0.40：改为自选目标（双人局默认对手），追加随机丢弃 1 张素材 */
+      return offerTargetPick(pk, '抢镜 · 选择目标',
+        '选择 1 名玩家：其下回合不能获得任何素材，并且随机丢弃 1 张素材。', seat => {
+        const t = state.players[seat];
+        if(skillActive(seat, 'umi')) log(`${t.name}【园田海未】的技能：干扰效果无效！`, pk);
+        else {
+          t.mods.noGain += 1;
+          const all = allMats(t);
+          if(all.length){
+            const lost = all[Math.floor(Math.random() * all.length)];
+            t.mats[lost.cat].splice(t.mats[lost.cat].indexOf(lost.name), 1);
+            log(`${t.name}下回合无法获得素材，并被抢镜随机丢弃：${CAT_LABEL[lost.cat]}「${lost.name}」`, pk);
+          } else log(`${t.name}下回合无法获得素材（其身上没有素材可丢弃）`, pk);
+        }
+        render(); endTurnStep();
+      });
+    case 'declareWar': {
+      /* v0.40 新事件卡「来自对手的宣战」：目标专辑领先你时，其下次 LIVE 检定结果 - 双方专辑差 */
+      const cands = activeSeats().filter(s => s !== pk && state.players[s].albums.length > p.albums.length);
+      if(!cands.length){ log(`没有已完成专辑领先于你的对手，【来自对手的宣战】无效`, pk); break; }
+      return offerTargetPick(pk, '来自对手的宣战 · 选择目标',
+        '选择 1 名已完成专辑领先你的玩家：其下次 LIVE 检定结果减去双方专辑差。', seat => {
+        const t = state.players[seat];
+        const diff = t.albums.length - p.albums.length;
+        if(skillActive(seat, 'umi')) log(`${t.name}【园田海未】的技能：干扰效果无效！`, pk);
+        else if(diff <= 0) log(`${t.name}的专辑已不再领先，宣战无效`, pk);
+        else { t.mods.liveDown += diff; log(`${t.name}下次 LIVE 检定结果 -${diff}（双方专辑差）`, pk); }
+        render(); endTurnStep();
+      }, cands);
+    }
+    case 'studentCouncil': {
+      /* v0.40 新事件卡「学生会长的否定」：随机弃 2 张（不足则全弃），再随机抽 2 张 */
+      const all = allMats(p), lost = [];
+      const n = Math.min(2, all.length);
+      for(let i = 0; i < n; i++){
+        const m = all.splice(Math.floor(Math.random() * all.length), 1)[0];
+        p.mats[m.cat].splice(p.mats[m.cat].indexOf(m.name), 1);
+        lost.push(`${CAT_LABEL[m.cat]}「${m.name}」`);
+      }
+      log(lost.length ? `学生会长的否定：丢弃素材 ${lost.join('、')}` : `学生会长的否定：身上没有素材可丢弃`, pk);
+      for(let i = 0; i < 2; i++) gainMaterial(pk, rand(['music','dance','costume']));
       break;
+    }
+    case 'idolClub':   // v0.40 新机遇卡「学园偶像部成立！」
+      return offerIdolClub(pk);
     case 'gainPlus':
       if(p.mods.noBuffs) log(`增益类效果被封印，无法获得`, pk);
       else p.mods.gainPlus += 1;
@@ -1124,7 +1218,7 @@ function applyCardEffect(pk, card){
       }
       return offerCharPick(pk);
     case 'popPoll':
-      if(state.charPool.length) return offerCharPick(pk, () => addLiveUp(pk, 1));
+      if(state.charPool.length) return offerCharPick(pk, () => { addLiveUp(pk, 1); endTurnStep(); });   // v0.40：after 回调负责收尾
       addLiveUp(pk, 1);
       break;
     case 'moveToTokyo':
@@ -1456,10 +1550,24 @@ function finishMove(){
     state.players[m.pk].hanayoUsed = false;
     state.players[m.pk].nozomiUsed = false;
   }
+  /* v0.40：跑圈奖励——顺时针玩家经过穗村后再次经过屋顶、逆时针玩家经过穗村后再次经过学校礼堂，视为完成一圈，
+     自选获得 1 张音乐素材（不受任何增益加成）。一次移动同时经过穗村与圈标时，按经过先后判定。 */
+  const lapMark = state.players[m.pk].dir === 1 ? 'okujou' : 'gakudou';
+  {
+    let restSeen = state.players[m.pk].lapRest, lapDone = false;
+    for(const id of m.route){
+      if(id === 'hokumura') restSeen = true;
+      else if(id === lapMark && restSeen){ lapDone = true; restSeen = false; }
+    }
+    state.players[m.pk].lapRest = restSeen;
+    if(lapDone){
+      state.players[m.pk].lapRewardPending = true;
+      log(`跑完一整圈（${TILE_MAP.hokumura.name} → ${TILE_MAP[lapMark].name}）！跑圈奖励：可自选 1 张音乐素材（不受增益加成）`, m.pk);
+    }
+  }
   /* v0.37：西武巨蛋支线圈次重置——
      顺时针玩家路过屋顶(okujou)、逆时针玩家路过学校礼堂(gakudou)时，
-     重置本圈西武巨蛋选择机会标记。 */
-  const lapMark = state.players[m.pk].dir === 1 ? 'okujou' : 'gakudou';
+     重置本圈西武巨蛋选择机会标记。（lapMark 已在上方跑圈奖励段定义） */
   if(m.route.includes(lapMark)){
     state.players[m.pk].seibuUsedThisLap = false;
   }
@@ -1494,7 +1602,7 @@ function finishMove(){
   }
   resumeTileFlow(m.pk, passedRest);
 }
-/* 移动结束后的常规结算：希占卜 → 地块触发 → 结束回合 */
+/* 移动结束后的常规结算：希占卜 → 跑圈奖励 → 地块触发 → 结束回合 */
 function resumeTileFlow(pk, passedRest){
   const p = state.players[pk];
   if(passedRest && skillActive(pk, 'nozomi') && !p.nozomiUsed){   // 东条希：路过休息区后占卜
@@ -1502,8 +1610,25 @@ function resumeTileFlow(pk, passedRest){
     offerDivination(pk);
     return;
   }
+  if(offerLapReward(pk)) return;                                  // v0.40：跑圈奖励优先结算
   const deferred = triggerTile(pk);   // LIVE/挑战/角色弹窗流程会自行结束回合
   if(!deferred) endTurnStep();
+}
+/* v0.40：跑圈奖励——完成一圈后自选 1 张音乐素材（固定获得，不受任何增益加成） */
+function offerLapReward(pk){
+  const p = state.players[pk];
+  if(!p.lapRewardPending) return false;
+  p.lapRewardPending = false;
+  if(p.mods.noGain > 0){ log(`素材获取被封锁，跑圈奖励无法领取`, pk); return false; }
+  showModal('跑圈奖励 · 自选音乐素材', '完成一整圈！选择 1 张音乐素材（固定获得，不受增益加成）：',
+    TYPE_LIST.music.map(name => ({ label:name, onSelect(){
+      p.mats.music.push(name);
+      log(`跑圈奖励：获得音乐素材「${name}」`, pk);
+      render();
+      const deferred = triggerTile(pk);
+      if(!deferred) endTurnStep();
+    } })), pk);
+  return true;
 }
 /* 东条希占卜（v0.39 平衡：50%成功率，成功夺取指定玩家 1 张「指定」素材，失败从系统随机获得 1 张素材） */
 /* 占卜结束后继续结算当前停留格（修复占卜与 LIVE 场馆等地块触发的冲突） */
@@ -1512,7 +1637,7 @@ function afterDivination(pk){
      原代码在 moving 非空时调用 triggerTile，若 triggerTile 返回 true（弹窗流程），
      弹窗可能因 AI 决策或网络延迟未正确回调 endTurnStep，导致回合挂起、跳过下家。
      修复：占卜后无论 moving 状态如何，先结算当前停留格，再结束回合。 */
-  const deferred = triggerTile(pk);
+  const deferred = offerLapReward(pk) ? true : triggerTile(pk);   /* v0.40：占卜后先补发跑圈奖励，再结算停留格 */
   if(!deferred) endTurnStep();
 }
 function offerDivination(pk){
@@ -1559,7 +1684,9 @@ function endTurnStep(){
 
 /* 停留地块触发（返回 true 表示弹窗流程未结束，回合稍后自行结束） */
 function triggerTile(pk){
-  const t = TILE_MAP[state.players[pk].pos];
+  const p0 = state.players[pk];
+  if(p0.mods.noTile){ p0.mods.noTile = false; log(`【对手的背影】干扰：本回合无法触发格子效果`, pk); return false; }   // v0.40
+  const t = TILE_MAP[p0.pos];
   switch(t.type){
     case '音乐素材格':
     case '舞蹈素材格':
@@ -1612,6 +1739,9 @@ function doLiveCheck(pk, a, t, opts = {}){
   if(skillActive(pk, 'honoka')){ adj += 1; notes.push('穗乃果检定+1'); }   // 高坂穗乃果
   if(skillActive(pk, 'nico'))  { adj -= 2; notes.push('妮可检定-2'); }     // 矢泽妮可
   if(p.mods.liveUp > 0){ adj += p.mods.liveUp; notes.push(`加成+${p.mods.liveUp}`); p.mods.liveUp = 0; }
+  if(p.mods.liveDown > 0){ adj -= p.mods.liveDown; notes.push(`宣战-${p.mods.liveDown}`); p.mods.liveDown = 0; }   // v0.40：来自对手的宣战
+  /* v0.40：安可增益——独立机制，不受任何增益封印/无效化效果影响，失败累进、成功清零 */
+  if(p.encore > 0){ adj += p.encore; notes.push(`安可+${p.encore}`); }
   if(opts.modifier){ adj += opts.modifier; notes.push(`临时${opts.modifier > 0 ? '+' : ''}${opts.modifier}`); }
   const check = sum + adj;
   diceEl.textContent = sum;
@@ -1622,6 +1752,7 @@ function doLiveCheck(pk, a, t, opts = {}){
     a.owner = 'done';                                    // 专辑随LIVE成功而消失
     p.albums = p.albums.filter(n => n !== a.name);
     p.progress += isTokyo ? 2 : 1;
+    if(p.encore > 0){ log(`安可成功兑现，增益清零`, pk); p.encore = 0; }   // v0.40：安可成功即清零
     log(`LIVE大成功！胜利进度 +${isTokyo ? 2 : 1}，当前 ${p.progress}/${WIN_TARGET}`, pk);
     playLiveBgm(a.name);                                 // v0.31：专属曲片段淡入播放（联机时各端同步）
     if(NET.role === 'host' && NET.connected) send({ type:'fx', fx:{ kind:'liveBgm', album: a.name } });
@@ -1633,10 +1764,12 @@ function doLiveCheck(pk, a, t, opts = {}){
     log(`LIVE检定失败！《${a.name}》保留为已完成专辑`
         + (lost.length ? `；扣除全部服装素材（${lost.length} 张）：${lost.map(n => '「' + n + '」').join('、')}` : '；身上没有服装素材可扣')
         + `，且下回合无法获得素材`, pk);
+    encoreFail(p, pk);                                   // v0.40：安可连败累进
   } else {
     a.owner = null;                                      // 失败则专辑回到专辑池
     p.albums = p.albums.filter(n => n !== a.name);
     log(`LIVE检定失败……《${a.name}》回到专辑池，可重新创作`, pk);
+    encoreFail(p, pk);                                   // v0.40：安可连败累进
     if(opts.dash){                                       // 挑战「响彻东京巨蛋吧！」的失败代价
       p.mods.skillsOff = true;
       p.mods.blockChallenge = true;
@@ -1645,6 +1778,12 @@ function doLiveCheck(pk, a, t, opts = {}){
   }
   render();
   endTurnStep();
+}
+/* v0.40：安可机制——LIVE 检定失败连败累进（独立增益，不受任何增益封印/无效化影响）
+   失败后：encore 0→+1（下次 LIVE 检定 +1）；已有 +1 再败→+3（上限）；成功兑现后清零。 */
+function encoreFail(p, pk){
+  p.encore = p.encore >= 1 ? 3 : 1;
+  log(`安可蓄力中：下次 LIVE 检定 +${p.encore}（独立增益，不受其他效果影响）`, pk);
 }
 function checkWin(pk){
   if(state.players[pk].progress < WIN_TARGET) return;
@@ -1768,8 +1907,11 @@ function buffList(p){
   const out = [];
   if(p.mods.gainPlus > 0) out.push(['素材获取+1×' + p.mods.gainPlus, 1]);
   if(p.mods.liveUp > 0) out.push(['LIVE检定+' + p.mods.liveUp, 1]);
+  if(p.encore > 0) out.push(['安可+' + p.encore, 1]);                    // v0.40：独立增益
+  if(p.mods.liveDown > 0) out.push(['LIVE检定-' + p.mods.liveDown, 0]);  // v0.40：宣战
   if(p.mods.nextAlbumDiscount) out.push(['下一张专辑需求-1', 1]);
   if(p.mods.diceHalf) out.push(['下回合骰点减半', 0]);
+  if(p.mods.noTile) out.push(['下回合格子效果无效', 0]);                 // v0.40：对手的背影
   if(p.mods.diceMinus > 0) out.push(['骰点-1×' + p.mods.diceMinus, 0]);
   if(p.mods.diceMinus2) out.push(['下回合骰点-2', 0]);
   if(p.mods.noGain > 0) out.push(['禁止获得素材×' + p.mods.noGain, 0]);
@@ -2280,6 +2422,17 @@ function aiChooseOption(title, options){
   if(title === '星空凛的技能') return Math.floor(Math.random() * options.length);
   if(title.startsWith('行进方向')) return Math.random() < .5 ? 0 : 1;
   if(title === '主题公演 · 二选一') return Math.random() < .5 ? 0 : 1;
+  if(title.startsWith('跑圈奖励')) return aiLapRewardChoose(options);   // v0.40：AI 选最优音乐素材
+  if(title.startsWith('对手的背影') || title.startsWith('抢镜') || title.startsWith('来自对手的宣战')){   // v0.40：干扰目标选最强对手
+    const others = activeSeats().filter(s => s !== AI_SEAT);
+    let best = 0, bestScore = -1;
+    options.forEach((o, i) => {
+      const s2 = state.players[others[i]];
+      const sc = s2 ? s2.progress * 10 + s2.albums.length * 3 + totalMats(s2) : 0;
+      if(sc > bestScore){ bestScore = sc; best = i; }
+    });
+    return best;
+  }
   if(title.startsWith('场馆岔路')){                                  // 有专辑进场馆开LIVE，否则走外圈
     const p = state.players[AI_SEAT];
     const v = options.findIndex(o => /LIVE场馆|特殊场馆/.test(o.label));
@@ -2304,6 +2457,16 @@ function aiChooseOption(title, options){
   const skip = /^(取消|不演出|放弃|保持不变|←)/;                      // 其余：选第一个非放弃项
   i = options.findIndex(o => !skip.test(o.label));
   return i >= 0 ? i : 0;
+}
+/* AI 跑圈奖励选素材：选最优音乐素材 */
+function aiLapRewardChoose(options){
+  const strip = s => String(s).replace(/<[^>]*>/g, '');
+  let best = 0, bestScore = -1;
+  options.forEach((o, i) => {
+    const s = aiMaterialScore(AI_SEAT, 'music', strip(o.label));
+    if(s > bestScore){ bestScore = s; best = i; }
+  });
+  return best;
 }
 /* 素材价值评估：优先挑能让专辑凑齐/少缺一类的素材 */
 function aiMaterialScore(pk, cat, name){
@@ -2393,7 +2556,7 @@ document.getElementById('lb-join').addEventListener('click', () => {
 /* =========================================================
  * 十、开局公告（发布更新时：编辑 HTML 中 #notice-box 内容，并把 NOTICE_VERSION 调大，全员重新可见）
  * ========================================================= */
-const NOTICE_VERSION = 'v0.39';
+const NOTICE_VERSION = 'v0.40';
 const noticeMask = document.getElementById('notice-mask');
 try{ if(localStorage.getItem('ll-notice-read') === NOTICE_VERSION) noticeMask.classList.add('hidden'); }catch(e){}
 document.getElementById('notice-close').addEventListener('click', () => {
