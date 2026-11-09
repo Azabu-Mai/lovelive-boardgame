@@ -530,6 +530,14 @@
   html.phone-land aside[data-mtab="log"] #pane-mat{ display:none; }
   html.phone-land aside[data-mtab="log"] #pool-panel,
   html.phone-land aside[data-mtab="log"] #roster-panel{ display:none; }
+
+  /* 弹窗打开时：右侧面板浮到遮罩之上，玩家可边看弹窗边切换标签页查看自己的素材；
+     弹窗整体右移让出面板宽度，避免被面板遮住（与桌面端「专辑池浮起」同一思路）。 */
+  html.phone-land body.modal-open aside{
+    position:relative; z-index:66;
+    box-shadow:0 0 0 3px #b89ae0, 0 6px 24px rgba(90,60,140,.35);
+  }
+  html.phone-land body.modal-open #modal-mask{ padding-right:32%; }
 </style>
 </head>
 <body>
