@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>学园偶像大进击！· 单机原型 v0.40</title>
+<title>学园偶像大进击！· 单机原型 v0.41</title>
 <style>
   :root{
     --red:#e94f6a; --blue:#4f8fe9; --bg:#f5f0fa; --panel:#ffffff;
@@ -397,17 +397,151 @@
   html.phone-land .c-front .c-name{ font-size:16px; }
   html.phone-land .c-front .c-desc{ font-size:12px; line-height:1.65; }
   html.phone-land #card-apply{ padding:10px; font-size:13.5px; margin:8px 14px 12px; }
+
+  /* ===== v0.41 移动端布局重构（v4）=====
+     左列（68%）= 地图 + 掷骰栏；右侧面板（32%）从顶栏贯通到屏幕底部，改由
+     「玩家状态 + 素材/卡池/日志」三页组成。仅 html.phone-land 生效，桌面不受影响。 */
+  #m-pc-head, #m-tabs, #pane-mat, #m-ab-left, #m-ab-right, #map-zoom{ display:none; }
+
+  html.phone-land body{
+    display:grid; grid-template-columns:68% 32%;
+    grid-template-rows:auto minmax(0,1fr) auto;
+    grid-template-areas:"hd hd" "map aside" "ft aside";
+    padding:0; gap:0;
+  }
+  html.phone-land header{
+    grid-area:hd; height:38px; padding:0 10px 0 14px;
+    gap:8px; background:var(--panel); flex:none;
+  }
+  html.phone-land header .title{ font-size:13px; flex:none; }
+  html.phone-land #turn-banner{ display:flex; align-items:center; gap:4px; margin-left:auto; }
+  html.phone-land .turn-label{ display:none; }
+  html.phone-land #net-badge{ margin-right:0 !important; }
+
+  html.phone-land main{ display:contents; }
+  html.phone-land #map-panel{
+    grid-area:map; position:relative;
+    margin:5px 5px 5px 6px; padding:5px; border-radius:10px;
+    min-height:0; overflow:auto;
+  }
+  /* 地图缩放控件：吸附在地图区右上角（sticky 随面板滚动始终可见） */
+  html.phone-land #map-zoom{
+    display:flex; position:sticky; top:0; z-index:20;
+    width:max-content; height:0; margin-left:auto;
+    flex-direction:column; gap:4px;
+  }
+  html.phone-land .mz-btn{
+    width:34px; height:34px; border:1px solid var(--line); border-radius:8px;
+    background:rgba(255,255,255,.92); color:var(--ink);
+    font-size:16px; font-weight:bold; line-height:1; cursor:pointer;
+  }
+  html.phone-land .piece.current{ animation:mPiece 1.6s ease-in-out infinite; z-index:7; }
+  @keyframes mPiece{
+    0%,100%{ transform:translate(-50%,-50%) scale(1);   box-shadow:0 2px 6px rgba(0,0,0,.4), 0 0 0 0 rgba(122,95,168,.5); }
+    50%    { transform:translate(-50%,-50%) scale(1.18); box-shadow:0 2px 6px rgba(0,0,0,.4), 0 0 0 8px rgba(122,95,168,0); }
+  }
+
+  html.phone-land footer{
+    grid-area:ft; height:auto; min-height:56px;
+    margin:0 5px 5px 6px; padding:4px 8px;
+    display:grid; grid-template-columns:1fr auto 1fr; align-items:center;
+    border-top:none; border-radius:10px;
+    box-shadow:0 2px 10px rgba(90,60,140,.08);
+  }
+  html.phone-land #dice-side{ width:auto; flex-direction:row; justify-content:center; gap:8px; }
+  html.phone-land #dice{ width:44px; height:44px; border-radius:50%; font-size:20px; flex:none; }
+  html.phone-land #roll-btn{ padding:10px 12px; font-size:12px; min-height:44px; }
+  html.phone-land #m-ab-left{ display:flex; justify-content:flex-start; min-width:0; }
+  html.phone-land #m-ab-right{ display:flex; justify-content:flex-end; min-width:0; }
+  html.phone-land #m-ab-left #create-album-btn{
+    margin:0; padding:0 10px; min-height:44px; max-width:100%;
+    font-size:11.5px; border-radius:9px;
+    white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
+  }
+  html.phone-land #m-ab-right .m-step{ font-size:9.5px; color:var(--muted); text-align:right; line-height:1.25; }
+  html.phone-land #m-ab-right .m-step b{ display:block; font-size:14px; color:var(--ink); }
+
+  html.phone-land aside{
+    grid-area:aside; min-width:0; min-height:0;
+    margin:5px 6px 5px 0; padding:0 0 4px;
+    gap:4px; overflow:hidden;
+    background:var(--panel); border-radius:10px;
+    box-shadow:0 2px 10px rgba(90,60,140,.08);
+  }
+  html.phone-land #m-pc-head{
+    display:flex; align-items:center; gap:6px;
+    padding:6px 9px 4px; flex:none;
+    font-size:10.5px; font-weight:bold; color:var(--ink);
+    background:#faf7ff; border-bottom:1px solid var(--line);
+  }
+  html.phone-land #m-pc-head .pp-tip{ margin-left:auto; font-size:9.5px; font-weight:normal; color:var(--muted); }
+  /* 玩家状态：每方一行紧凑列表（色点+名称+行动中+进度星 / 素材·专辑·角色） */
+  html.phone-land aside > .player-card{
+    flex:none; padding:4px 8px; border-radius:8px;
+    background:var(--bg); border:1.5px solid transparent;
+    box-shadow:none;
+    display:flex; flex-wrap:wrap; align-items:center; gap:1px 8px;
+  }
+  html.phone-land aside > .player-card.active{ border-color:currentColor; background:#fdf0f3; }
+  html.phone-land aside > .player-card .pc-head{ flex:1 1 100%; margin:0; gap:5px; }
+  html.phone-land aside > .player-card .pc-head + .pc-row{ display:none; }   /* 隐藏「位置/行进」行 */
+  html.phone-land aside > .player-card .pc-row{ flex:1 1 100%; margin:0; font-size:10px; }
+  html.phone-land aside > .player-card .buff-row{ margin-top:0; gap:3px; }
+  html.phone-land aside > .player-card .buff{ font-size:9.5px; padding:0 6px; }
+
+  html.phone-land #m-tabs{
+    display:flex; flex:none;
+    background:#faf7ff; border-bottom:1px solid var(--line);
+  }
+  html.phone-land .m-tab{
+    flex:1; padding:7px 0; border:none; background:transparent;
+    font-family:inherit; font-size:11.5px; color:var(--muted);
+    border-bottom:2px solid transparent; cursor:pointer;
+  }
+  html.phone-land .m-tab.active{
+    color:#7a5fa8; border-bottom-color:#7a5fa8;
+    font-weight:bold; background:#fff;
+  }
+
+  html.phone-land #bottom-panels{ display:contents; }
+  html.phone-land #log-panel,
+  html.phone-land #pool-panel,
+  html.phone-land #roster-panel{
+    flex:1 1 auto; min-height:0; margin:0 4px 4px;
+  }
+  /* 素材页：页内纵向排列素材/角色/专辑块，整页滚动 */
+  html.phone-land #pane-mat{
+    flex:1; min-height:0; overflow-y:auto;
+    padding:5px; flex-direction:column; gap:5px;
+  }
+  html.phone-land #pane-mat .block{ flex:none; padding:6px 8px; border-radius:8px; }
+  html.phone-land #pane-mat .block-body{ overflow:visible; flex:none; }
+  html.phone-land #pane-mat .block-title{ font-size:11px; margin-bottom:5px; }
+  html.phone-land #pane-mat .mat-row{ margin-bottom:4px; }
+  html.phone-land #pane-mat .psec{ margin-bottom:5px; }
+
+  /* 三页切换：由 aside[data-mtab] 控制显隐 */
+  html.phone-land aside[data-mtab="mat"] #pane-mat{ display:flex; }
+  html.phone-land aside[data-mtab="mat"] #log-panel,
+  html.phone-land aside[data-mtab="mat"] #pool-panel,
+  html.phone-land aside[data-mtab="mat"] #roster-panel{ display:none; }
+  html.phone-land aside[data-mtab="pool"] #pane-mat{ display:none; }
+  html.phone-land aside[data-mtab="pool"] #log-panel{ display:none; }
+  html.phone-land aside[data-mtab="log"] #pane-mat{ display:none; }
+  html.phone-land aside[data-mtab="log"] #pool-panel,
+  html.phone-land aside[data-mtab="log"] #roster-panel{ display:none; }
 </style>
 </head>
 <body>
 
 <header>
-  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.40 · 单机/联机</span></div>
-  <div id="turn-banner"><button id="ori-btn" title="手机横竖屏显示异常时可手动切换">横屏:关</button><button id="notice-btn">公告</button><button id="bgm-btn" title="背景音乐开关（三首LoveLive歌曲循环）">音乐:开</button><span id="net-badge" class="tag" style="display:none;background:#8a7aa8;margin-right:10px;"></span>当前回合：<span id="turn-chip" class="tag red">红方</span></div>
+  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.41 · 单机/联机</span></div>
+  <div id="turn-banner"><button id="ori-btn" title="手机横竖屏显示异常时可手动切换">横屏:关</button><button id="notice-btn">公告</button><button id="bgm-btn" title="背景音乐开关（三首LoveLive歌曲循环）">音乐:开</button><span id="net-badge" class="tag" style="display:none;background:#8a7aa8;margin-right:10px;"></span><span class="turn-label">当前回合：</span><span id="turn-chip" class="tag red">红方</span></div>
 </header>
 
 <main>
   <section id="map-panel">
+    <div id="map-zoom"><button class="mz-btn" data-z="in" title="放大地图">＋</button><button class="mz-btn" data-z="out" title="缩小地图">－</button></div>
     <div id="map-wrap">
       <img src="map.jpg" alt="桌游地图">
       <div class="piece red"  id="piece-red">红</div>
@@ -418,6 +552,8 @@
   </section>
 
   <aside>
+    <div id="m-pc-head">玩家状态<span class="pp-tip">按座位顺序</span></div>
+
     <div class="player-card" id="pc-red" style="color:var(--red)">
       <div class="pc-head"><span class="chip red"></span><b style="color:var(--ink)">红方</b><span class="stars" id="stars-red"></span><span class="turn-mark">行动中</span></div>
       <div class="pc-row">位置：<b id="pos-red">-</b> · 行进：<b id="dir-red">未选择</b></div>
@@ -444,6 +580,14 @@
       <div class="buff-row" id="buffs-yellow"></div>
     </div>
 
+    <div id="m-tabs">
+      <button class="m-tab active" data-pane="mat">素材</button>
+      <button class="m-tab" data-pane="pool">卡池</button>
+      <button class="m-tab" data-pane="log">日志</button>
+    </div>
+
+    <div id="pane-mat"></div>
+
     <div id="bottom-panels">
       <div id="log-panel">
         <div id="log-head">回合日志</div>
@@ -462,6 +606,7 @@
 </main>
 
 <footer>
+  <div id="m-ab-left"></div>
   <div id="dice-side">
     <div id="dice">?</div>
     <button id="roll-btn" disabled>掷骰移动</button>
@@ -499,6 +644,7 @@
     </div>
     <div class="block-body" id="album-body"></div>
   </div>
+  <div id="m-ab-right"><div class="m-step">剩余步数<b id="step-left">—</b></div></div>
 </footer>
 
 <!-- 通用弹窗：方向选择 / 岔路选向 / 专辑创作 -->
@@ -514,7 +660,7 @@
 <div id="notice-mask">
   <div id="notice-box">
     <div class="n-title">学园偶像大进击！</div>
-    <div class="n-ver">当前版本 v0.40 · 2026-11-06</div>
+    <div class="n-ver">当前版本 v0.41 · 2026-11-09</div>
     <div class="n-sec">
       <span class="n-sec-t">【玩法速览 · 30秒上手】</span>
       <ul>
@@ -526,9 +672,9 @@
       </ul>
       <span class="n-sec-t">【更新公告】</span>
       <ul>
+        <li>v0.41 移动端界面重构（仅影响手机横屏布局，桌面版与全部玩法数值不变）：① 掷骰栏收窄到地图列宽度，改为三栏——左「创作专辑」、中大圆钮掷骰、右「剩余步数」实时显示；② 右侧面板收窄至约 32%（地图 68%），并从顶栏贯通到屏幕底部，多出约 78px 竖向空间；③ 玩家状态回到右侧面板顶部，每方一行紧凑列表（色点＋名称＋行动中＋进度星＋素材/专辑/角色），当前行动方描边高亮；④ 面板下方改为「素材 / 卡池 / 日志」三个标签页，角色一览并入卡池页；⑤ 底部不再设常驻交易按钮，交易仍仅在停留【LoveLive 大赛组委会】格时触发；⑥ 地图新增双指缩放、＋/－按钮与拖动查看，当前行动棋子脉冲高亮。</li>
         <li>v0.40 新机制与新卡：① <b>安可机制</b>——LIVE 检定失败后，下次 LIVE 检定 +1；连续两次失败后第三次起 +3（上限 +3，成功兑现后清零；为独立增益，不受任何增益封印/无效化影响）；② <b>跑圈奖励</b>——顺时针玩家经过穗村后再次经过屋顶、逆时针玩家经过穗村后再次经过学校礼堂视为完成一圈，可自选 1 张音乐素材（不受任何增益加成）；③ <b>干扰卡加强</b>——「抢镜」改为指定玩家：下回合不能获得素材且随机丢弃 1 张素材；「对手的背影」改为指定玩家：下回合骰点减半且无法触发格子效果；④ 新事件卡「<b>来自对手的宣战</b>」（对手专辑领先时，其下次 LIVE 检定减去双方专辑差）与「<b>学生会长的否定</b>」（弃 2 抽 2）；⑤ 新机遇卡「<b>学园偶像部成立！</b>」（全员角色卡回池，按落后者优先原则依次重选）。</li>
         <li>v0.39 卡牌与技能平衡：① <b>响彻东京巨蛋吧！</b>挑战时 LIVE 检定 <b>+1</b>（失败惩罚不变，风险收益更合理）；② <b>雨中追加公演</b>重写——缺少服装素材时可选择立即完成该专辑（正常消耗已有素材），随后进行一次 LIVE 检定（<b>2骰 > 7</b>），成功累计胜利进度，失败扣除身上全部服装素材且下回合无法获得素材；③ <b>东条希</b>占卜平衡：成功改为夺取指定玩家 <b>1 张指定素材</b>（原为 2 张随机），失败效果不变。</li>
-        <li>v0.38 玩法与体验优化：① 大厅新增<b>音量设置</b>——BGM / LIVE 专属曲 / 掷骰音效三通道独立滑块，0-100% 自由调节，localStorage 记忆；② 修复<b>东条希占卜后跳过下一玩家回合</b>的 BUG：占卜弹窗显式指定归属玩家，避免 AI 自动决策计时器因座位不匹配而挂起；③ <b>西武巨蛋支线</b>改为每圈一次机会：每圈第一次在偶像活动室/明神男坂可选择进入西武巨蛋，若选择后绕圈（顺时针过屋顶/逆时针过学校礼堂）则重置机会，同圈再次路过不再触发路线选择。</li>
       </ul>
     </div>
     <button id="notice-close">我知道了，开始游戏</button>
@@ -1494,6 +1640,7 @@ function startMove(pk, steps){
   const p = state.players[pk];
   moving = { pk, remaining: steps, prev: null, cur: p.pos, route: [p.pos], usedVenues: [] };
   rollBtn.disabled = true;
+  syncStepLeft();
   stepMove();
 }
 function stepMove(){
@@ -1515,6 +1662,7 @@ function advance(id){
     state.players[m.pk].seibuUsedThisLap = true;
   }
   m.route.push(id); m.prev = m.cur; m.cur = id; m.remaining--;
+  syncStepLeft();
   setPieceTo(m.pk, m.cur);
   if(NET.role === 'host' && NET.connected) send({ type:'fx', fx:{ kind:'step', pk: m.pk, tile: id } });
   setTimeout(afterArrive, 280);
@@ -1572,6 +1720,7 @@ function finishMove(){
     state.players[m.pk].seibuUsedThisLap = false;
   }
   moving = null;
+  syncStepLeft();
   const p = state.players[m.pk];
   /* 小泉花阳：每圈一次，停留在穗村 2 格范围内时可直接进入（路过不触发）
      && !justPassedRest 保证"本次移动本身经过了圈标 hokumura"时不触发花阳——
@@ -1847,7 +1996,9 @@ function setPieceTo(pk, tileId){
 function updatePieces(){
   const act = activeSeats();
   SEATS.forEach(pk => {
-    document.getElementById('piece-' + pk).style.display = act.includes(pk) ? 'flex' : 'none';
+    const pe = document.getElementById('piece-' + pk);
+    pe.style.display = act.includes(pk) ? 'flex' : 'none';
+    pe.classList.toggle('current', pk === state.current);   /* v0.41：当前行动方脉冲高亮 */
   });
   const posCount = {};
   act.forEach(pk => { const pos = state.players[pk].pos; posCount[pos] = (posCount[pos] || 0) + 1; });
@@ -2556,7 +2707,7 @@ document.getElementById('lb-join').addEventListener('click', () => {
 /* =========================================================
  * 十、开局公告（发布更新时：编辑 HTML 中 #notice-box 内容，并把 NOTICE_VERSION 调大，全员重新可见）
  * ========================================================= */
-const NOTICE_VERSION = 'v0.40';
+const NOTICE_VERSION = 'v0.41';
 const noticeMask = document.getElementById('notice-mask');
 try{ if(localStorage.getItem('ll-notice-read') === NOTICE_VERSION) noticeMask.classList.add('hidden'); }catch(e){}
 document.getElementById('notice-close').addEventListener('click', () => {
@@ -2773,6 +2924,7 @@ function updateOrientationMode(){
   else { b.style.width = ''; b.style.height = ''; }
   const ob = document.getElementById('ori-btn');
   if(ob) ob.textContent = '横屏:' + (rot ? '开' : '关');
+  applyMobilePanels();   /* v0.41：按横屏/桌面状态迁移右侧面板内容 */
 }
 
 function toggleOri(){
@@ -2789,6 +2941,102 @@ addEventListener('resize', updateOrientationMode);
 addEventListener('orientationchange', () => { updateOrientationMode(); setTimeout(updateOrientationMode, 300); });
 if(window.visualViewport) visualViewport.addEventListener('resize', updateOrientationMode);
 addEventListener('load', updateOrientationMode);
+
+/* =========================================================
+ * 十三、移动端布局迁移（v0.41 / v4）
+ *   手机横屏时把底部的素材/角色/专辑块移入右侧「素材」页，
+ *   把「创作专辑」按钮移入掷骰栏左侧；回到桌面时按原位置还原。
+ *   仅重排 DOM，不改动任何玩法逻辑与数值。
+ * ========================================================= */
+const M_PANEL_IDS = ['mat-block-0','mat-block-1','mat-block-2','mat-block-3','album-block','char-block','create-album-btn'];
+const mPanelOrigins = {};
+let mPanelsOn = false;
+let mapZoom = 1;
+
+function setMobileTab(key){
+  const aside = document.querySelector('main > aside');
+  if(!aside) return;
+  aside.dataset.mtab = key;
+  document.querySelectorAll('#m-tabs .m-tab')
+    .forEach(b => b.classList.toggle('active', b.dataset.pane === key));
+}
+
+function applyMobilePanels(){
+  const on = document.documentElement.classList.contains('phone-land');
+  if(on === mPanelsOn) return;
+  const paneMat = document.getElementById('pane-mat');
+  const abLeft = document.getElementById('m-ab-left');
+  if(!paneMat || !abLeft) return;
+
+  if(on){
+    M_PANEL_IDS.forEach(id => {
+      const el = document.getElementById(id);
+      if(!el) return;
+      mPanelOrigins[id] = { parent: el.parentElement, next: el.nextElementSibling };
+    });
+    ['mat-block-0','mat-block-1','mat-block-2','mat-block-3','album-block','char-block']
+      .forEach(id => { const el = document.getElementById(id); if(el) paneMat.appendChild(el); });
+    const btn = document.getElementById('create-album-btn');
+    if(btn) abLeft.appendChild(btn);
+    setMobileTab('mat');
+    applyMapZoom(true);
+  } else {
+    [...M_PANEL_IDS].reverse().forEach(id => {
+      const el = document.getElementById(id), o = mPanelOrigins[id];
+      if(!el || !o || !o.parent) return;
+      if(o.next && o.next.parentElement === o.parent) o.parent.insertBefore(el, o.next);
+      else o.parent.appendChild(el);
+      delete mPanelOrigins[id];
+    });
+    document.getElementById('map-wrap').style.width = '';
+    mapZoom = 1;
+    document.querySelectorAll('.piece').forEach(p => p.classList.remove('current'));
+  }
+  mPanelsOn = on;
+}
+
+/* ---- 地图缩放：内容宽度按倍率放大，拖动由 #map-panel 原生滚动完成 ---- */
+function applyMapZoom(reset){
+  if(reset) mapZoom = 1;
+  const wrap = document.getElementById('map-wrap');
+  if(wrap) wrap.style.width = document.documentElement.classList.contains('phone-land')
+    ? (mapZoom * 100).toFixed(1) + '%' : '';
+}
+function setMapZoom(z){
+  mapZoom = Math.max(1, Math.min(3, z));
+  applyMapZoom();
+}
+document.querySelectorAll('#map-zoom .mz-btn').forEach(btn => {
+  btn.addEventListener('click', () => setMapZoom(mapZoom + (btn.dataset.z === 'in' ? 0.5 : -0.5)));
+});
+/* 双指缩放（地图区内；单指拖动交给原生滚动） */
+(function(){
+  const panel = document.getElementById('map-panel');
+  if(!panel || !('ontouchstart' in window)) return;
+  let startDist = 0, startZoom = 1;
+  const dist = t => Math.hypot(t[0].clientX - t[1].clientX, t[0].clientY - t[1].clientY);
+  panel.addEventListener('touchstart', e => {
+    if(!document.documentElement.classList.contains('phone-land')) return;
+    if(e.touches.length === 2){ startDist = dist(e.touches); startZoom = mapZoom; }
+  }, { passive:true });
+  panel.addEventListener('touchmove', e => {
+    if(!document.documentElement.classList.contains('phone-land') || e.touches.length !== 2 || !startDist) return;
+    setMapZoom(startZoom * dist(e.touches) / startDist);
+    e.preventDefault();
+  }, { passive:false });
+  panel.addEventListener('touchend', () => { startDist = 0; }, { passive:true });
+})();
+
+document.querySelectorAll('#m-tabs .m-tab').forEach(btn => {
+  btn.addEventListener('click', () => setMobileTab(btn.dataset.pane));
+});
+
+/* 掷骰栏右侧「剩余步数」：跟随移动动画实时刷新 */
+function syncStepLeft(){
+  const el = document.getElementById('step-left');
+  if(el) el.textContent = moving ? (moving.remaining + ' 步') : '—';
+}
+
 updateOrientationMode();
 
 render();
