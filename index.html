@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>学园偶像大进击！· 单机原型 v0.41</title>
+<title>学园偶像大进击！· 单机原型 v0.42</title>
 <style>
   :root{
     --red:#e94f6a; --blue:#4f8fe9; --bg:#f5f0fa; --panel:#ffffff;
@@ -43,6 +43,28 @@
   }
   #map-wrap{ position:relative; }
   #map-wrap img{ width:100%; display:block; border-radius:10px; }
+  #map-svg{
+    position:absolute; inset:0; width:100%; height:100%;
+    pointer-events:none; z-index:2;
+  }
+  /* SVG 渲染层：由 TILES 数组驱动；desktop 与 mobile 通用 */
+  #map-svg .m-edge-stroke{ stroke:rgba(122,95,168,.45); stroke-width:.22; stroke-dasharray:.6 .4; fill:none; }
+  #map-svg .m-edge-branch { stroke:rgba(122,95,168,.3);  stroke-width:.18; stroke-dasharray:.3 .3; fill:none; }
+  #map-svg .m-tile-outline{ fill:rgba(255,255,255,.72); stroke-width:.35; stroke-linejoin:round; }
+  #map-svg .m-tile-label{ font-family:"Microsoft YaHei","PingFang SC",sans-serif; font-weight:bold; fill:#3a2e4f; paint-order:stroke; stroke:#fff; stroke-width:.18; }
+  /* 类型配色：与游戏卡片主题一致 */
+  #map-svg .tt-事件格        { stroke:#3aa66a; }
+  #map-svg .tt-机遇格        { stroke:#e07b39; }
+  #map-svg .tt-挑战格        { stroke:#2e5fa8; }
+  #map-svg .tt-音乐素材格    { stroke:#7a5fa8; }
+  #map-svg .tt-舞蹈素材格    { stroke:#d4568a; }
+  #map-svg .tt-服装素材格    { stroke:#4fb6d4; }
+  #map-svg .tt-LIVE场馆      { stroke:#e94f6a; }
+  #map-svg .tt-特殊场馆      { stroke:#d9a017; stroke-width:.55; }
+  #map-svg .tt-休息区        { stroke:#8a7aa8; }
+  #map-svg .tt-交易格        { stroke:#2ea8a8; }
+  #map-svg .tt-起点          { stroke:#b89ae0; stroke-width:.3; stroke-dasharray:.5 .3; }
+
   .piece{
     position:absolute; width:26px; height:26px; border-radius:50%;
     border:2.5px solid #fff; transform:translate(-50%,-50%);
@@ -543,7 +565,7 @@
 <body>
 
 <header>
-  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.41 · 单机/联机</span></div>
+  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.42 · 单机/联机</span></div>
   <div id="turn-banner"><button id="ori-btn" title="手机横竖屏显示异常时可手动切换">横屏:关</button><button id="notice-btn">公告</button><button id="bgm-btn" title="背景音乐开关（三首LoveLive歌曲循环）">音乐:开</button><span id="net-badge" class="tag" style="display:none;background:#8a7aa8;margin-right:10px;"></span><span class="turn-label">当前回合：</span><span id="turn-chip" class="tag red">红方</span></div>
 </header>
 
@@ -552,6 +574,9 @@
     <div id="map-zoom"><button class="mz-btn" data-z="in" title="放大地图">＋</button><button class="mz-btn" data-z="out" title="缩小地图">－</button></div>
     <div id="map-wrap">
       <img src="map.jpg" alt="桌游地图">
+      <svg id="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- 由 renderMapSVG() 动态填充：格子轮廓 + 文字 + 连线 -->
+      </svg>
       <div class="piece red"  id="piece-red">红</div>
       <div class="piece blue" id="piece-blue">蓝</div>
       <div class="piece green" id="piece-green" style="display:none;">绿</div>
@@ -668,7 +693,7 @@
 <div id="notice-mask">
   <div id="notice-box">
     <div class="n-title">学园偶像大进击！</div>
-    <div class="n-ver">当前版本 v0.41 · 2026-11-09</div>
+    <div class="n-ver">当前版本 v0.42 · 2026-11-09</div>
     <div class="n-sec">
       <span class="n-sec-t">【玩法速览 · 30秒上手】</span>
       <ul>
@@ -680,6 +705,7 @@
       </ul>
       <span class="n-sec-t">【更新公告】</span>
       <ul>
+        <li>v0.42 地图架构升级（SVG 渲染层）与格子平衡调整：① 地图格子轮廓、颜色边框、连线、名称文字全部由代码自动绘制，不再依赖底图上固定的格子插画；未来新增/删除/调整格子类型只需改数组，无需重画图；② 格子平衡——挑战格从 2→3（新增屋顶·挑战格，上半圈与下半圈现在各有挑战），休息区从 1→2（新增废弃校舍·休息区，左下也能自选素材），事件格 5→4、机遇格 4→3（从偏多调回均衡）；③ 三类素材格各 3 格保持不变（音乐全在下半圈为已知小瑕疵，后续迭代再挪）；④ 移动端弹窗打开时右侧面板自动浮起并让出位置，可边看弹窗边切换标签页查看自己的素材。</li>
         <li>v0.41 移动端界面重构（仅影响手机横屏布局，桌面版与全部玩法数值不变）：① 掷骰栏收窄到地图列宽度，改为三栏——左「创作专辑」、中大圆钮掷骰、右「剩余步数」实时显示；② 右侧面板收窄至约 32%（地图 68%），并从顶栏贯通到屏幕底部，多出约 78px 竖向空间；③ 玩家状态回到右侧面板顶部，每方一行紧凑列表（色点＋名称＋行动中＋进度星＋素材/专辑/角色），当前行动方描边高亮；④ 面板下方改为「素材 / 卡池 / 日志」三个标签页，角色一览并入卡池页；⑤ 底部不再设常驻交易按钮，交易仍仅在停留【LoveLive 大赛组委会】格时触发；⑥ 地图新增双指缩放、＋/－按钮与拖动查看，当前行动棋子脉冲高亮。</li>
         <li>v0.40 新机制与新卡：① <b>安可机制</b>——LIVE 检定失败后，下次 LIVE 检定 +1；连续两次失败后第三次起 +3（上限 +3，成功兑现后清零；为独立增益，不受任何增益封印/无效化影响）；② <b>跑圈奖励</b>——顺时针玩家经过穗村后再次经过屋顶、逆时针玩家经过穗村后再次经过学校礼堂视为完成一圈，可自选 1 张音乐素材（不受任何增益加成）；③ <b>干扰卡加强</b>——「抢镜」改为指定玩家：下回合不能获得素材且随机丢弃 1 张素材；「对手的背影」改为指定玩家：下回合骰点减半且无法触发格子效果；④ 新事件卡「<b>来自对手的宣战</b>」（对手专辑领先时，其下次 LIVE 检定减去双方专辑差）与「<b>学生会长的否定</b>」（弃 2 抽 2）；⑤ 新机遇卡「<b>学园偶像部成立！</b>」（全员角色卡回池，按落后者优先原则依次重选）。</li>
         <li>v0.39 卡牌与技能平衡：① <b>响彻东京巨蛋吧！</b>挑战时 LIVE 检定 <b>+1</b>（失败惩罚不变，风险收益更合理）；② <b>雨中追加公演</b>重写——缺少服装素材时可选择立即完成该专辑（正常消耗已有素材），随后进行一次 LIVE 检定（<b>2骰 > 7</b>），成功累计胜利进度，失败扣除身上全部服装素材且下回合无法获得素材；③ <b>东条希</b>占卜平衡：成功改为夺取指定玩家 <b>1 张指定素材</b>（原为 2 张随机），失败效果不变。</li>
@@ -851,10 +877,10 @@ const TILES = [
   { id:'myojinzaka',   name:'明神男坂',        type:'挑战格',    x:77.9, y:92 },
   { id:'ongaku',       name:'音乐教室',        type:'音乐素材格', x:66.7, y:92 },
   { id:'gakudou',      name:'学校礼堂',        type:'舞蹈素材格', x:55.4, y:92 },
-  { id:'okujou',       name:'屋顶',            type:'事件格',    x:43.8, y:92 },
+  { id:'okujou',       name:'屋顶',            type:'挑战格',    x:43.8, y:92 },
   { id:'utx',          name:'UTX',             type:'机遇格',    x:32.9, y:92 },
   { id:'lantis',       name:'Lantis录音室',    type:'音乐素材格', x:20.8, y:92 },
-  { id:'haikyo',       name:'废弃校舍',        type:'机遇格',    x:8.5,  y:92 },
+  { id:'haikyo',       name:'废弃校舍',        type:'休息区',    x:8.5,  y:92 },
   { id:'rijichou',     name:'理事长室',        type:'事件格',    x:9.3,  y:72.9 },
   { id:'hirobe',       name:'广播室',          type:'音乐素材格', x:9.3,  y:51.4 },
   { id:'arcade',       name:'街机厅',          type:'挑战格',    x:9.3,  y:30.7 },
@@ -2715,7 +2741,7 @@ document.getElementById('lb-join').addEventListener('click', () => {
 /* =========================================================
  * 十、开局公告（发布更新时：编辑 HTML 中 #notice-box 内容，并把 NOTICE_VERSION 调大，全员重新可见）
  * ========================================================= */
-const NOTICE_VERSION = 'v0.41';
+const NOTICE_VERSION = 'v0.42';
 const noticeMask = document.getElementById('notice-mask');
 try{ if(localStorage.getItem('ll-notice-read') === NOTICE_VERSION) noticeMask.classList.add('hidden'); }catch(e){}
 document.getElementById('notice-close').addEventListener('click', () => {
@@ -3045,6 +3071,72 @@ function syncStepLeft(){
   if(el) el.textContent = moving ? (moving.remaining + ' 步') : '—';
 }
 
+/* ---------- SVG 渲染层（路径 A）----------
+   由 TILES + RING + BRANCH_EDGES 自动绘制：
+   - 主环线：沿着 RING 顺序画虚线 polyline
+   - 支线：BRANCH_EDGES 每条边画虚线
+   - 格子：每个 TILE 画圆角矩形轮廓 + 类型颜色 + 名称文字
+   viewBox 0 0 100 100 与 TILES[i].x/y 百分比直接对应 */
+function renderMapSVG(){
+  const svg = document.getElementById('map-svg');
+  if(!svg) return;
+  svg.innerHTML = '';
+  const NS = 'http://www.w3.org/2000/svg';
+  const T = id => TILE_MAP[id];
+
+  /* 1. 主环线 */
+  const ringPts = RING.map(id => T(id).x + ',' + T(id).y).join(' ');
+  const ringPoly = document.createElementNS(NS, 'polyline');
+  ringPoly.setAttribute('points', ringPts);
+  ringPoly.setAttribute('class', 'm-edge-stroke');
+  svg.appendChild(ringPoly);
+
+  /* 2. 支线 */
+  BRANCH_EDGES.forEach(([a,b]) => {
+    const pts = T(a).x + ',' + T(a).y + ' ' + T(b).x + ',' + T(b).y;
+    const pl = document.createElementNS(NS, 'line');
+    pl.setAttribute('x1', T(a).x); pl.setAttribute('y1', T(a).y);
+    pl.setAttribute('x2', T(b).x); pl.setAttribute('y2', T(b).y);
+    pl.setAttribute('class', 'm-edge-branch');
+    svg.appendChild(pl);
+  });
+
+  /* 3. 格子轮廓 + 文字 */
+  TILES.forEach(t => {
+    const cx = t.x, cy = t.y;
+    /* 根据格子位置决定形状：上/下边用扁矩形，左/右边用高矩形，其他用圆角 */
+    const isTop = Math.abs(cy - 9.7) < 2;
+    const isBot = Math.abs(cy - 92) < 2;
+    const isL   = Math.abs(cx - 9.3) < 2;
+    const isR   = Math.abs(cx - 91.5) < 2;
+    let w, h, rx;
+    if(isTop || isBot){ w = 8.2; h = 4.2; rx = 1.4; }
+    else if(isL || isR){ w = 4.2; h = 8.2; rx = 1.4; }
+    else { w = 6.0; h = 4.0; rx = 1.2; }
+
+    const x = cx - w/2, y = cy - h/2;
+    const rect = document.createElementNS(NS, 'rect');
+    rect.setAttribute('x', x); rect.setAttribute('y', y);
+    rect.setAttribute('width', w); rect.setAttribute('height', h);
+    rect.setAttribute('rx', rx);   rect.setAttribute('ry', rx);
+    rect.setAttribute('class', 'm-tile-outline tt-' + t.type);
+    svg.appendChild(rect);
+
+    /* 文字标签，放在中心 */
+    const label = document.createElementNS(NS, 'text');
+    label.setAttribute('x', cx); label.setAttribute('y', cy);
+    label.setAttribute('class', 'm-tile-label');
+    label.setAttribute('text-anchor', 'middle');
+    label.setAttribute('dominant-baseline', 'central');
+    /* 根据格子尺寸调整字号 */
+    const fontSize = (isTop||isBot) ? 2.2 : (isL||isR ? 2.0 : 2.1);
+    label.setAttribute('font-size', fontSize);
+    label.textContent = t.name;
+    svg.appendChild(label);
+  });
+}
+
+renderMapSVG();
 updateOrientationMode();
 
 render();
