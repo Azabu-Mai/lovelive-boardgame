@@ -11,7 +11,7 @@
 
   var hasEcharts = typeof echarts !== 'undefined';
 
-  /* ---------- 图 2 · 地图 28 格构成（环形图） ---------- */
+  /* ---------- 图 2 · 地图 38 格构成（环形图） ---------- */
   var elTiles = document.getElementById('chart-tiles');
   if (hasEcharts && elTiles) {
     var donut = echarts.init(elTiles, null, { renderer: 'svg' });
@@ -34,17 +34,17 @@
         labelLine: { lineStyle: { color: rule } },
         emphasis: { scale: true, scaleSize: 4 },
         data: [
-          { name: '素材格·音乐', value: 3, itemStyle: { color: cMusic } },
-          { name: '素材格·舞蹈', value: 3, itemStyle: { color: cDance } },
-          { name: '素材格·服装', value: 3, itemStyle: { color: cCostume } },
-          { name: '事件格', value: 5, itemStyle: { color: cEvent } },
+          { name: '素材格·音乐', value: 4, itemStyle: { color: cMusic } },
+          { name: '素材格·舞蹈', value: 4, itemStyle: { color: cDance } },
+          { name: '素材格·服装', value: 5, itemStyle: { color: cCostume } },
+          { name: '事件格', value: 6, itemStyle: { color: cEvent } },
           { name: '机遇格', value: 4, itemStyle: { color: cChance } },
-          { name: '挑战格', value: 2, itemStyle: { color: cChallenge } },
+          { name: '挑战格', value: 4, itemStyle: { color: cChallenge } },
           { name: '普通 LIVE 场馆', value: 4, itemStyle: { color: cVenue } },
           { name: '特殊场馆·东京巨蛋', value: 1, itemStyle: { color: cTokyo } },
           { name: '起点·音乃木坂', value: 1, itemStyle: { color: cStart } },
-          { name: '休息区·穗村', value: 1, itemStyle: { color: cRest } },
-          { name: '交易格', value: 1, itemStyle: { color: cTrade } }
+          { name: '休息区', value: 3, itemStyle: { color: cRest } },
+          { name: '交易格', value: 2, itemStyle: { color: cTrade } }
         ]
       }]
     });
@@ -54,16 +54,19 @@
   /* ---------- 图 3 · 地图拓扑（环形布局 + 内部支线） ---------- */
   var elMap = document.getElementById('chart-map');
   if (hasEcharts && elMap) {
-    // 外圈环线（22 格，按棋盘顺序）
+    // 外圈环线（32 格，按棋盘顺序）
     var RING = [
       ['秋叶原', cEvent], ['步行者天国', cDance], ['女仆咖啡屋', cCostume],
       ['上野公园', cChance], ['穗村', cRest], ['海边', cCostume],
       ['昌平桥', cEvent], ['大赛组委会', cTrade], ['服饰店', cCostume],
-      ['万世桥', cChance], ['偶像活动室', cDance], ['神田明神', cEvent],
-      ['明神男坂', cChallenge], ['音乐教室', cMusic], ['学校礼堂', cDance],
-      ['屋顶', cEvent], ['UTX', cChance], ['Lantis录音室', cMusic],
-      ['废弃校舍', cChance], ['理事长室', cEvent], ['广播室', cMusic],
-      ['街机厅', cChallenge]
+      ['万世桥', cChance], ['偶像活动室', cDance], ['明神男坂', cChallenge],
+      ['神田明神', cEvent], ['音乐教室', cMusic], ['竹下通り', cCostume],
+      ['屋顶', cChallenge], ['UTX', cChance], ['Lantis', cMusic],
+      ['废弃校舍', cRest], ['理事长室', cEvent], ['广播室', cMusic],
+      ['代代木公园', cRest], ['御茶之水', cMusic], ['台场海滨', cDance],
+      ['涩谷109', cCostume], ['学校礼堂', cDance], ['涩谷路口', cEvent],
+      ['浅草雷门', cEvent], ['明治神宫', cChance], ['舞滨剧场', cChallenge],
+      ['街机厅', cChallenge], ['动画商店', cTrade]
     ];
     var TYPE_NAME = {
       '#3BA272': '事件格', '#E85D5D': '机遇格', '#4A5FC1': '挑战格',
@@ -93,12 +96,12 @@
     }
     // 内部支线格
     var inner = [
-      { name: '埼玉超级竞技场', deg: -90, r: 190, c: cVenue },
+      { name: '埼玉竞技场', deg: angleOf(31.5), r: 190, c: cVenue },
       { name: '东京巨蛋', deg: angleOf(3), r: 195, c: cTokyo },
-      { name: '横滨K', deg: (angleOf(6) + angleOf(8)) / 2, r: 190, c: cVenue },
+      { name: '横滨K', deg: angleOf(7), r: 190, c: cVenue },
       { name: '名古屋巨蛋', deg: angleOf(19), r: 200, c: cVenue },
-      { name: '西武巨蛋', deg: angleOf(10), r: 200, c: cVenue },
-      { name: '音乃木坂（起点）', deg: (angleOf(14) + angleOf(16)) / 2, r: 135, c: cStart }
+      { name: '西武巨蛋', deg: angleOf(10.5), r: 200, c: cVenue },
+      { name: '音乃木坂（起点）', deg: angleOf(20), r: 135, c: cStart }
     ];
     inner.forEach(function (n) {
       var xy = polar(n.deg, n.r);
@@ -125,11 +128,11 @@
     });
     // 支线连接（外圈端点用名称索引）；起点仅供出发，不与任何地块连通
     function ringEdge(nameA, nameB) { edges.push({ source: nameA, target: nameB }); }
-    ringEdge('步行者天国', '埼玉超级竞技场');
-    ringEdge('街机厅', '埼玉超级竞技场');
+    ringEdge('步行者天国', '埼玉竞技场');
+    ringEdge('街机厅', '埼玉竞技场');
     ringEdge('上野公园', '东京巨蛋');
     ringEdge('昌平桥', '横滨K');
-    ringEdge('横滨K', '服饰店');
+    ringEdge('服饰店', '横滨K');
     ringEdge('理事长室', '名古屋巨蛋');
     ringEdge('西武巨蛋', '偶像活动室');
     ringEdge('西武巨蛋', '明神男坂');

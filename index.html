@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>学园偶像大进击！· 单机原型 v0.42</title>
+<title>学园偶像大进击！· 单机原型 v0.44</title>
 <style>
   :root{
     --red:#e94f6a; --blue:#4f8fe9; --bg:#f5f0fa; --panel:#ffffff;
@@ -41,8 +41,12 @@
     flex:1.7; background:var(--panel); border-radius:14px;
     padding:10px; overflow:auto; box-shadow:0 2px 10px rgba(90,60,140,.08);
   }
-  #map-wrap{ position:relative; }
-  #map-wrap img{ width:100%; display:block; border-radius:10px; }
+  /* 2026-11-18 v0.43：去掉 map.jpg 底图，改为 100:64 纯矢量棋盘 */
+  /* 2026-11-18 v0.44：9人技能重平衡 + 觉醒系统实装 */
+  #map-wrap{
+    position:relative; aspect-ratio:100 / 64; overflow:hidden;
+    background:#fbf7ef; border:1px solid #e6dccb; border-radius:12px;
+  }
   #map-svg{
     position:absolute; inset:0; width:100%; height:100%;
     pointer-events:none; z-index:2;
@@ -50,6 +54,7 @@
   /* SVG 渲染层：由 TILES 数组驱动；desktop 与 mobile 通用 */
   #map-svg .m-edge-stroke{ stroke:rgba(122,95,168,.45); stroke-width:.22; stroke-dasharray:.6 .4; fill:none; }
   #map-svg .m-edge-branch { stroke:rgba(122,95,168,.3);  stroke-width:.18; stroke-dasharray:.3 .3; fill:none; }
+  #map-svg .m-board-frame { fill:none; stroke:#e8dfcf; stroke-width:.35; stroke-dasharray:1.2 .8; }
   #map-svg .m-tile-outline{ fill:rgba(255,255,255,.72); stroke-width:.35; stroke-linejoin:round; }
   #map-svg .m-tile-label{ font-family:"Microsoft YaHei","PingFang SC",sans-serif; font-weight:bold; fill:#3a2e4f; paint-order:stroke; stroke:#fff; stroke-width:.18; }
   /* 类型配色：与游戏卡片主题一致 */
@@ -223,6 +228,10 @@
     font-size:12.5px; padding:5px 10px; border-radius:8px; font-weight:bold;
     background:linear-gradient(90deg,#fff6de,#fde8f1); border:1px solid #eed9a8; color:#9c6f1e;
     cursor:help;
+  }
+  .char-card.awaken{
+    background:linear-gradient(90deg,#ffe4ec,#f6d4ff); border-color:#ff6b9d; color:#c0396f;
+    box-shadow:0 0 6px rgba(255,107,157,.4);
   }
 
   /* 大厅（模式选择） */
@@ -565,7 +574,7 @@
 <body>
 
 <header>
-  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.42 · 单机/联机</span></div>
+  <div class="title">学园偶像大进击！<span class="sub">单机原型 v0.44 · 单机/联机</span></div>
   <div id="turn-banner"><button id="ori-btn" title="手机横竖屏显示异常时可手动切换">横屏:关</button><button id="notice-btn">公告</button><button id="bgm-btn" title="背景音乐开关（三首LoveLive歌曲循环）">音乐:开</button><span id="net-badge" class="tag" style="display:none;background:#8a7aa8;margin-right:10px;"></span><span class="turn-label">当前回合：</span><span id="turn-chip" class="tag red">红方</span></div>
 </header>
 
@@ -573,8 +582,7 @@
   <section id="map-panel">
     <div id="map-zoom"><button class="mz-btn" data-z="in" title="放大地图">＋</button><button class="mz-btn" data-z="out" title="缩小地图">－</button></div>
     <div id="map-wrap">
-      <img src="map.jpg" alt="桌游地图">
-      <svg id="map-svg" viewBox="0 0 100 100" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
+      <svg id="map-svg" viewBox="0 0 100 64" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">
         <!-- 由 renderMapSVG() 动态填充：格子轮廓 + 文字 + 连线 -->
       </svg>
       <div class="piece red"  id="piece-red">红</div>
@@ -674,6 +682,7 @@
     <div class="block-title">
       专辑 · 双方
       <button id="create-album-btn" disabled>＋ 创作专辑</button>
+      <button id="awaken-btn" disabled>✦ 觉醒</button>
     </div>
     <div class="block-body" id="album-body"></div>
   </div>
@@ -693,7 +702,7 @@
 <div id="notice-mask">
   <div id="notice-box">
     <div class="n-title">学园偶像大进击！</div>
-    <div class="n-ver">当前版本 v0.42 · 2026-11-09</div>
+    <div class="n-ver">当前版本 v0.44 · 2026-11-18</div>
     <div class="n-sec">
       <span class="n-sec-t">【玩法速览 · 30秒上手】</span>
       <ul>
@@ -705,10 +714,7 @@
       </ul>
       <span class="n-sec-t">【更新公告】</span>
       <ul>
-        <li>v0.42 地图架构升级（SVG 渲染层）与格子平衡调整：① 地图格子轮廓、颜色边框、连线、名称文字全部由代码自动绘制，不再依赖底图上固定的格子插画；未来新增/删除/调整格子类型只需改数组，无需重画图；② 格子平衡——挑战格从 2→3（新增屋顶·挑战格，上半圈与下半圈现在各有挑战），休息区从 1→2（新增废弃校舍·休息区，左下也能自选素材），事件格 5→4、机遇格 4→3（从偏多调回均衡）；③ 三类素材格各 3 格保持不变（音乐全在下半圈为已知小瑕疵，后续迭代再挪）；④ 移动端弹窗打开时右侧面板自动浮起并让出位置，可边看弹窗边切换标签页查看自己的素材。</li>
-        <li>v0.41 移动端界面重构（仅影响手机横屏布局，桌面版与全部玩法数值不变）：① 掷骰栏收窄到地图列宽度，改为三栏——左「创作专辑」、中大圆钮掷骰、右「剩余步数」实时显示；② 右侧面板收窄至约 32%（地图 68%），并从顶栏贯通到屏幕底部，多出约 78px 竖向空间；③ 玩家状态回到右侧面板顶部，每方一行紧凑列表（色点＋名称＋行动中＋进度星＋素材/专辑/角色），当前行动方描边高亮；④ 面板下方改为「素材 / 卡池 / 日志」三个标签页，角色一览并入卡池页；⑤ 底部不再设常驻交易按钮，交易仍仅在停留【LoveLive 大赛组委会】格时触发；⑥ 地图新增双指缩放、＋/－按钮与拖动查看，当前行动棋子脉冲高亮。</li>
-        <li>v0.40 新机制与新卡：① <b>安可机制</b>——LIVE 检定失败后，下次 LIVE 检定 +1；连续两次失败后第三次起 +3（上限 +3，成功兑现后清零；为独立增益，不受任何增益封印/无效化影响）；② <b>跑圈奖励</b>——顺时针玩家经过穗村后再次经过屋顶、逆时针玩家经过穗村后再次经过学校礼堂视为完成一圈，可自选 1 张音乐素材（不受任何增益加成）；③ <b>干扰卡加强</b>——「抢镜」改为指定玩家：下回合不能获得素材且随机丢弃 1 张素材；「对手的背影」改为指定玩家：下回合骰点减半且无法触发格子效果；④ 新事件卡「<b>来自对手的宣战</b>」（对手专辑领先时，其下次 LIVE 检定减去双方专辑差）与「<b>学生会长的否定</b>」（弃 2 抽 2）；⑤ 新机遇卡「<b>学园偶像部成立！</b>」（全员角色卡回池，按落后者优先原则依次重选）。</li>
-        <li>v0.39 卡牌与技能平衡：① <b>响彻东京巨蛋吧！</b>挑战时 LIVE 检定 <b>+1</b>（失败惩罚不变，风险收益更合理）；② <b>雨中追加公演</b>重写——缺少服装素材时可选择立即完成该专辑（正常消耗已有素材），随后进行一次 LIVE 检定（<b>2骰 > 7</b>），成功累计胜利进度，失败扣除身上全部服装素材且下回合无法获得素材；③ <b>东条希</b>占卜平衡：成功改为夺取指定玩家 <b>1 张指定素材</b>（原为 2 张随机），失败效果不变。</li>
+        <li>v0.44 角色技能重平衡 + 觉醒系统 + 地图修复：① 9 人技能全面重做——凛改为强制 ±1（不再保留原点数）、花阳改为休息区 ±1 格触发、希改为随机夺取素材且经过任意休息区、海未新增跑圈保底奖励、妮可改为全素材 +1 且 LIVE -1、穗乃果新增觉醒免疫检定负面、收集者新增觉醒素材翻倍；② 觉醒系统上线——消耗 1 张已完成未演出专辑，觉醒 1 名角色，获得专属强化效果（每局限 1 次）；③ 修复 38 格棋盘棋子垂直错位（坐标系换算错误）与主环线未闭合问题；④ 38 格基准重算：全员基础 V 落入 -1~7V，无极端异常。</li>
       </ul>
     </div>
     <button id="notice-close">我知道了，开始游戏</button>
@@ -846,66 +852,81 @@ const CHALLENGE_CARDS = [
 
 /* 角色卡（9 名 μ's 成员，开局各选 1 名，游戏中可额外获得；每张卡每局唯一） */
 const CHARACTERS = [
-  { id:'kotori', name:'南小鸟',   skill:'收集服装素材时，素材获得量 +1' },
-  { id:'umi',    name:'园田海未', skill:'其他玩家对你的干扰效果无效' },
-  { id:'honoka', name:'高坂穗乃果', skill:'进行LIVE检定时，检定 +1' },
-  { id:'maki',   name:'西木野真姬', skill:'收集音乐素材时，素材获得量 +1' },
-  { id:'hanayo', name:'小泉花阳', skill:'每圈一次机会：停留在穗村 2 格范围内时（路过不算），可直接进入穗村并获得休息区效果' },
-  { id:'rin',    name:'星空凛',   skill:'掷骰移动后，可选择行进步数 +1 或 -1' },
-  { id:'eli',    name:'绚濑绘里', skill:'收集舞蹈素材时，素材获得量 +1' },
-  { id:'nozomi', name:'东条希',   skill:'每圈第一次路过穗村后可占卜一次（原型简化：50%成功），成功夺取指定玩家 1 张指定素材，失败则从系统随机获得 1 张素材' },
-  { id:'nico',   name:'矢泽妮可', skill:'LIVE检定 -2，但获得的所有素材 +1' },
+  { id:'kotori', name:'南小鸟',   skill:'收集服装素材时，素材获得量 +1', awaken:'每圈第一次获得素材翻倍（先结算增益，再翻倍）' },
+  { id:'umi',    name:'园田海未', skill:'免疫他人干扰（角色技能除外）；跑圈若本圈未受干扰，跑圈奖励 +1', awaken:'跑圈奖励改为 +2' },
+  { id:'honoka', name:'高坂穗乃果', skill:'LIVE 检定 +1', awaken:'免疫降低检定的负面效果' },
+  { id:'maki',   name:'西木野真姬', skill:'收集音乐素材时，素材获得量 +1', awaken:'每圈第一次获得素材翻倍（先结算增益，再翻倍）' },
+  { id:'hanayo', name:'小泉花阳', skill:'行进至休息格前后 1 格时，可直接进入休息区并获得效果（每圈每休息区限 1 次）', awaken:'第一次进入休息区时效果触发两次' },
+  { id:'rin',    name:'星空凛',   skill:'掷骰后选择点数 +1 或 -1 前进（不按原点数走）', awaken:'每圈可重投 1 次行进骰子' },
+  { id:'eli',    name:'绚濑绘里', skill:'收集舞蹈素材时，素材获得量 +1', awaken:'每圈第一次获得素材翻倍（先结算增益，再翻倍）' },
+  { id:'nozomi', name:'东条希',   skill:'每圈第一次经过休息区时占卜：50% 成功随机获得该玩家 1 张素材，失败随机获得 1 张素材', awaken:'成功率提升至 75%' },
+  { id:'nico',   name:'矢泽妮可', skill:'三种素材获取量 +1，但 LIVE 检定 -1', awaken:'取消 LIVE 检定 -1' },
 ];
 const CHAR_MAP = Object.fromEntries(CHARACTERS.map(c => [c.id, c]));
 
 /* =========================================================
- * 二、地图数据（坐标为图片上的百分比位置，可微调）
+ * 二、地图数据（2026-11-18 v0.43：38 格纯矢量棋盘）
+ * 坐标系 viewBox 0 0 100 64，直接使用百分比坐标；
+ * shape 决定格子外框尺寸：h=上下边横格 / v=左右边竖格 / venue=内部场馆 / start=起点
+ * lines 为可选的强制换行（不写则按格子宽度自动折成两行）
  * ========================================================= */
 const TILES = [
-  { id:'akihabara',    name:'秋叶原',          type:'事件格',    x:9.5,  y:9.7 },
-  { id:'hokosha',      name:'步行者天国',      type:'舞蹈素材格', x:19,   y:9.7 },
-  { id:'maid',         name:'女仆咖啡屋',      type:'服装素材格', x:30.2, y:9.7 },
-  { id:'ueno',         name:'上野公园',        type:'机遇格',    x:41.6, y:9.7 },
-  { id:'hokumura',     name:'穗村',            type:'休息区',    x:52.7, y:9.7 },
-  { id:'seaside',      name:'海边',            type:'服装素材格', x:64.1, y:9.7 },
-  { id:'koishikawa',   name:'昌平桥',          type:'事件格',    x:75.4, y:9.7 },
-  { id:'committee',    name:'LoveLive大赛组委会', type:'交易格', x:89.1, y:9.7 },
-  { id:'shop',         name:'服饰店',          type:'服装素材格', x:91.5, y:30.7 },
-  { id:'manseibashi',  name:'万世桥',          type:'机遇格',    x:91.5, y:51.9 },
-  { id:'katsudou',     name:'偶像活动室',      type:'舞蹈素材格', x:91.5, y:73.3 },
-  { id:'kandamyojin',  name:'神田明神',        type:'事件格',    x:89.7, y:92 },
-  { id:'myojinzaka',   name:'明神男坂',        type:'挑战格',    x:77.9, y:92 },
-  { id:'ongaku',       name:'音乐教室',        type:'音乐素材格', x:66.7, y:92 },
-  { id:'gakudou',      name:'学校礼堂',        type:'舞蹈素材格', x:55.4, y:92 },
-  { id:'okujou',       name:'屋顶',            type:'挑战格',    x:43.8, y:92 },
-  { id:'utx',          name:'UTX',             type:'机遇格',    x:32.9, y:92 },
-  { id:'lantis',       name:'Lantis录音室',    type:'音乐素材格', x:20.8, y:92 },
-  { id:'haikyo',       name:'废弃校舍',        type:'休息区',    x:8.5,  y:92 },
-  { id:'rijichou',     name:'理事长室',        type:'事件格',    x:9.3,  y:72.9 },
-  { id:'hirobe',       name:'广播室',          type:'音乐素材格', x:9.3,  y:51.4 },
-  { id:'arcade',       name:'街机厅',          type:'挑战格',    x:9.3,  y:30.7 },
-  { id:'saitama',      name:'埼玉超级竞技场',  type:'LIVE场馆',  x:21.5, y:30.7 },
-  { id:'tokyo',        name:'东京巨蛋',        type:'特殊场馆',  x:43,   y:30 },
-  { id:'yokohama',     name:'横滨K',           type:'LIVE场馆',  x:78.6, y:30.7 },
-  { id:'nagoya',       name:'名古屋巨蛋',      type:'LIVE场馆',  x:21.8, y:73.3 },
-  { id:'otonokizaka',  name:'音乃木坂',        type:'起点',      x:49.7, y:76.1 },
-  { id:'seibu',        name:'西武巨蛋',        type:'LIVE场馆',  x:78.8, y:73.3 },
+  /* ---- 外圈 32 格（按顺时针顺序，RING 即此顺序） ---- */
+  { id:'akihabara',    name:'秋叶原',      type:'事件格',     shape:'h', x:7,     y:7 },
+  { id:'hokosha',      name:'步行者天国',  type:'舞蹈素材格', shape:'h', x:16.56, y:7, lines:['步行者','天国'] },
+  { id:'maid',         name:'女仆咖啡屋',  type:'服装素材格', shape:'h', x:26.11, y:7, lines:['女仆','咖啡屋'] },
+  { id:'ueno',         name:'上野公园',    type:'机遇格',     shape:'h', x:35.67, y:7 },
+  { id:'hokumura',     name:'穗村',        type:'休息区',     shape:'h', x:45.22, y:7 },
+  { id:'seaside',      name:'海边',        type:'服装素材格', shape:'h', x:54.78, y:7 },
+  { id:'koishikawa',   name:'昌平桥',      type:'事件格',     shape:'h', x:64.33, y:7 },
+  { id:'committee',    name:'大赛组委会',  type:'交易格',     shape:'h', x:73.89, y:7, lines:['大赛','组委会'] },
+  { id:'shop',         name:'服饰店',      type:'服装素材格', shape:'h', x:83.44, y:7 },
+  { id:'manseibashi',  name:'万世桥',      type:'机遇格',     shape:'h', x:93,    y:7 },
+  { id:'katsudou',     name:'偶像活动室',  type:'舞蹈素材格', shape:'v', x:93,    y:14.14, lines:['偶像','活动室'] },
+  { id:'myojinzaka',   name:'明神男坂',    type:'挑战格',     shape:'v', x:93,    y:21.29 },
+  { id:'kandamyojin',  name:'神田明神',    type:'事件格',     shape:'v', x:93,    y:28.43 },
+  { id:'ongaku',       name:'音乐教室',    type:'音乐素材格', shape:'v', x:93,    y:35.57 },
+  { id:'takeshita',    name:'竹下通り',    type:'服装素材格', shape:'v', x:93,    y:42.71, lines:['竹下','通り'] },
+  { id:'okujou',       name:'屋顶',        type:'挑战格',     shape:'v', x:93,    y:49.86 },
+  { id:'utx',          name:'UTX',         type:'机遇格',     shape:'h', x:93,    y:57 },
+  { id:'lantis',       name:'Lantis',      type:'音乐素材格', shape:'h', x:83.44, y:57 },
+  { id:'haikyo',       name:'废弃校舍',    type:'休息区',     shape:'h', x:73.89, y:57 },
+  { id:'rijichou',     name:'理事长室',    type:'事件格',     shape:'h', x:64.33, y:57 },
+  { id:'hirobe',       name:'广播室',      type:'音乐素材格', shape:'h', x:54.78, y:57 },
+  { id:'yoyogi',       name:'代代木公园',  type:'休息区',     shape:'h', x:45.22, y:57, lines:['代代木','公园'] },
+  { id:'ocha',         name:'御茶之水',    type:'音乐素材格', shape:'h', x:35.67, y:57 },
+  { id:'odaiba',       name:'台场海滨',    type:'舞蹈素材格', shape:'h', x:26.11, y:57 },
+  { id:'shibuya109',   name:'涩谷109',     type:'服装素材格', shape:'h', x:16.56, y:57, lines:['涩谷','109'] },
+  { id:'gakudou',      name:'学校礼堂',    type:'舞蹈素材格', shape:'h', x:7,     y:57 },
+  { id:'shibuya_cross',name:'涩谷路口',    type:'事件格',     shape:'v', x:7,     y:49.86 },
+  { id:'asakusa',      name:'浅草雷门',    type:'事件格',     shape:'v', x:7,     y:42.71 },
+  { id:'meiji',        name:'明治神宫',    type:'机遇格',     shape:'v', x:7,     y:35.57 },
+  { id:'maihama',      name:'舞滨剧场',    type:'挑战格',     shape:'v', x:7,     y:28.43 },
+  { id:'arcade',       name:'街机厅',      type:'挑战格',     shape:'v', x:7,     y:21.29 },
+  { id:'animate',      name:'动画商店',    type:'交易格',     shape:'v', x:7,     y:14.14, lines:['动画','商店'] },
+
+  /* ---- 内部：5 个场馆 + 起点（起点仅供出发，不参与环线） ---- */
+  { id:'saitama',      name:'埼玉竞技场',  type:'LIVE场馆',   shape:'venue', x:18, y:25 },
+  { id:'tokyo',        name:'东京巨蛋',    type:'特殊场馆',   shape:'venue', x:38, y:17 },
+  { id:'yokohama',     name:'横滨K',       type:'LIVE场馆',   shape:'venue', x:72, y:18 },
+  { id:'nagoya',       name:'名古屋巨蛋',  type:'LIVE场馆',   shape:'venue', x:62, y:44 },
+  { id:'seibu',        name:'西武巨蛋',    type:'LIVE场馆',   shape:'venue', x:82, y:34 },
+  { id:'otonokizaka',  name:'音乃木坂',    type:'起点',       shape:'start', x:44, y:37 },
 ];
 const TILE_MAP = Object.fromEntries(TILES.map(t => [t.id, t]));
 
-/* 外圈环线（按数组顺序即顺时针方向，首尾相连） */
+/* 外圈环线（32 格，按数组顺序即顺时针方向，首尾相连） */
 const RING = ['akihabara','hokosha','maid','ueno','hokumura','seaside','koishikawa','committee',
-  'shop','manseibashi','katsudou','kandamyojin','myojinzaka','ongaku','gakudou','okujou',
-  'utx','lantis','haikyo','rijichou','hirobe','arcade'];
-/* 内部支线（上野公园—东京巨蛋仅事件传送可走，普通行进不可进入） */
+  'shop','manseibashi','katsudou','myojinzaka','kandamyojin','ongaku','takeshita','okujou',
+  'utx','lantis','haikyo','rijichou','hirobe','yoyogi','ocha','odaiba','shibuya109','gakudou',
+  'shibuya_cross','asakusa','meiji','maihama','arcade','animate'];
+/* 内部支线（东京巨蛋仅事件传送可进，普通行进不可进入） */
 const BRANCH_EDGES = [
   ['hokosha','saitama'], ['arcade','saitama'], ['ueno','tokyo'],
-  ['koishikawa','yokohama'], ['yokohama','shop'],
+  ['koishikawa','yokohama'], ['shop','yokohama'],
   ['rijichou','nagoya'],
-  ['seibu','katsudou'], ['seibu','myojinzaka'],
-  /* 2026-11-04 v0.34：起点「音乃木坂」仅供出发使用，不再作为通行点；
-     已删除 4 条起点边——取消其与名古屋巨蛋、西武巨蛋、屋顶、学校礼堂的内部支线连接
-     2026-11-04 v0.36：补上西武巨蛋—明神男坂支线（两格地图相邻，修复连接断开） */
+  ['katsudou','seibu'], ['myojinzaka','seibu'],
+  /* 起点「音乃木坂」仅供出发使用，不与任何格子连边 */
 ];
 
 const ADJ = {};
@@ -922,7 +943,13 @@ function newPlayer(name){
     name, pos:'otonokizaka',
     dir:null,                       // 行进方向：1=顺时针 -1=逆时针（开局选定后锁定）
     chars:[],                       // 已获得的角色卡（id）
-    hanayoUsed:false, nozomiUsed:false,   // 「每圈一次」技能标记（经过穗村时重置）
+    awakenChars:[],                 // v0.44：已觉醒的角色卡（id）
+    hanayoUsed:false, nozomiUsed:false,   // 「每圈一次」技能标记（经过休息区时重置）
+    hanayoRestUsed:[],              // v0.44：花阳本圈已用过的休息区 id 列表
+    rinRerollUsed:false,            // v0.44：凛本圈重投是否已用
+    firstGainDoubled:false,         // v0.44：收集者觉醒——本圈首次素材是否已翻倍
+    umiInterfered:false,            // v0.44：海未本圈是否受到干扰
+    hanayoDoubleUsed:false,         // v0.44：花阳觉醒——首次休息区翻倍是否已用
     seibuUsedThisLap:false,           // v0.37：本圈是否已在偶像活动室/明神男坂获得过西武巨蛋选择机会
     encore:0,                         // v0.40：安可增益（LIVE 连败累进：1→下次+1，2→+3，上限+3，成功清零）
     lapRest:false,                    // v0.40：本圈是否已经过穗村（跑圈奖励判定用：穗村→圈标=完成一圈）
@@ -1036,6 +1063,7 @@ function allMats(p){
 }
 /* 角色技能是否生效（「响彻东京巨蛋吧！」失败后 skillsOff 封印全部技能） */
 const skillActive = (pk, id) => { const p = state.players[pk]; return p.chars.includes(id) && !p.mods.skillsOff; };
+const isAwaken = (pk, id) => state.players[pk].awakenChars.includes(id);
 
 /* ---------- v0.40：干扰类效果目标选择 ----------
    2 人局自动取唯一下家，3-4 人局弹窗由发动玩家自选（弹窗归属发动玩家）。
@@ -1120,7 +1148,15 @@ function gainMaterial(pk, cat, fixedName){
     else { extra = 1; p.mods.gainPlus--; log(`触发「素材获取量+1」效果`, pk); }
   }
   const bonus = charGainBonus(p, cat);
-  const total = 1 + extra + bonus;
+  let total = 1 + extra + bonus;
+  /* v0.44：收集者觉醒——每圈第一次获得素材翻倍（先结算增益，再翻倍） */
+  const collectorAwaken = (isAwaken(pk,'kotori') || isAwaken(pk,'maki') || isAwaken(pk,'eli'));
+  let doubled = false;
+  if(collectorAwaken && !p.firstGainDoubled){
+    total = total * 2;
+    p.firstGainDoubled = true;
+    doubled = true;
+  }
   const first = fixedName || rand(TYPE_LIST[cat]);
   const names = [first];
   p.mats[cat].push(first);
@@ -1131,7 +1167,7 @@ function gainMaterial(pk, cat, fixedName){
     names.push(nm);
   }
   log(total > 1
-    ? `获得素材：${CAT_LABEL[cat]}「${first}」，另随机获得${CAT_LABEL[cat]}「${names.slice(1).join('」「')}」（增益/角色加成追加）`
+    ? `获得素材：${CAT_LABEL[cat]}「${first}」，另随机获得${CAT_LABEL[cat]}「${names.slice(1).join('」「')}」（增益/角色加成追加${doubled?'，觉醒翻倍':''}）`
     : `获得素材：${CAT_LABEL[cat]}「${first}」`, pk);
   return true;
 }
@@ -1197,6 +1233,30 @@ document.getElementById('create-album-btn').addEventListener('click', () => {
   if(NET.role === 'guest'){ send({ type:'action', action:{ type:'createAlbum', seat: NET.seat } }); return; }
   if(state.single && state.current !== 'red') return;   // AI回合不可代点
   doCreateAlbum();
+});
+
+/* v0.44：觉醒系统——消耗 1 张已完成未演出专辑，觉醒 1 名角色（每局 1 次） */
+document.getElementById('awaken-btn').addEventListener('click', () => {
+  if(state.single && state.current !== 'red') return;
+  const pk = state.current;
+  const p = state.players[pk];
+  const unperformed = p.albums.filter(a => !a.performed);
+  if(!unperformed.length){ log('没有可用于觉醒的已完成未演出专辑', pk); return; }
+  const awakenable = p.chars.filter(id => !p.awakenChars.includes(id));
+  if(!awakenable.length){ log('所有角色均已觉醒', pk); return; }
+  showModal('觉醒 · 选择角色',
+    `消耗 1 张已完成未演出专辑，选择要觉醒的角色（每局限 1 次）：`,
+    awakenable.map(id => {
+      const c = CHARACTERS.find(c => c.id === id);
+      return { label:`${c.name}：${c.awaken}`, onSelect(){
+        // 消耗 1 张已完成未演出专辑
+        const idx = p.albums.findIndex(a => !a.performed);
+        const consumed = p.albums.splice(idx, 1)[0];
+        p.awakenChars.push(id);
+        log(`觉醒 ${c.name}！消耗专辑《${consumed.name}》，效果：${c.awaken}`, pk);
+        render();
+      } };
+    }), pk);
 });
 
 /* =========================================================
@@ -1296,7 +1356,7 @@ function applyCardEffect(pk, card){
       return offerTargetPick(pk, '对手的背影 · 选择目标',
         '选择 1 名玩家：其下回合移动骰点数减半（向上取整），并且无法触发格子效果。', seat => {
         const t = state.players[seat];
-        if(skillActive(seat, 'umi')) log(`${t.name}【园田海未】的技能：干扰效果无效！`, pk);
+        if(skillActive(seat, 'umi')){ t.umiInterfered = true; log(`${t.name}【园田海未】的技能：干扰效果无效！`, pk); }
         else { t.mods.diceHalf = true; t.mods.noTile = true; log(`${t.name}下回合骰点减半，且无法触发格子效果`, pk); }
         render(); endTurnStep();
       });
@@ -1305,7 +1365,7 @@ function applyCardEffect(pk, card){
       return offerTargetPick(pk, '抢镜 · 选择目标',
         '选择 1 名玩家：其下回合不能获得任何素材，并且随机丢弃 1 张素材。', seat => {
         const t = state.players[seat];
-        if(skillActive(seat, 'umi')) log(`${t.name}【园田海未】的技能：干扰效果无效！`, pk);
+        if(skillActive(seat, 'umi')){ t.umiInterfered = true; log(`${t.name}【园田海未】的技能：干扰效果无效！`, pk); }
         else {
           t.mods.noGain += 1;
           const all = allMats(t);
@@ -1325,7 +1385,7 @@ function applyCardEffect(pk, card){
         '选择 1 名已完成专辑领先你的玩家：其下次 LIVE 检定结果减去双方专辑差。', seat => {
         const t = state.players[seat];
         const diff = t.albums.length - p.albums.length;
-        if(skillActive(seat, 'umi')) log(`${t.name}【园田海未】的技能：干扰效果无效！`, pk);
+        if(skillActive(seat, 'umi')){ t.umiInterfered = true; log(`${t.name}【园田海未】的技能：干扰效果无效！`, pk); }
         else if(diff <= 0) log(`${t.name}的专辑已不再领先，宣战无效`, pk);
         else { t.mods.liveDown += diff; log(`${t.name}下次 LIVE 检定结果 -${diff}（双方专辑差）`, pk); }
         render(); endTurnStep();
@@ -1722,21 +1782,15 @@ function finishMove(){
   const m = moving;
   state.players[m.pk].pos = m.cur;
   log(`移动${m.route.length - 1}格：${m.route.map(id => TILE_MAP[id].name).join(' → ')}`, m.pk);
-  const passedRest = m.route.slice(0, -1).includes('hokumura');   // 路过（非停留）穗村
-  /* 重置"每圈一次"标记：只有 route 真正经过圈标 hokumura 才重置
-     重置逻辑放在花阳/希检查之前，但花阳条件加了 !m.route.includes('hokumura') 保护：
-     - 防止"route 经过圈标 → hanayoUsed 重置为 false → 同次 finishMove 立即触发花阳"
-     - 那圈（绕完一整圈后）不该再用花阳，必须等下次移动（= 新一圈） */
-  const justPassedRest = m.route.includes('hokumura');
-  if(justPassedRest){
-    state.players[m.pk].hanayoUsed = false;
-    state.players[m.pk].nozomiUsed = false;
-  }
+  const REST_IDS = ['hokumura','haikyo','yoyogi'];
+  const passedRest = m.route.slice(0, -1).some(id => REST_IDS.includes(id));   // 路过（非停留）任一休息区
+  const justPassedHokumura = m.route.includes('hokumura');
   /* v0.40：跑圈奖励——顺时针玩家经过穗村后再次经过屋顶、逆时针玩家经过穗村后再次经过学校礼堂，视为完成一圈，
      自选获得 1 张音乐素材（不受任何增益加成）。一次移动同时经过穗村与圈标时，按经过先后判定。 */
   const lapMark = state.players[m.pk].dir === 1 ? 'okujou' : 'gakudou';
+  let lapDone = false;
   {
-    let restSeen = state.players[m.pk].lapRest, lapDone = false;
+    let restSeen = state.players[m.pk].lapRest;
     for(const id of m.route){
       if(id === 'hokumura') restSeen = true;
       else if(id === lapMark && restSeen){ lapDone = true; restSeen = false; }
@@ -1745,6 +1799,13 @@ function finishMove(){
     if(lapDone){
       state.players[m.pk].lapRewardPending = true;
       log(`跑完一整圈（${TILE_MAP.hokumura.name} → ${TILE_MAP[lapMark].name}）！跑圈奖励：可自选 1 张音乐素材（不受增益加成）`, m.pk);
+      /* v0.44：跑圈完成时重置所有「每圈一次」技能标记 */
+      state.players[m.pk].hanayoUsed = false;
+      state.players[m.pk].hanayoRestUsed = [];
+      state.players[m.pk].nozomiUsed = false;
+      state.players[m.pk].rinRerollUsed = false;
+      state.players[m.pk].firstGainDoubled = false;
+      state.players[m.pk].umiInterfered = false;
     }
   }
   /* v0.37：西武巨蛋支线圈次重置——
@@ -1756,32 +1817,47 @@ function finishMove(){
   moving = null;
   syncStepLeft();
   const p = state.players[m.pk];
-  /* 小泉花阳：每圈一次，停留在穗村 2 格范围内时可直接进入（路过不触发）
-     && !justPassedRest 保证"本次移动本身经过了圈标 hokumura"时不触发花阳——
-     因为 route 含 hokumura 意味着玩家绕了一整圈回到了原点附近，
-     hanayoUsed 刚被重置为 false，但这圈（绕完一整圈后的这一圈）不该再用，必须等下一圈 */
-  if(skillActive(m.pk, 'hanayo') && !p.hanayoUsed && m.cur !== 'hokumura' && distTo(m.cur, 'hokumura') <= 2 && !justPassedRest){
-    p.hanayoUsed = true;
-    showModal('小泉花阳的技能',
-      `停留在【${TILE_MAP[m.cur].name}】，距【穗村】仅 2 格以内。每圈一次机会，直接移动到穗村休息？`, [
-      { label:'直接进入穗村（获得休息区效果）', onSelect(){
-          state.players[m.pk].pos = 'hokumura';
-          setPieceTo(m.pk, 'hokumura');
-          if(NET.role === 'host' && NET.connected) send({ type:'fx', fx:{ kind:'step', pk: m.pk, tile: 'hokumura' } });
-          log(`花阳的实感！从【${TILE_MAP[m.cur].name}】直接进入【穗村】`, m.pk);
-          log(`在【穗村】休息，可选择获得 1 张素材`, m.pk);
-          offerMaterialPick(m.pk, () => {
-            if(passedRest && skillActive(m.pk, 'nozomi') && !p.nozomiUsed){
-              p.nozomiUsed = true;
-              offerDivination(m.pk);
-              return;
-            }
-            endTurnStep();
-          });
-        } },
-      { label:'原地继续结算', onSelect(){ resumeTileFlow(m.pk, passedRest); } },
-    ]);
-    return;
+  /* v0.44：小泉花阳——行进至休息格前后 1 格时，可直接进入休息区（每圈每个休息区限 1 次）
+     觉醒：第一次进入休息区时效果触发两次 */
+  if(skillActive(m.pk, 'hanayo') && !justPassedHokumura){
+    const restIds = ['hokumura','haikyo','yoyogi'];
+    const adjRest = restIds.find(rid => m.cur !== rid && distTo(m.cur, rid) === 1 && !p.hanayoRestUsed.includes(rid));
+    if(adjRest){
+      showModal('小泉花阳的技能',
+        `停留在【${TILE_MAP[m.cur].name}】，紧邻【${TILE_MAP[adjRest].name}】。是否直接进入休息区？`, [
+        { label:`进入${TILE_MAP[adjRest].name}（获得休息区效果）`, onSelect(){
+            state.players[m.pk].pos = adjRest;
+            state.players[m.pk].hanayoRestUsed.push(adjRest);
+            setPieceTo(m.pk, adjRest);
+            if(NET.role === 'host' && NET.connected) send({ type:'fx', fx:{ kind:'step', pk: m.pk, tile: adjRest } });
+            log(`花阳的实感！从【${TILE_MAP[m.cur].name}】直接进入【${TILE_MAP[adjRest].name}】`, m.pk);
+            const firstRest = isAwaken(m.pk, 'hanayo') && !state.players[m.pk].hanayoDoubleUsed;
+            if(firstRest) state.players[m.pk].hanayoDoubleUsed = true;
+            log(`在【${TILE_MAP[adjRest].name}】休息，可选择获得${firstRest ? ' 2 张' : ' 1 张'}素材` + (firstRest ? '（觉醒：效果翻倍）' : ''), m.pk);
+            offerMaterialPick(m.pk, () => {
+              if(firstRest){
+                offerMaterialPick(m.pk, () => {
+                  if(passedRest && skillActive(m.pk, 'nozomi') && !state.players[m.pk].nozomiUsed){
+                    state.players[m.pk].nozomiUsed = true;
+                    offerDivination(m.pk);
+                    return;
+                  }
+                  endTurnStep();
+                });
+              } else {
+                if(passedRest && skillActive(m.pk, 'nozomi') && !state.players[m.pk].nozomiUsed){
+                  state.players[m.pk].nozomiUsed = true;
+                  offerDivination(m.pk);
+                  return;
+                }
+                endTurnStep();
+              }
+            });
+          } },
+        { label:'原地继续结算', onSelect(){ resumeTileFlow(m.pk, passedRest); } },
+      ]);
+      return;
+    }
   }
   resumeTileFlow(m.pk, passedRest);
 }
@@ -1803,61 +1879,62 @@ function offerLapReward(pk){
   if(!p.lapRewardPending) return false;
   p.lapRewardPending = false;
   if(p.mods.noGain > 0){ log(`素材获取被封锁，跑圈奖励无法领取`, pk); return false; }
+  /* v0.44：园田海未跑圈保底——本圈未受干扰则跑圈奖励 +1（觉醒 +2），均为随机音乐素材 */
+  let umiBonus = 0;
+  if(skillActive(pk, 'umi') && !p.umiInterfered){
+    umiBonus = isAwaken(pk, 'umi') ? 2 : 1;
+  }
   showModal('跑圈奖励 · 自选音乐素材', '完成一整圈！选择 1 张音乐素材（固定获得，不受增益加成）：',
     TYPE_LIST.music.map(name => ({ label:name, onSelect(){
       p.mats.music.push(name);
       log(`跑圈奖励：获得音乐素材「${name}」`, pk);
+      if(umiBonus > 0){
+        for(let i = 0; i < umiBonus; i++){
+          const nm = rand(TYPE_LIST.music);
+          p.mats.music.push(nm);
+        }
+        log(`【园田海未】跑圈保底：本圈未受干扰，额外获得 ${umiBonus} 张随机音乐素材${isAwaken(pk,'umi')?'（觉醒 +2）':'（+1）'}`, pk);
+      }
       render();
       const deferred = triggerTile(pk);
       if(!deferred) endTurnStep();
     } })), pk);
   return true;
 }
-/* 东条希占卜（v0.39 平衡：50%成功率，成功夺取指定玩家 1 张「指定」素材，失败从系统随机获得 1 张素材） */
 /* 占卜结束后继续结算当前停留格（修复占卜与 LIVE 场馆等地块触发的冲突） */
 function afterDivination(pk){
-  /* v0.37 修复：占卜结算后必须继续结算当前停留格。
-     原代码在 moving 非空时调用 triggerTile，若 triggerTile 返回 true（弹窗流程），
-     弹窗可能因 AI 决策或网络延迟未正确回调 endTurnStep，导致回合挂起、跳过下家。
-     修复：占卜后无论 moving 状态如何，先结算当前停留格，再结束回合。 */
   const deferred = offerLapReward(pk) ? true : triggerTile(pk);   /* v0.40：占卜后先补发跑圈奖励，再结算停留格 */
   if(!deferred) endTurnStep();
 }
+/* v0.44：东条希占卜——每圈第一次经过休息区时，50%成功随机夺取该玩家1张素材，失败随机获得1张素材；觉醒75% */
 function offerDivination(pk){
   const foe = other(pk);
-  /* v0.37 修复：显式传 seat 参数，确保弹窗归属到占卜玩家而非当前回合玩家。 */
-  showModal('东条希的占卜', '路过【穗村】后进行占卜（原型简化：50%成功率）：成功夺取指定玩家 1 张指定素材，失败则从系统随机获得 1 张素材。是否占卜？', [
+  const rate = isAwaken(pk, 'nozomi') ? 0.75 : 0.5;
+  showModal('东条希的占卜',
+    `经过休息区后进行占卜（${isAwaken(pk,'nozomi')?'觉醒：75%':'50%'}成功率）：成功随机获得该玩家 1 张素材，失败则从系统随机获得 1 张素材。是否占卜？`, [
     { label:`对 ${state.players[foe].name} 占卜`, onSelect(){
-        if(Math.random() < 0.5){
-          /* v0.39：成功改为夺取指定玩家 1 张「指定」素材（由占卜者选择） */
-          const uniq = uniqMats(state.players[foe]);
-          if(!uniq.length){
+        if(Math.random() < rate){
+          const all = allMats(state.players[foe]);
+          if(!all.length){
             log(`占卜成功！但${state.players[foe].name}身上没有素材，一无所获`, pk);
-            render();
-            afterDivination(pk);
-            return;
+            render(); afterDivination(pk); return;
           }
-          showModal('东条希的占卜 · 指定素材',
-            `占卜成功！选择要从 ${state.players[foe].name} 身上夺取的 1 张素材：`,
-            uniq.map(m => ({ label:`${CAT_LABEL[m.cat]}「${m.name}」`, onSelect(){
-              const arr = state.players[foe].mats[m.cat];
-              arr.splice(arr.indexOf(m.name), 1);
-              state.players[pk].mats[m.cat].push(m.name);   // 技能效果：不受「无法获得素材」封锁影响
-              log(`占卜成功！夺得了${state.players[foe].name}的${CAT_LABEL[m.cat]}「${m.name}」`, pk);
-              render();
-              afterDivination(pk);
-            } })), pk);
-          return;
+          const stolen = all[Math.floor(Math.random() * all.length)];
+          const arr = state.players[foe].mats[stolen.cat];
+          arr.splice(arr.indexOf(stolen.name), 1);
+          state.players[pk].mats[stolen.cat].push(stolen.name);   // 技能效果：不受「无法获得素材」封锁影响
+          log(`占卜成功！随机夺得了${state.players[foe].name}的${CAT_LABEL[stolen.cat]}「${stolen.name}」`, pk);
+          render(); afterDivination(pk);
+        } else {
+          const cat = rand(['music','dance','costume']);
+          const name = rand(TYPE_LIST[cat]);
+          state.players[pk].mats[cat].push(name);
+          log(`占卜失败……从系统随机获得素材：${CAT_LABEL[cat]}「${name}」`, pk);
+          render(); afterDivination(pk);
         }
-        const cat = rand(['music','dance','costume']);
-        const name = rand(TYPE_LIST[cat]);
-        state.players[pk].mats[cat].push(name);
-        log(`占卜失败……从系统随机获得补偿素材：${CAT_LABEL[cat]}「${name}」`, pk);
-        render();
-        afterDivination(pk);
       } },
     { label:'不占卜', onSelect(){ afterDivination(pk); } },
-  ], pk);   /* ← 显式传 seat，确保 AI 自动决策计时器归属正确 */
+  ], pk);
 }
 function endTurnStep(){
   if(state.gameOver){ render(); return; }
@@ -1920,9 +1997,13 @@ function doLiveCheck(pk, a, t, opts = {}){
   const p = state.players[pk];
   let adj = 0; const notes = [];
   if(skillActive(pk, 'honoka')){ adj += 1; notes.push('穗乃果检定+1'); }   // 高坂穗乃果
-  if(skillActive(pk, 'nico'))  { adj -= 2; notes.push('妮可检定-2'); }     // 矢泽妮可
+  if(skillActive(pk, 'nico') && !isAwaken(pk, 'nico')){ adj -= 1; notes.push('妮可检定-1'); }     // 矢泽妮可（觉醒后取消）
   if(p.mods.liveUp > 0){ adj += p.mods.liveUp; notes.push(`加成+${p.mods.liveUp}`); p.mods.liveUp = 0; }
-  if(p.mods.liveDown > 0){ adj -= p.mods.liveDown; notes.push(`宣战-${p.mods.liveDown}`); p.mods.liveDown = 0; }   // v0.40：来自对手的宣战
+  /* v0.44：穗乃果觉醒——免疫降低检定的负面效果（liveDown 不扣减） */
+  if(p.mods.liveDown > 0){
+    if(skillActive(pk, 'honoka') && isAwaken(pk, 'honoka')){ notes.push(`穗乃果觉醒免疫：检定-${p.mods.liveDown} 无效`); p.mods.liveDown = 0; }
+    else { adj -= p.mods.liveDown; notes.push(`宣战-${p.mods.liveDown}`); p.mods.liveDown = 0; }
+  }   // v0.40：来自对手的宣战
   /* v0.40：安可增益——独立机制，不受任何增益封印/无效化效果影响，失败累进、成功清零 */
   if(p.encore > 0){ adj += p.encore; notes.push(`安可+${p.encore}`); }
   if(opts.modifier){ adj += opts.modifier; notes.push(`临时${opts.modifier > 0 ? '+' : ''}${opts.modifier}`); }
@@ -2012,11 +2093,15 @@ function rebuildLog(){   // 联机客人端：由快照重建日志
   logEl.innerHTML = '';
   state.logRing.forEach(appendLogEntry);
 }
+/* v0.44 修复：TILES 坐标基于 viewBox 0 0 100 64，
+   x 本身是 0-100 可直接作百分比；y 是 0-64，必须除以 64 再转百分比，
+   否则棋子会整体上移（例如 y=57 的底边行会被画在 57% 高度而不是 89%）。 */
+const MAP_VB_H = 64;
 function placePiece(id, tileId, dx){
   const t = TILE_MAP[tileId];
   const el = document.getElementById(id);
   el.style.left = (t.x + dx) + '%';
-  el.style.top  = t.y + '%';
+  el.style.top  = (t.y / MAP_VB_H * 100) + '%';
 }
 function setPieceTo(pk, tileId){
   const act = activeSeats();
@@ -2080,7 +2165,9 @@ function charSectionHTML(pk){
   const p = state.players[pk];
   const cards = p.chars.map(id => {
     const c = CHAR_MAP[id];
-    return `<div class="char-card" title="${c.name}：${c.skill}">${c.name}</div>`;
+    const aw = p.awakenChars.includes(id) ? ' ✦' : '';
+    const title = c.skill + (p.awakenChars.includes(id) ? `；觉醒：${c.awaken}` : '');
+    return `<div class="char-card${p.awakenChars.includes(id)?' awaken':''}" title="${c.name}：${title}">${c.name}${aw}</div>`;
   }).join('') || '<span class="empty-note">暂无角色</span>';
   return `<div class="psec ${pk}"><span class="tag ${pk}">${p.name}</span><div class="sec-wrap">${cards}</div></div>`;
 }
@@ -2142,10 +2229,12 @@ function renderRoster(){
   const act = activeSeats();
   document.getElementById('roster-list').innerHTML = CHARACTERS.map(c => {
     let owner = null;
-    act.forEach(pk => { if(state.players[pk].chars.includes(c.id)) owner = pk; });
+    let awakened = false;
+    act.forEach(pk => { if(state.players[pk].chars.includes(c.id)){ owner = pk; awakened = state.players[pk].awakenChars.includes(c.id); } });
     const tag = owner ? `<span class="tag ${owner}">${state.players[owner].name}</span>` : '';
+    const awakenTag = awakened ? `<span class="tag" style="background:#ff6b9d;color:#fff">觉醒</span>` : '';
     return `<div class="roster-item${owner ? ' taken' : ''}">
-      <div class="r-name">${c.name}${tag}</div>
+      <div class="r-name">${c.name}${tag}${awakenTag}</div>
       <div class="r-skill">${c.skill}</div></div>`;
   }).join('');
 }
@@ -2176,6 +2265,13 @@ function render(){
   createBtn.disabled = !cands.length;
   createBtn.textContent = `＋ 创作专辑（${state.players[cur].name}）`;
   createBtn.title = cands.length ? '素材足够，点击选择专辑创作' : '素材不足，无法创作专辑';
+  /* v0.44：觉醒按钮——需有已完成未演出专辑 + 未觉醒角色 */
+  const awakenBtn = document.getElementById('awaken-btn');
+  const pCur = state.players[cur];
+  const canAwaken = pCur.albums.some(a => !a.performed) && pCur.chars.some(id => !pCur.awakenChars.includes(id));
+  awakenBtn.disabled = !canAwaken || state.gameOver || moving || rolling || !modalMask.classList.contains('hidden');
+  awakenBtn.textContent = `✦ 觉醒（${pCur.awakenChars.length}/${pCur.chars.length}）`;
+  awakenBtn.title = canAwaken ? '消耗 1 张已完成未演出专辑觉醒一名角色' : (pCur.chars.length && pCur.albums.some(a=>!a.performed) ? '所有角色均已觉醒' : '需要 1 张已完成未演出专辑');
   diceEl.textContent = (state.lastDice != null) ? state.lastDice : '?';
   if(NET.role){   // 联机：只允许本座位在无弹窗时行动
     const myTurn = state.current === NET.seat && state.setupDone;
@@ -2269,17 +2365,35 @@ function doRoll(){
     if(notes.length) log(`掷出 ${base} 点（${notes.join('，')}）`, pk);
     else log(`掷出 ${final} 点`, pk);
     rolling = false;
-    if(skillActive(pk, 'rin')){   // 星空凛：骰后可 +1 / -1
-      showModal('星空凛的技能',
-        `掷出 ${final} 点，是否调整行进步数？（最少移动 1 格）`, [
-        { label:`+1 → 移动 ${final + 1} 格`, onSelect(){ diceEl.textContent = final + 1; state.lastDice = final + 1; startMove(pk, final + 1); } },
-        { label:`-1 → 移动 ${Math.max(1, final - 1)} 格`, onSelect(){ const s = Math.max(1, final - 1); diceEl.textContent = s; state.lastDice = s; startMove(pk, s); } },
-        { label:'保持不变', onSelect(){ startMove(pk, final); } },
+    /* 星空凛：觉醒后每圈可重投 1 次行进骰子 */
+    if(skillActive(pk, 'rin') && isAwaken(pk, 'rin') && !state.players[pk].rinRerollUsed){
+      showModal('星空凛的觉醒 · 重投骰子',
+        `掷出 ${final} 点，是否使用本圈 1 次重投机会？`, [
+        { label:'重投骰子', onSelect(){
+            state.players[pk].rinRerollUsed = true;
+            const r2 = rollDice(p);
+            diceEl.textContent = r2.final; state.lastDice = r2.final;
+            if(r2.notes.length) log(`重投掷出 ${r2.base} 点（${r2.notes.join('，')}）`, pk);
+            else log(`重投掷出 ${r2.final} 点`, pk);
+            rinAdjust(pk, r2.final);
+          } },
+        { label:'不重投', onSelect(){ rinAdjust(pk, final); } },
       ]);
       return;
     }
+    if(skillActive(pk, 'rin')){ rinAdjust(pk, final); return; }
     startMove(pk, final);
   }, 70);
+}
+/* 星空凛：掷骰后强制选择 +1 或 -1（不按原点数走） */
+function rinAdjust(pk, val){
+  const plus = val + 1;
+  const minus = Math.max(1, val - 1);
+  showModal('星空凛的技能',
+    `掷出 ${val} 点，选择调整后的行进步数（不按原点数走）：`, [
+    { label:`+1 → 移动 ${plus} 格`, onSelect(){ diceEl.textContent = plus; state.lastDice = plus; startMove(pk, plus); } },
+    { label:`-1 → 移动 ${minus} 格`, onSelect(){ diceEl.textContent = minus; state.lastDice = minus; startMove(pk, minus); } },
+  ]);
 }
 rollBtn.addEventListener('click', () => {
   if(NET.role === 'guest'){ send({ type:'action', action:{ type:'roll', seat: NET.seat } }); return; }
@@ -2604,6 +2718,10 @@ function aiChooseOption(title, options){
   if((i = idxOf(/^发起挑战/)) >= 0) return i;                        // 挑战必发起
   if((i = idxOf(/^同意交换/)) >= 0) return i;                        // 人类发起的1:1交换：同意
   if(labels.includes('不占卜')) return labels.findIndex(l => l !== '不占卜');   // 占卜必做
+  if(title === '星空凛的觉醒 · 重投骰子'){
+    // 点数 ≤3 时重投，否则保留
+    return labels[0].includes('重投') ? (state.lastDice <= 3 ? 0 : 1) : (state.lastDice <= 3 ? 1 : 0);
+  }
   if(title === '星空凛的技能') return Math.floor(Math.random() * options.length);
   if(title.startsWith('行进方向')) return Math.random() < .5 ? 0 : 1;
   if(title === '主题公演 · 二选一') return Math.random() < .5 ? 0 : 1;
@@ -2741,7 +2859,7 @@ document.getElementById('lb-join').addEventListener('click', () => {
 /* =========================================================
  * 十、开局公告（发布更新时：编辑 HTML 中 #notice-box 内容，并把 NOTICE_VERSION 调大，全员重新可见）
  * ========================================================= */
-const NOTICE_VERSION = 'v0.42';
+const NOTICE_VERSION = 'v0.44';
 const noticeMask = document.getElementById('notice-mask');
 try{ if(localStorage.getItem('ll-notice-read') === NOTICE_VERSION) noticeMask.classList.add('hidden'); }catch(e){}
 document.getElementById('notice-close').addEventListener('click', () => {
@@ -3071,21 +3189,36 @@ function syncStepLeft(){
   if(el) el.textContent = moving ? (moving.remaining + ' 步') : '—';
 }
 
-/* ---------- SVG 渲染层（路径 A）----------
-   由 TILES + RING + BRANCH_EDGES 自动绘制：
-   - 主环线：沿着 RING 顺序画虚线 polyline
+/* ---------- SVG 渲染层（路径 A · v0.43 纯矢量棋盘）----------
+   由 TILES + RING + BRANCH_EDGES 自动绘制，不再依赖 map.jpg 底图：
+   - 主环线：沿着 32 格 RING 顺序画虚线 polyline
    - 支线：BRANCH_EDGES 每条边画虚线
-   - 格子：每个 TILE 画圆角矩形轮廓 + 类型颜色 + 名称文字
-   viewBox 0 0 100 100 与 TILES[i].x/y 百分比直接对应 */
+   - 格子：按 shape 决定外框尺寸，名称按格宽自动折成两行
+   viewBox 0 0 100 64 与 TILES[i].x/y 百分比直接对应 */
 function renderMapSVG(){
   const svg = document.getElementById('map-svg');
   if(!svg) return;
   svg.innerHTML = '';
   const NS = 'http://www.w3.org/2000/svg';
   const T = id => TILE_MAP[id];
+  const SHAPE = {
+    h:     { w:8.4, h:5.2, rx:1.6, fs:1.8 },
+    v:     { w:5.6, h:5.2, rx:1.6, fs:1.7 },
+    venue: { w:11,  h:5.4, rx:1.8, fs:1.9 },
+    start: { w:9.5, h:4.8, rx:1.6, fs:1.8 },
+  };
 
-  /* 1. 主环线 */
-  const ringPts = RING.map(id => T(id).x + ',' + T(id).y).join(' ');
+  /* 0. 棋盘内框（替代原地图插画的视觉边界） */
+  const frame = document.createElementNS(NS, 'rect');
+  frame.setAttribute('x', 2);         frame.setAttribute('y', 2);
+  frame.setAttribute('width', 96);    frame.setAttribute('height', 60);
+  frame.setAttribute('rx', 3);        frame.setAttribute('ry', 3);
+  frame.setAttribute('class', 'm-board-frame');
+  svg.appendChild(frame);
+
+  /* 1. 主环线（首尾闭合：末尾补回首格坐标，否则缺「最后一格→第一格」这段虚线） */
+  const ringPts = RING.map(id => T(id).x + ',' + T(id).y).join(' ')
+    + ' ' + T(RING[0]).x + ',' + T(RING[0]).y;
   const ringPoly = document.createElementNS(NS, 'polyline');
   ringPoly.setAttribute('points', ringPts);
   ringPoly.setAttribute('class', 'm-edge-stroke');
@@ -3093,7 +3226,6 @@ function renderMapSVG(){
 
   /* 2. 支线 */
   BRANCH_EDGES.forEach(([a,b]) => {
-    const pts = T(a).x + ',' + T(a).y + ' ' + T(b).x + ',' + T(b).y;
     const pl = document.createElementNS(NS, 'line');
     pl.setAttribute('x1', T(a).x); pl.setAttribute('y1', T(a).y);
     pl.setAttribute('x2', T(b).x); pl.setAttribute('y2', T(b).y);
@@ -3103,36 +3235,43 @@ function renderMapSVG(){
 
   /* 3. 格子轮廓 + 文字 */
   TILES.forEach(t => {
+    const s = SHAPE[t.shape] || SHAPE.h;
     const cx = t.x, cy = t.y;
-    /* 根据格子位置决定形状：上/下边用扁矩形，左/右边用高矩形，其他用圆角 */
-    const isTop = Math.abs(cy - 9.7) < 2;
-    const isBot = Math.abs(cy - 92) < 2;
-    const isL   = Math.abs(cx - 9.3) < 2;
-    const isR   = Math.abs(cx - 91.5) < 2;
-    let w, h, rx;
-    if(isTop || isBot){ w = 8.2; h = 4.2; rx = 1.4; }
-    else if(isL || isR){ w = 4.2; h = 8.2; rx = 1.4; }
-    else { w = 6.0; h = 4.0; rx = 1.2; }
+    const x = cx - s.w/2, y = cy - s.h/2;
 
-    const x = cx - w/2, y = cy - h/2;
     const rect = document.createElementNS(NS, 'rect');
     rect.setAttribute('x', x); rect.setAttribute('y', y);
-    rect.setAttribute('width', w); rect.setAttribute('height', h);
-    rect.setAttribute('rx', rx);   rect.setAttribute('ry', rx);
+    rect.setAttribute('width', s.w); rect.setAttribute('height', s.h);
+    rect.setAttribute('rx', s.rx);   rect.setAttribute('ry', s.rx);
     rect.setAttribute('class', 'm-tile-outline tt-' + t.type);
     svg.appendChild(rect);
 
-    /* 文字标签，放在中心 */
-    const label = document.createElementNS(NS, 'text');
-    label.setAttribute('x', cx); label.setAttribute('y', cy);
-    label.setAttribute('class', 'm-tile-label');
-    label.setAttribute('text-anchor', 'middle');
-    label.setAttribute('dominant-baseline', 'central');
-    /* 根据格子尺寸调整字号 */
-    const fontSize = (isTop||isBot) ? 2.2 : (isL||isR ? 2.0 : 2.1);
-    label.setAttribute('font-size', fontSize);
-    label.textContent = t.name;
-    svg.appendChild(label);
+    /* 名称：优先用 lines，否则按格宽折成两行；超宽时轻微缩字号 */
+    const maxChars = Math.floor(s.w / s.fs);
+    let lines = t.lines;
+    if(!lines){
+      if(t.name.length <= maxChars) lines = [t.name];
+      else {
+        const mid = Math.ceil(t.name.length / 2);
+        lines = [t.name.slice(0, mid), t.name.slice(mid)];
+      }
+    }
+    let fs = s.fs;
+    const longest = Math.max(...lines.map(l => l.length));
+    if(longest * fs > s.w - 0.8) fs = (s.w - 0.8) / longest;
+
+    const lh = fs * 1.45;
+    lines.forEach((ln, i) => {
+      const label = document.createElementNS(NS, 'text');
+      label.setAttribute('x', cx);
+      label.setAttribute('y', cy + (i - (lines.length - 1) / 2) * lh);
+      label.setAttribute('class', 'm-tile-label');
+      label.setAttribute('text-anchor', 'middle');
+      label.setAttribute('dominant-baseline', 'central');
+      label.setAttribute('font-size', fs);
+      label.textContent = ln;
+      svg.appendChild(label);
+    });
   });
 }
 

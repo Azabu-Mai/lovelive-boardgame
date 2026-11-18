@@ -374,7 +374,7 @@
       <p class="sub">学园偶像们被神秘力量带进了桌面世界——这里的 LoveLive 大赛规则好像不太一样？掷骰行进、收集素材、创作专辑、开办 LIVE，最先完成 3 场成功的演唱会，就是大赛冠军！</p>
       <img class="hero-img" src="assets/cover_hero_5827x3375.jpg" alt="学园偶像大进击 封面：学园偶像们的合影自拍插画">
       <div class="stat-strip">
-        <div class="stat"><b>28</b><span>地图格</span></div>
+        <div class="stat"><b>38</b><span>地图格</span></div>
         <div class="stat"><b>9</b><span>角色卡</span></div>
         <div class="stat"><b>23</b><span>功能卡</span></div>
         <div class="stat"><b>18</b><span>专辑卡池</span></div>
@@ -422,27 +422,27 @@ flowchart LR
       <!-- ========== 03 角色系统 ========== -->
       <section id="s3">
         <h2><span class="no">03</span>角色系统：9 名学园偶像</h2>
-        <p class="lead">开局由系统<mark class="key">随机发放 1 名角色</mark>作为初始阵容（每张角色卡每局唯一，不可重复获得）。角色拥有各自不同的技能，游戏中还可以通过事件与机遇卡获得更多角色。</p>
+        <p class="lead">开局由系统<mark class="key">随机发放 1 名角色</mark>作为初始阵容（每张角色卡每局唯一，不可重复获得）。角色拥有各自不同的技能，游戏中还可以通过事件与机遇卡获得更多角色。消耗 1 张已完成未演出专辑可觉醒 1 名角色（每局限 1 次），获得专属强化效果。</p>
         <div class="char-grid">
-          <div class="char-card"><h4>高坂穗乃果</h4><span class="tag">检定增益</span><p>在进行 LIVE 检定时 +1，稳稳站上舞台的中心。</p></div>
-          <div class="char-card"><h4>绚濑绘里</h4><span class="tag">素材加成</span><p>收集舞蹈素材时，素材获得量 +1。</p></div>
-          <div class="char-card"><h4>南小鸟</h4><span class="tag">素材加成</span><p>收集服装素材时，素材获得量 +1。</p></div>
-          <div class="char-card"><h4>西木野真姬</h4><span class="tag">素材加成</span><p>收集音乐素材时，素材获得量 +1。</p></div>
-          <div class="char-card"><h4>园田海未</h4><span class="tag">干扰防护</span><p>其他玩家对你的干扰效果无效，纪律委员长守卫全队。</p></div>
-          <div class="char-card"><h4>星空凛</h4><span class="tag">机动</span><p>投掷骰子后可以选择行进步数 +1、-1 或保持不变（最少移动 1 格）。</p></div>
-          <div class="char-card"><h4>小泉花阳</h4><span class="tag">特殊</span><p>每一圈一次机会，停留在穗村 2 格范围内时（路过不算）可以直接进入，并正常获得休息区效果；刚路过穗村的同一次移动内不可触发。</p></div>
-          <div class="char-card"><h4>东条希</h4><span class="tag">特殊</span><p>每圈第一次路过休息区后可进行一次占卜（原型简化：50% 成功率），指定你的下一位玩家，成功则夺取其 1 张「指定」素材（由占卜者选择夺取哪一张），失败则从系统随机获得 1 张素材。</p></div>
-          <div class="char-card"><h4>矢泽妮可</h4><span class="tag">高风险回报</span><p>LIVE 检定结果 -2，但获得的所有素材 +1——赌上舞台换来收集速度。</p></div>
+          <div class="char-card"><h4>高坂穗乃果</h4><span class="tag">检定增益</span><p>在进行 LIVE 检定时 +1，稳稳站上舞台的中心。<br><b>觉醒</b>：免疫降低检定的负面效果。</p></div>
+          <div class="char-card"><h4>绚濑绘里</h4><span class="tag">素材加成</span><p>收集舞蹈素材时，素材获得量 +1。<br><b>觉醒</b>：每圈第一次获得素材翻倍。</p></div>
+          <div class="char-card"><h4>南小鸟</h4><span class="tag">素材加成</span><p>收集服装素材时，素材获得量 +1。<br><b>觉醒</b>：每圈第一次获得素材翻倍。</p></div>
+          <div class="char-card"><h4>西木野真姬</h4><span class="tag">素材加成</span><p>收集音乐素材时，素材获得量 +1。<br><b>觉醒</b>：每圈第一次获得素材翻倍。</p></div>
+          <div class="char-card"><h4>园田海未</h4><span class="tag">干扰防护</span><p>免疫来自他人的干扰效果（角色技能除外）；完成跑圈时若本圈未受干扰，跑圈奖励 +1。<br><b>觉醒</b>：跑圈奖励改为 +2。</p></div>
+          <div class="char-card"><h4>星空凛</h4><span class="tag">机动</span><p>掷骰后选择点数 +1 或 -1 前进（不按原点数走）。<br><b>觉醒</b>：每圈可重投 1 次行进骰子。</p></div>
+          <div class="char-card"><h4>小泉花阳</h4><span class="tag">位置控制</span><p>行进至休息格前后 1 格时，可直接进入休息区并获得效果（每圈每休息区限 1 次）。<br><b>觉醒</b>：第一次进入休息区时效果触发两次。</p></div>
+          <div class="char-card"><h4>东条希</h4><span class="tag">情报干扰</span><p>每圈第一次经过休息区时占卜：50% 成功随机获得该玩家 1 张素材，失败随机获得 1 张素材。<br><b>觉醒</b>：成功率提升至 75%。</p></div>
+          <div class="char-card"><h4>矢泽妮可</h4><span class="tag">高风险回报</span><p>三种素材获取量 +1，但 LIVE 检定 -1。<br><b>觉醒</b>：取消 LIVE 检定 -1。</p></div>
         </div>
       </section>
 
       <!-- ========== 04 地图系统 ========== -->
       <section id="s4">
-        <h2><span class="no">04</span>地图系统：28 格的学园都市</h2>
-        <p class="lead">地图类似一张 RPG 地图。玩家从「音乃木坂学院」出发，途经秋叶原、穗村、各大巨蛋等 LoveLive 系列的熟悉地点。棋盘共 <mark class="key">28 格</mark>：22 格组成外圈环线，其余场馆经由内部支线连接；起点「音乃木坂」仅供出发使用，<mark class="key">不作为游戏中可以通行的点位</mark>。</p>
+        <h2><span class="no">04</span>地图系统：38 格的学园都市</h2>
+        <p class="lead">地图是一张规整的矢量棋盘（v0.43 起不再使用插画底图）。玩家从「音乃木坂学院」出发，途经秋叶原、穗村、各大巨蛋等 LoveLive 系列的熟悉地点。棋盘共 <mark class="key">38 格</mark>：32 格组成外圈环线，5 个场馆经由内部支线连接，另有 1 个起点；起点「音乃木坂」仅供出发使用，<mark class="key">不作为游戏中可以通行的点位</mark>。</p>
 
         <figure class="chart-figure">
-          <figcaption class="top">图 2 · 地图 28 格构成分布</figcaption>
+          <figcaption class="top">图 2 · 地图 38 格构成分布</figcaption>
           <div id="chart-tiles" style="width:100%;min-height:400px"></div>
         </figure>
 
@@ -452,22 +452,22 @@ flowchart LR
             <thead><tr><th>类型</th><th>数量</th><th>地块</th><th>停留效果</th></tr></thead>
             <tbody>
               <tr><td><span class="dot" style="background:var(--c-start)"></span>起点格</td><td>1</td><td>音乃木坂</td><td>仅供出发使用，不作为可通行点位；开局每人选 1 个音乐素材出发</td></tr>
-              <tr><td><span class="dot" style="background:var(--c-rest)"></span>休息格</td><td>1</td><td>穗村</td><td>停留可自选 1 个类型，再自选该类型下 1 张具体素材（非随机）</td></tr>
-              <tr><td><span class="dot" style="background:var(--c-venue)"></span>普通 LIVE 场馆</td><td>4</td><td>西武巨蛋、横滨K、名古屋巨蛋、埼玉超级竞技场</td><td>可开办 LIVE，2 骰 &gt; 6 检定（西武巨蛋支线每圈仅限一次入口，详见移动规则）</td></tr>
+              <tr><td><span class="dot" style="background:var(--c-rest)"></span>休息格</td><td>3</td><td>穗村、废弃校舍、代代木公园</td><td>停留可自选 1 个类型，再自选该类型下 1 张具体素材（非随机）</td></tr>
+              <tr><td><span class="dot" style="background:var(--c-venue)"></span>普通 LIVE 场馆</td><td>4</td><td>西武巨蛋、横滨K、名古屋巨蛋、埼玉竞技场</td><td>可开办 LIVE，2 骰 &gt; 6 检定（西武巨蛋支线每圈仅限一次入口，详见移动规则）</td></tr>
               <tr><td><span class="dot" style="background:var(--c-tokyo)"></span>特殊场馆</td><td>1</td><td>东京巨蛋</td><td>2 骰 &gt; 11 检定，成功胜利进度 +2；只可通过事件／机遇／挑战进入</td></tr>
-              <tr><td><span class="dot" style="background:var(--c-trade)"></span>交易格</td><td>1</td><td>LoveLive 大赛组委会</td><td>执行「学园偶像同好会」素材交易规则</td></tr>
-              <tr><td><span class="dot" style="background:var(--c-event)"></span>事件格</td><td>5</td><td>秋叶原、昌平桥、理事长室、屋顶、神田明神</td><td>抽取 1 张事件卡</td></tr>
-              <tr><td><span class="dot" style="background:var(--c-chance)"></span>机遇格</td><td>4</td><td>上野公园、废弃校舍、UTX、万世桥</td><td>抽取 1 张机遇卡</td></tr>
-              <tr><td><span class="dot" style="background:var(--c-challenge)"></span>挑战格</td><td>2</td><td>街机厅、明神男坂</td><td>抽取 1 张挑战任务，可选择做任务拿奖励或放弃</td></tr>
-              <tr><td><span class="dot" style="background:var(--c-music)"></span>音乐素材格</td><td>3</td><td>广播室、Lantis 录音室、音乐教室</td><td>获得音乐类素材</td></tr>
-              <tr><td><span class="dot" style="background:var(--c-dance)"></span>舞蹈素材格</td><td>3</td><td>步行者天国、学校礼堂、偶像活动室</td><td>获得舞蹈类素材</td></tr>
-              <tr><td><span class="dot" style="background:var(--c-costume)"></span>服装素材格</td><td>3</td><td>女仆咖啡屋、海边、服饰店</td><td>获得服装类素材</td></tr>
+              <tr><td><span class="dot" style="background:var(--c-trade)"></span>交易格</td><td>2</td><td>大赛组委会、动画商店</td><td>执行「学园偶像同好会」素材交易规则</td></tr>
+              <tr><td><span class="dot" style="background:var(--c-event)"></span>事件格</td><td>6</td><td>秋叶原、昌平桥、神田明神、理事长室、涩谷路口、浅草雷门</td><td>抽取 1 张事件卡</td></tr>
+              <tr><td><span class="dot" style="background:var(--c-chance)"></span>机遇格</td><td>4</td><td>上野公园、万世桥、UTX、明治神宫</td><td>抽取 1 张机遇卡</td></tr>
+              <tr><td><span class="dot" style="background:var(--c-challenge)"></span>挑战格</td><td>4</td><td>街机厅、明神男坂、屋顶、舞滨剧场</td><td>抽取 1 张挑战任务，可选择做任务拿奖励或放弃</td></tr>
+              <tr><td><span class="dot" style="background:var(--c-music)"></span>音乐素材格</td><td>4</td><td>音乐教室、Lantis、广播室、御茶之水</td><td>获得音乐类素材</td></tr>
+              <tr><td><span class="dot" style="background:var(--c-dance)"></span>舞蹈素材格</td><td>4</td><td>步行者天国、偶像活动室、台场海滨、学校礼堂</td><td>获得舞蹈类素材</td></tr>
+              <tr><td><span class="dot" style="background:var(--c-costume)"></span>服装素材格</td><td>5</td><td>女仆咖啡屋、海边、服饰店、竹下通り、涩谷109</td><td>获得服装类素材</td></tr>
             </tbody>
           </table>
         </div>
 
         <figure class="chart-figure">
-          <figcaption class="top">图 3 · 地图拓扑：外圈环线（22 格）与场馆支线（起点仅供出发，不参与通行）</figcaption>
+          <figcaption class="top">图 3 · 地图拓扑：外圈环线（32 格）与场馆支线（起点仅供出发，不参与通行）</figcaption>
           <div id="chart-map" style="width:100%;min-height:520px"></div>
         </figure>
 
@@ -568,7 +568,7 @@ flowchart LR
       <!-- ========== 07 素材交易 ========== -->
       <section id="s7">
         <h2><span class="no">07</span>素材交易：学园偶像同好会</h2>
-        <p class="lead">停留在地图的「LoveLive 大赛组委会」交易格时，可以执行素材交易：<mark class="key">两个同素材可以交换任意素材一个</mark>。若交易格上停留着其他玩家的棋子，还可以向其发起素材交换，单次交换数量固定为 <mark class="key">1:1</mark>。</p>
+        <p class="lead">停留在地图的交易格（「大赛组委会」或「动画商店」）时，可以执行素材交易：<mark class="key">两个同素材可以交换任意素材一个</mark>。若交易格上停留着其他玩家的棋子，还可以向其发起素材交换，单次交换数量固定为 <mark class="key">1:1</mark>。</p>
       </section>
 
       <!-- ========== 08 演唱会规则 ========== -->
@@ -579,7 +579,7 @@ flowchart LR
           <table>
             <thead><tr><th>场馆</th><th>进入方式</th><th>检定条件</th><th>成功奖励</th><th>失败</th></tr></thead>
             <tbody>
-              <tr><td>普通 LIVE 场馆<br><span style="font-size:.8rem;color:var(--muted)">西武巨蛋 / 横滨K / 名古屋巨蛋 / 埼玉超级竞技场</span></td><td>直接行进到达</td><td><strong>2 骰 &gt; 6</strong>（总和 ≥ 7）</td><td>胜利进度 <strong>+1</strong></td><td rowspan="2">专辑回到专辑池，可重新创作后再挑战</td></tr>
+              <tr><td>普通 LIVE 场馆<br><span style="font-size:.8rem;color:var(--muted)">西武巨蛋 / 横滨K / 名古屋巨蛋 / 埼玉竞技场</span></td><td>直接行进到达</td><td><strong>2 骰 &gt; 6</strong>（总和 ≥ 7）</td><td>胜利进度 <strong>+1</strong></td><td rowspan="2">专辑回到专辑池，可重新创作后再挑战</td></tr>
               <tr><td>东京巨蛋</td><td>仅可通过事件／机遇／挑战进入</td><td><strong>2 骰 &gt; 11</strong>（总和 ≥ 12）</td><td>胜利进度 <strong>+2</strong>（含特殊场馆额外 +1）</td></tr>
             </tbody>
           </table>
@@ -595,7 +595,7 @@ flowchart LR
 
       <!-- ========== 09 电子版 ========== -->
       <section id="s9">
-        <h2><span class="no">09</span>电子版玩法（v0.40 原型）</h2>
+        <h2><span class="no">09</span>电子版玩法（v0.44 原型）</h2>
         <p class="lead">本桌游已完成可运行的电子原型，支持单机与联机对战，可直接在浏览器中游玩：</p>
         <div class="btn-line">
           <a href="https://azabu-mai.github.io/lovelive-boardgame/" target="_blank" rel="noopener">▶ 在线试玩（GitHub Pages）</a>
@@ -621,7 +621,7 @@ flowchart LR
           <div class="step"><div class="n"></div><div><h4>开办 LIVE</h4><p>带着完成专辑走进场馆，选择开办演唱会并投 2 骰检定：普通场馆 &gt; 6，东京巨蛋 &gt; 11。</p></div></div>
           <div class="step"><div class="n"></div><div><h4>夺冠</h4><p>累计 3 次 LIVE 成功（普通 +1 / 东京巨蛋 +2）即获得 LoveLive 大赛冠军！</p></div></div>
         </div>
-        <div class="callout tips"><b class="t">新手建议</b>：优先锁定素材需求与手中已有素材最接近的专辑；穗村（休息区）和组委会（交易格）是补缺口的好去处；攒够素材后别贪线，尽早进馆开唱——抢先创作还能卡掉对手的 album 计划。</div>
+        <div class="callout tips"><b class="t">新手建议</b>：优先锁定素材需求与手中已有素材最接近的专辑；休息区（穗村 / 废弃校舍 / 代代木公园）和交易格（大赛组委会 / 动画商店）是补缺口的好去处；攒够素材后别贪线，尽早进馆开唱——抢先创作还能卡掉对手的 album 计划。</div>
       </section>
 
     </main>
@@ -631,11 +631,11 @@ flowchart LR
         <h2>资料来源</h2>
         <ol>
           <li id="cite-1">
-            <span class="src-title">Azabu-Mai, 《桌游设计文档》——学园偶像大进击！完整规则设计（游戏背景、角色、地图、卡牌、专辑卡池与电子原型实现对照 v0.40）</span>
+            <span class="src-title">Azabu-Mai, 《桌游设计文档》——学园偶像大进击！完整规则设计（游戏背景、角色、地图、卡牌、专辑卡池与电子原型实现对照 v0.43）</span>
             <a class="src-url" href="https://github.com/Azabu-Mai/lovelive-boardgame/blob/main/%E6%A1%8C%E6%B8%B8%E8%AE%BE%E8%AE%A1%E6%96%87%E6%A1%A3.md" target="_blank" rel="noopener">github.com/Azabu-Mai/lovelive-boardgame</a>
           </li>
           <li id="cite-2">
-            <span class="src-title">《学园偶像大进击！》电子原型在线试玩（GitHub Pages，v0.40）</span>
+            <span class="src-title">《学园偶像大进击！》电子原型在线试玩（GitHub Pages，v0.43）</span>
             <a class="src-url" href="https://azabu-mai.github.io/lovelive-boardgame/" target="_blank" rel="noopener">azabu-mai.github.io/lovelive-boardgame</a>
           </li>
         </ol>
