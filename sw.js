@@ -1,6 +1,6 @@
 /* 学园偶像大进击！ PWA Service Worker v1.0
    作用：① 离线可进入游戏（缓存页面骨架与联机库）；② 音频交给浏览器原生处理（保留 Range 拖动与整曲播放）。 */
-const VERSION = '1.0.1';
+const VERSION = '1.0.2';
 const CACHE = 'll-app-v' + VERSION;
 const CORE = [
   './',

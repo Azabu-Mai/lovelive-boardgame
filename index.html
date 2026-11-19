@@ -1843,6 +1843,7 @@ function forwardOptions(cur, prev, dir, usedVenues){
   return cands;
 }
 function startMove(pk, steps, extra = false){
+  if(moving) return;                    /* v1.0 自检：防止上一段移动未收尾时被重复启动 */
   const p = state.players[pk];
   moving = { pk, remaining: steps, prev: null, cur: p.pos, route: [p.pos], usedVenues: [], extra };
   rollBtn.disabled = true;
@@ -1851,17 +1852,20 @@ function startMove(pk, steps, extra = false){
 }
 function stepMove(){
   const m = moving;
+  if(!m) return;                        /* v1.0 自检：迟到的移动回调直接忽略 */
   if(m.remaining <= 0) return finishMove();
   const cands = forwardOptions(m.cur, m.prev, state.players[m.pk].dir, m.usedVenues);
   if(cands.length === 1){ advance(cands[0]); return; }
   showModal(
     `场馆岔路 · 还剩 ${m.remaining} 步`,
     `当前在【${TILE_MAP[m.cur].name}】，是否进入场馆支线（不能回头；每个场馆每圈只能进入或穿行一次）：`,
-    cands.map(id => ({ label: '→ ' + TILE_MAP[id].name + `（${TILE_MAP[id].type}）`, onSelect(){ advance(id); } }))
+    cands.map(id => ({ label: '→ ' + TILE_MAP[id].name + `（${TILE_MAP[id].type}）`, onSelect(){ if(moving !== m) return; advance(id); } }))
   );
 }
 function advance(id){
   const m = moving;
+  if(!m || m.advancing) return;         /* v1.0 自检：移动已结束或正在前进一步时，忽略重复/迟到点击 */
+  m.advancing = true;
   if(VENUE_IDS.includes(id)){
     if(!m.usedVenues.includes(id)) m.usedVenues.push(id);
     /* v0.46：记录本圈已使用的场馆，本圈内两个入口都不再提供 */
@@ -1872,7 +1876,7 @@ function advance(id){
   syncStepLeft();
   setPieceTo(m.pk, m.cur);
   if(NET.role === 'host' && NET.connected) send({ type:'fx', fx:{ kind:'step', pk: m.pk, tile: id } });
-  setTimeout(afterArrive, 280);
+  setTimeout(() => { m.advancing = false; afterArrive(); }, 280);
 }
 /* 图上距离（音乃木坂出发后不可通行） */
 function distTo(a, b){
@@ -1893,6 +1897,7 @@ function afterArrive(){
 }
 function finishMove(){
   const m = moving;
+  if(!m) return;                        /* v1.0 自检：迟到的收尾回调直接忽略 */
   state.players[m.pk].pos = m.cur;
   log(`移动${m.route.length - 1}格：${m.route.map(id => TILE_MAP[id].name).join(' → ')}`, m.pk);
   const REST_IDS = ['hokumura','shimajima','yasuda'];
