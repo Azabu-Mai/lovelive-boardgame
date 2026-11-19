@@ -785,8 +785,8 @@
         <span id="vol-dice-val" style="font-size:11px;width:30px;text-align:right;">20%</span>
       </div>
     </div>
-    <button id="lb-install" style="display:none;">安装到桌面 · App 模式（全屏无地址栏）</button>
-    <div id="lb-install-tip" style="display:none;font-size:11px;color:#8a7aa8;line-height:1.6;text-align:left;background:#f7f2ff;border-radius:8px;padding:8px 10px;">iOS 安装方法：用 Safari 打开本页 → 点底部「分享」→ 选择「添加到主屏幕」。安装后从桌面图标启动即是全屏 App，游戏中的返回误触也会被拦截。</div>
+    <button id="lb-install">安装到桌面 · App 模式（全屏无地址栏）</button>
+    <div id="lb-install-tip" style="display:none;font-size:11px;color:#8a7aa8;line-height:1.6;text-align:left;background:#f7f2ff;border-radius:8px;padding:8px 10px;">安装方法：安卓 Chrome / 电脑 Chrome 点上方按钮（或浏览器菜单 →「安装应用」）；iOS 用 Safari 打开本页 → 底部「分享」→「添加到主屏幕」。安装后从桌面图标启动即为全屏 App，游戏中的返回误触也会被拦截。</div>
     <div id="lb-ori" title="若手机上画面方向不对，点此切换横/竖屏">手机画面方向不对？点此切换横/竖屏</div>
   </div>
 </div>
@@ -3532,6 +3532,7 @@ render();
   var ua = navigator.userAgent || '';
   var isIOS = /iPad|iPhone|iPod/.test(ua) || (ua.indexOf('Mac') > -1 && 'ontouchend' in document);
   var deferredPrompt = null;
+  if(installBtn && standalone) installBtn.style.display = 'none';
 
   window.addEventListener('beforeinstallprompt', function(e){
     e.preventDefault();
