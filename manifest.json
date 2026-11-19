@@ -1,0 +1,19 @@
+{
+  "name": "学园偶像大进击！",
+  "short_name": "学园偶像",
+  "description": "LoveLive 主题对战桌游 · 单机对战 AI / 2-4 人联机",
+  "lang": "zh-CN",
+  "start_url": "./?pwa=1",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": ["standalone", "fullscreen"],
+  "orientation": "any",
+  "background_color": "#f5f0fa",
+  "theme_color": "#e94f6a",
+  "categories": ["games", "entertainment"],
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
