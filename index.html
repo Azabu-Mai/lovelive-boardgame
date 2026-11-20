@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>学园偶像大进击！ v1.0</title>
+<title>学园偶像大进击！ v1.1</title>
 <meta name="theme-color" content="#e94f6a">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -583,7 +583,7 @@
 <body>
 
 <header>
-  <div class="title">学园偶像大进击！<span class="sub">v1.0 · 单机/联机</span></div>
+  <div class="title">学园偶像大进击！<span class="sub">v1.1 · 单机/联机</span></div>
   <div id="turn-banner"><button id="ori-btn" title="手机横竖屏显示异常时可手动切换">横屏:关</button><button id="notice-btn">公告</button><button id="bgm-btn" title="背景音乐开关（三首LoveLive歌曲循环）">音乐:开</button><span id="net-badge" class="tag" style="display:none;background:#8a7aa8;margin-right:10px;"></span><span class="turn-label">当前回合：</span><span id="turn-chip" class="tag red">红方</span></div>
 </header>
 
@@ -711,7 +711,7 @@
 <div id="notice-mask">
   <div id="notice-box">
     <div class="n-title">学园偶像大进击！</div>
-    <div class="n-ver">当前版本 v1.0 · 2026-11-19</div>
+    <div class="n-ver">当前版本 v1.1 · 2026-11-20</div>
     <div class="n-sec">
       <span class="n-sec-t">【玩法速览 · 30秒上手】</span>
       <ul>
@@ -723,6 +723,7 @@
       </ul>
       <span class="n-sec-t">【更新公告】</span>
       <ul>
+        <li>v1.1 角色平衡：① 东条希觉醒改为成功/失败各获得 2 张素材；② 高海千歌改为 LIVE 失败获得 2 张素材，觉醒后失败累计 LIVE 检定 +1（可叠加、成功清零，东京巨蛋同样生效）；③ 国木田花丸改为经过休息区获得素材（基础每圈最多 2 次，觉醒不限次，单个休息区每圈限 1 次）；④ 松浦果南改为音乐转舞蹈，每圈首次获得音乐再额外 +1 舞蹈，觉醒首次触发额外获得服装。</li>
         <li>v1.0 正式版：① 支持安装到手机桌面（PWA），全屏运行、断网也能进入游戏；② 专辑池新增 8 张 Aqours 专辑（共 26 张）；③ LIVE 成功专属曲改为整曲播放——从 0 秒开始，播完自动随机换回背景音乐，期间换场直接切歌；④ 游戏进行中拦截手机返回误触。</li>
         <li>v0.46 规则修复：① 樱内梨子改为返还本次创作消耗的 1 张素材（不再随机给无关素材）；② 学园偶像部成立！按被洗回的角色数量重选（原有 2 名就重选 2 名）；③ 场馆支线统一为每圈每个场馆限一次，两个入口共用次数。</li>
         <li>v0.45 地图重构 + Aqours 九人：① 棋盘改为示意图布局——外圈 33 格（上10/右6/下11/左6）+ 6 个场馆 + 音乃木坂起点，新增沼津站、淡岛酒店、沼津神社、浦之星、三津水族馆、蜜柑园、松屋、动画商品店、安田屋旅馆、圣泉女高、大阪巨蛋等格子；② 格子颜色按类型重绘（绿=事件、红=机遇、橙=舞蹈、青=服装、蓝=挑战、黄=音乐、粉=休息、紫=交易、米色=场馆）；③ 取消顺/逆时针选择，全员固定从音乃木坂出发经【音乐教室】顺时针行进，跑圈结算点统一为经过音乐教室；西武巨蛋改由蜜柑园 / 动画商品店进入；④ Aqours 九人技能与固定觉醒实装。</li>
@@ -882,19 +883,19 @@ const CHARACTERS = [
   { id:'hanayo', name:'小泉花阳', skill:'行进至休息格前后 1 格时，可直接进入休息区并获得效果（每圈每休息区限 1 次）', awaken:'第一次进入休息区时效果触发两次' },
   { id:'rin',    name:'星空凛',   skill:'掷骰后选择点数 +1 或 -1 前进（不按原点数走）', awaken:'每圈可重投 1 次行进骰子' },
   { id:'eli',    name:'绚濑绘里', skill:'收集舞蹈素材时，素材获得量 +1', awaken:'每圈第一次获得素材翻倍（先结算增益，再翻倍）' },
-  { id:'nozomi', name:'东条希',   skill:'每圈第一次经过休息区时占卜：50% 成功随机获得该玩家 1 张素材，失败随机获得 1 张素材', awaken:'成功率提升至 75%' },
+  { id:'nozomi', name:'东条希',   skill:'每圈第一次经过休息区时占卜：50% 成功随机获得该玩家 1 张素材，失败随机获得 1 张素材', awaken:'成功与失败的素材获取量 +1' },
   { id:'nico',   name:'矢泽妮可', skill:'三种素材获取量 +1，但 LIVE 检定 -1', awaken:'取消 LIVE 检定 -1' },
 
   /* Aqours（v0.45 定稿） */
-  { id:'chika',   name:'高海千歌', skill:'每完成一圈，若本圈没有开办 LIVE，下一次 LIVE 检定 +1', awaken:'LIVE 失败后随机获得 1 张素材' },
+  { id:'chika',   name:'高海千歌', skill:'LIVE 失败后随机获得 2 张素材', awaken:'LIVE 失败后 LIVE 检定 +1（可叠加，成功清零）' },
   { id:'you',     name:'渡边曜',   skill:'每次骰子移动结束后，可选择再前进 1 格；只结算最终落点', awaken:'若本圈每次骰子移动都选择再前进，完成跑圈时额外获得 1 张随机舞蹈素材' },
   { id:'riko',    name:'樱内梨子', skill:'每次创作专辑时，随机返还 1 张素材', awaken:'每次创作专辑时，额外随机获得 1 张音乐素材' },
   { id:'yoshiko', name:'津岛善子', skill:'每圈第一次经过休息区时，指定 1 名玩家：该玩家额外获得素材时，你获得 1 张随机素材', awaken:'被指定玩家下次 LIVE 检定 -1' },
-  { id:'hanamaru',name:'国木田花丸', skill:'停留在休息区时，额外选择 1 张素材', awaken:'本人触发事件格时，额外获得一次休息区选素材效果' },
+  { id:'hanamaru',name:'国木田花丸', skill:'每圈最多 2 次经过休息区时，各随机获得 1 张素材（单个休息区每圈限 1 次）', awaken:'每次经过休息区时，随机获得 1 张素材（单个休息区每圈限 1 次）' },
   { id:'ruby',    name:'黑泽露比', skill:'获得服装素材时，随机获得 1 张音乐素材', awaken:'每圈首次触发该技能时，再额外获得 1 张舞蹈素材' },
   { id:'dia',     name:'黑泽黛雅', skill:'每圈可反弹 1 次敌人对你的干扰效果；若本圈未触发，则跑圈后抽取并使用 1 张干扰事件卡', awaken:'使用或反弹干扰效果后，随机获得 1 张素材' },
   { id:'mari',    name:'小原鞠莉', skill:'掷出偶数行进骰（2/4/6）时，随机获得 1 张素材', awaken:'掷出 6 时，可自选素材类别与具体素材' },
-  { id:'kanan',   name:'松浦果南', skill:'每圈第一次 LIVE 检定可重掷 1 次骰子，但重掷结果 -1', awaken:'重掷后的 LIVE 检定结果不再 -1' },
+  { id:'kanan',   name:'松浦果南', skill:'获得音乐素材时，随机获得 1 张舞蹈素材；每圈首次获得音乐素材时额外获得 1 张舞蹈素材', awaken:'每圈首次触发该技能时，额外获得 1 张服装素材' },
 ];
 const CHAR_MAP = Object.fromEntries(CHARACTERS.map(c => [c.id, c]));
 
@@ -983,18 +984,21 @@ function newPlayer(name){
     dir:1,                          // v0.45：全员固定顺时针，不再选择方向
     chars:[],                       // 已获得的角色卡（id）
     awakenChars:[],                 // v0.44：已觉醒的角色卡（id）
+    awakenUsed:false,               // v0.44：本局觉醒次数是否已用（每人每局限 1 次）
     hanayoUsed:false, nozomiUsed:false,   // 「每圈一次」技能标记（经过休息区时重置）
     hanayoRestUsed:[],              // v0.44：花阳本圈已用过的休息区 id 列表
     rinRerollUsed:false,            // v0.44：凛本圈重投是否已用
     firstGainDoubled:false,         // v0.44：收集者觉醒——本圈首次素材是否已翻倍
     umiInterfered:false,            // v0.44：海未本圈是否受到干扰
     hanayoDoubleUsed:false,         // v0.44：花阳觉醒——首次休息区翻倍是否已用
-    liveHeldThisLap:false,          // v0.45：高海千歌——本圈是否开办过 LIVE
+    chikaBonus:0,                   // v1.1：高海千歌觉醒——LIVE 失败累计的检定加成（可叠加，LIVE 成功清零）
+    hanamaruRestUsed:[],            // v1.1：国木田花丸——本圈已触发过的休息区 id 列表（基础最多 2 次，觉醒不限）
     youMoveCount:0, youExtraCount:0,// v0.45：渡边曜——本圈骰子移动次数 / 选择再前进次数
     yoshikoUsed:false, yoshikoTarget:null, // v0.45：津岛善子——本圈首次经过休息区标记 / 被指定玩家
     rubyFirstSkillUsed:false,       // v0.45：黑泽露比觉醒——本圈首次技能是否已额外获得舞蹈
     diaReflected:false, diaFallbackUsed:false, // v0.45：黑泽黛雅——本圈是否反弹/兜底使用过干扰
-    kananRerollUsed:false,          // v0.45：松浦果南——本圈 LIVE 重掷是否已用
+    kananFirstTriggered:false,      // v1.1：松浦果南觉醒——本圈首次触发是否已用
+    kananLapBonusUsed:false,        // v1.2：松浦果南——本圈首次获得音乐素材的额外舞蹈是否已用
     venuesUsedThisLap:[],             // v0.46：本圈已进入/穿行过的场馆（每圈每个场馆限一次）
     encore:0,                         // v0.40：安可增益（LIVE 连败累进：1→下次+1，2→+3，上限+3，成功清零）
     lapRest:false,                    // v0.40：本圈是否已经过穗村（跑圈奖励判定用：穗村→圈标=完成一圈）
@@ -1118,7 +1122,6 @@ function resetLapSkillFlags(p){
   p.rinRerollUsed = false;
   p.firstGainDoubled = false;
   p.umiInterfered = false;
-  p.liveHeldThisLap = false;
   p.youMoveCount = 0;
   p.youExtraCount = 0;
   p.yoshikoUsed = false;
@@ -1126,7 +1129,9 @@ function resetLapSkillFlags(p){
   p.rubyFirstSkillUsed = false;
   p.diaReflected = false;
   p.diaFallbackUsed = false;
-  p.kananRerollUsed = false;
+  p.hanamaruRestUsed = [];
+  p.kananFirstTriggered = false;
+  p.kananLapBonusUsed = false;
   p.venuesUsedThisLap = [];
 }
 
@@ -1247,6 +1252,21 @@ function gainMaterial(pk, cat, fixedName){
       gainMaterial(pk, 'dance');
     }
   }
+  /* v1.2：松浦果南——获得音乐素材时随机获得 1 张舞蹈素材；每圈首次获得音乐再额外 +1 舞蹈；
+     觉醒每圈首次触发再额外获得 1 张服装 */
+  if(skillActive(pk, 'kanan') && cat === 'music'){
+    gainMaterial(pk, 'dance');
+    if(!p.kananLapBonusUsed){
+      p.kananLapBonusUsed = true;
+      gainMaterial(pk, 'dance');
+      log(`【松浦果南】本圈首次获得音乐素材，额外获得 1 张舞蹈素材`, pk);
+    }
+    if(isAwaken(pk, 'kanan') && !p.kananFirstTriggered){
+      p.kananFirstTriggered = true;
+      gainMaterial(pk, 'costume');
+      log(`【松浦果南】觉醒：本圈首次触发，额外获得 1 张服装素材`, pk);
+    }
+  }
   /* v0.45：津岛善子——被指定玩家获得素材时，善子获得 1 张随机素材 */
   activeSeats().forEach(s => {
     if(s === pk) return;
@@ -1339,6 +1359,7 @@ document.getElementById('awaken-btn').addEventListener('click', () => {
   if(state.single && state.current !== 'red') return;
   const pk = state.current;
   const p = state.players[pk];
+  if(p.awakenUsed){ log('本局已经使用过觉醒（每人每局限 1 次）', pk); return; }
   const unperformed = p.albums.filter(a => !a.performed);
   if(!unperformed.length){ log('没有可用于觉醒的已完成未演出专辑', pk); return; }
   const awakenable = p.chars.filter(id => !p.awakenChars.includes(id));
@@ -1351,8 +1372,12 @@ document.getElementById('awaken-btn').addEventListener('click', () => {
         // 消耗 1 张已完成未演出专辑
         const idx = p.albums.findIndex(a => !a.performed);
         const consumed = p.albums.splice(idx, 1)[0];
+        /* 同步移出专辑池：置为 done（移出游戏），否则仍会出现在 LIVE 可选列表中 */
+        const consumedAlbum = state.albumPool.find(a => a.owner === pk && a.name === consumed);
+        if(consumedAlbum) consumedAlbum.owner = 'done';
         p.awakenChars.push(id);
-        log(`觉醒 ${c.name}！消耗专辑《${consumed.name}》，效果：${c.awaken}`, pk);
+        p.awakenUsed = true;
+        log(`觉醒 ${c.name}！消耗专辑《${consumed}》，效果：${c.awaken}`, pk);
         render();
       } };
     }), pk);
@@ -1902,6 +1927,7 @@ function finishMove(){
   log(`移动${m.route.length - 1}格：${m.route.map(id => TILE_MAP[id].name).join(' → ')}`, m.pk);
   const REST_IDS = ['hokumura','shimajima','yasuda'];
   const passedRest = m.route.slice(0, -1).some(id => REST_IDS.includes(id));   // 路过（非停留）任一休息区
+  const restPassIds = [...new Set(m.route.slice(1, -1).filter(id => REST_IDS.includes(id)))];   // 本次移动真正经过的休息区（不含出发格与停留格）
   const justPassedHokumura = m.route.includes('hokumura');
   /* v0.45：跑圈奖励——经过穗村后再次回到起点旁的【音乐教室】视为完成一整圈，
      自选获得 1 张音乐素材（不受任何增益加成）。一次移动同时经过穗村与音乐教室时，按经过先后判定。 */
@@ -1919,11 +1945,6 @@ function finishMove(){
       state.players[m.pk].lapRewardPending = true;
       log(`跑完一整圈（${TILE_MAP.hokumura.name} → ${TILE_MAP[lapMark].name}）！跑圈奖励：可自选 1 张音乐素材（不受增益加成）`, m.pk);
       /* 回到起点【音乐教室】即完成一圈 */
-      /* v0.45：高海千歌——本圈未开办 LIVE，则下一次 LIVE +1 */
-      if(skillActive(m.pk, 'chika') && !lp.liveHeldThisLap){
-        addLiveUp(m.pk, 1);
-        log(`【高海千歌】本圈未开办 LIVE，下一次 LIVE 检定 +1`, m.pk);
-      }
       /* v0.45：渡边曜觉醒——本圈每次骰子移动都选择再前进，则额外获得 1 张随机舞蹈素材 */
       if(skillActive(m.pk, 'you') && isAwaken(m.pk, 'you') && lp.youMoveCount > 0 && lp.youMoveCount === lp.youExtraCount){
         gainMaterial(m.pk, 'dance');
@@ -1948,13 +1969,13 @@ function finishMove(){
   if(!m.extra && skillActive(m.pk, 'you')){
     showModal('渡边曜的技能', '移动结束，是否再前进 1 格？（只结算最终落点）', [
       { label:'再前进 1 格', onSelect(){ p.youExtraCount++; startMove(m.pk, 1, true); } },
-      { label:'不前进', onSelect(){ continueMove(m.pk, passedRest, justPassedHokumura); } },
+      { label:'不前进', onSelect(){ continueMove(m.pk, passedRest, justPassedHokumura, restPassIds); } },
     ]);
     return;
   }
-  continueMove(m.pk, passedRest, justPassedHokumura);
+  continueMove(m.pk, passedRest, justPassedHokumura, restPassIds);
 }
-function continueMove(pk, passedRest, justPassedHokumura){
+function continueMove(pk, passedRest, justPassedHokumura, restPassIds){
   const p = state.players[pk];
   const cur = p.pos;
   /* v0.44：小泉花阳——行进至休息格前后 1 格时，可直接进入休息区（每圈每个休息区限 1 次）
@@ -1975,28 +1996,44 @@ function continueMove(pk, passedRest, justPassedHokumura){
             if(firstRest) p.hanayoDoubleUsed = true;
             log(`在【${TILE_MAP[adjRest].name}】休息，可选择获得${firstRest ? ' 2 张' : ' 1 张'}素材` + (firstRest ? '（觉醒：效果翻倍）' : ''), pk);
             offerMaterialPick(pk, () => {
-              const done = () => afterPassedRestSkills(pk, passedRest) || endTurnStep();
+              const done = () => afterPassedRestSkills(pk, passedRest, restPassIds) || endTurnStep();
               if(firstRest) offerMaterialPick(pk, done);
               else done();
             });
           } },
-        { label:'原地继续结算', onSelect(){ resumeTileFlow(pk, passedRest); } },
+        { label:'原地继续结算', onSelect(){ resumeTileFlow(pk, passedRest, restPassIds); } },
       ]);
       return;
     }
   }
-  resumeTileFlow(pk, passedRest);
+  resumeTileFlow(pk, passedRest, restPassIds);
 }
 /* 移动结束后的常规结算：经过休息区技能 → 跑圈奖励 → 地块触发 → 结束回合 */
-function afterPassedRestSkills(pk, passedRest){
+function afterPassedRestSkills(pk, passedRest, restPassIds){
   const p = state.players[pk];
   if(!passedRest) return false;
+  /* v1.2：国木田花丸——经过休息区随机获得 1 张素材；基础每圈最多 2 次，觉醒不限次；单个休息区每圈限 1 次 */
+  if(skillActive(pk, 'hanamaru') && restPassIds && restPassIds.length){
+    const limit = isAwaken(pk, 'hanamaru') ? Infinity : 2;
+    let count = 0;
+    for(const rid of restPassIds){
+      if(p.hanamaruRestUsed.length >= limit) break;
+      if(p.hanamaruRestUsed.includes(rid)) continue;
+      p.hanamaruRestUsed.push(rid);
+      count++;
+    }
+    let got = 0;
+    for(let i = 0; i < count; i++){ if(gainMaterial(pk, rand(['music','dance','costume']))) got++; }
+    if(count) log(got
+      ? `【国木田花丸】经过休息区，获得 ${got} 张素材${isAwaken(pk,'hanamaru') ? '（觉醒）' : ''}`
+      : `【国木田花丸】经过休息区，但素材获取被封锁`, pk);
+  }
   if(skillActive(pk, 'nozomi') && !p.nozomiUsed){ p.nozomiUsed = true; offerDivination(pk); return true; }
   if(skillActive(pk, 'yoshiko') && !p.yoshikoUsed){ p.yoshikoUsed = true; offerYoshiko(pk); return true; }
   return false;
 }
-function resumeTileFlow(pk, passedRest){
-  if(afterPassedRestSkills(pk, passedRest)) return;
+function resumeTileFlow(pk, passedRest, restPassIds){
+  if(afterPassedRestSkills(pk, passedRest, restPassIds)) return;
   if(offerLapReward(pk)) return;                                  // v0.40：跑圈奖励优先结算
   const deferred = triggerTile(pk);   // LIVE/挑战/角色弹窗流程会自行结束回合
   if(!deferred) endTurnStep();
@@ -2066,30 +2103,38 @@ function offerYoshiko(pk){
       afterDivination(pk);
     });
 }
-/* v0.44：东条希占卜——每圈第一次经过休息区时，50%成功随机夺取该玩家1张素材，失败随机获得1张素材；觉醒75% */
+/* v1.1：东条希占卜——每圈第一次经过休息区时，50%成功随机夺取该玩家素材，失败随机获得素材；
+   觉醒：成功与失败的素材获取量 +1（各 2 张） */
 function offerDivination(pk){
   const foe = other(pk);
-  const rate = isAwaken(pk, 'nozomi') ? 0.75 : 0.5;
+  const amount = isAwaken(pk, 'nozomi') ? 2 : 1;
   showModal('东条希的占卜',
-    `经过休息区后进行占卜（${isAwaken(pk,'nozomi')?'觉醒：75%':'50%'}成功率）：成功随机获得该玩家 1 张素材，失败则从系统随机获得 1 张素材。是否占卜？`, [
+    `经过休息区后进行占卜（50% 成功率）：成功随机获得该玩家 ${amount} 张素材，失败则从系统随机获得 ${amount} 张素材。是否占卜？`, [
     { label:`对 ${state.players[foe].name} 占卜`, onSelect(){
-        if(Math.random() < rate){
-          const all = allMats(state.players[foe]);
-          if(!all.length){
-            log(`占卜成功！但${state.players[foe].name}身上没有素材，一无所获`, pk);
-            render(); afterDivination(pk); return;
+        if(Math.random() < 0.5){
+          const got = [];
+          for(let i = 0; i < amount; i++){
+            const all = allMats(state.players[foe]);
+            if(!all.length) break;
+            const stolen = all[Math.floor(Math.random() * all.length)];
+            const arr = state.players[foe].mats[stolen.cat];
+            arr.splice(arr.indexOf(stolen.name), 1);
+            state.players[pk].mats[stolen.cat].push(stolen.name);   // 技能效果：不受「无法获得素材」封锁影响
+            got.push(`${CAT_LABEL[stolen.cat]}「${stolen.name}」`);
           }
-          const stolen = all[Math.floor(Math.random() * all.length)];
-          const arr = state.players[foe].mats[stolen.cat];
-          arr.splice(arr.indexOf(stolen.name), 1);
-          state.players[pk].mats[stolen.cat].push(stolen.name);   // 技能效果：不受「无法获得素材」封锁影响
-          log(`占卜成功！随机夺得了${state.players[foe].name}的${CAT_LABEL[stolen.cat]}「${stolen.name}」`, pk);
+          log(got.length
+            ? `占卜成功！随机夺得了${state.players[foe].name}的 ${got.join('、')}`
+            : `占卜成功！但${state.players[foe].name}身上没有素材，一无所获`, pk);
           render(); afterDivination(pk);
         } else {
-          const cat = rand(['music','dance','costume']);
-          const name = rand(TYPE_LIST[cat]);
-          state.players[pk].mats[cat].push(name);
-          log(`占卜失败……从系统随机获得素材：${CAT_LABEL[cat]}「${name}」`, pk);
+          const got = [];
+          for(let i = 0; i < amount; i++){
+            const cat = rand(['music','dance','costume']);
+            const name = rand(TYPE_LIST[cat]);
+            state.players[pk].mats[cat].push(name);
+            got.push(`${CAT_LABEL[cat]}「${name}」`);
+          }
+          log(`占卜失败……从系统随机获得素材：${got.join('、')}`, pk);
           render(); afterDivination(pk);
         }
       } },
@@ -2115,19 +2160,10 @@ function triggerTile(pk){
       gainMaterial(pk, { '音乐素材格':'music', '舞蹈素材格':'dance', '服装素材格':'costume' }[t.type]);
       return false;
     case '休息区':
-      log(`在【${t.name}】休息，可选择获得${skillActive(pk, 'hanamaru') ? ' 2 张' : ' 1 张'}素材`, pk);
-      offerMaterialPick(pk, () => {
-        if(skillActive(pk, 'hanamaru')) offerMaterialPick(pk, () => endTurnStep());
-        else endTurnStep();
-      });
+      log(`在【${t.name}】休息，可选择获得 1 张素材`, pk);
+      offerMaterialPick(pk, () => endTurnStep());
       return true;
     case '事件格':
-      /* v0.45：国木田花丸觉醒——触发事件格时额外获得一次休息区选素材效果 */
-      if(skillActive(pk, 'hanamaru') && isAwaken(pk, 'hanamaru')){
-        log(`【国木田花丸】觉醒：触发事件格，额外获得一次休息区选素材效果`, pk);
-        offerMaterialPick(pk, () => drawCard(pk, 'eventDeck', '事件卡'));
-        return true;
-      }
       return drawCard(pk, 'eventDeck',  '事件卡');
     case '机遇格':
       if(state.players[pk].mods.blockChance){ log(`被【零预算LIVE】封印，本局不能触发机遇格`, pk); return false; }
@@ -2164,24 +2200,14 @@ function doLiveCheck(pk, a, t, opts = {}){
   const d2 = 1 + Math.floor(Math.random() * 6);
   const sum = d1 + d2;
   const p = state.players[pk];
-  p.liveHeldThisLap = true;   // v0.45：高海千歌——本圈已开办 LIVE
-  /* v0.45：松浦果南——每圈第一次 LIVE 检定可重掷 1 次，重掷结果 -1（觉醒取消 -1） */
-  if(skillActive(pk, 'kanan') && !p.kananRerollUsed && !opts.kananRerolled){
-    p.kananRerollUsed = true;
-    showModal('松浦果南的技能',
-      `LIVE 检定骰出 ${sum}，是否使用本圈 1 次重掷机会${isAwaken(pk, 'kanan') ? '（觉醒：无 -1 惩罚）' : '（重掷结果 -1）'}？`, [
-      { label:'重掷骰子', onSelect(){
-          const penalty = isAwaken(pk, 'kanan') ? 0 : -1;
-          doLiveCheck(pk, a, t, { ...opts, modifier: (opts.modifier || 0) + penalty, kananRerolled: true });
-        } },
-      { label:'不重掷', onSelect(){ finishLiveRoll(); } },
-    ]);
-    return;
-  }
   function finishLiveRoll(){
   let adj = 0; const notes = [];
   if(skillActive(pk, 'honoka')){ adj += 1; notes.push('穗乃果检定+1'); }   // 高坂穗乃果
   if(skillActive(pk, 'nico') && !isAwaken(pk, 'nico')){ adj -= 1; notes.push('妮可检定-1'); }     // 矢泽妮可（觉醒后取消）
+  /* v1.1：高海千歌觉醒——LIVE 失败累积的检定加成（可叠加，LIVE 成功清零；东京巨蛋同样计入） */
+  if(skillActive(pk, 'chika') && p.chikaBonus > 0){
+    adj += p.chikaBonus; notes.push(`千歌蓄力+${p.chikaBonus}`);
+  }
   if(p.mods.liveUp > 0){ adj += p.mods.liveUp; notes.push(`加成+${p.mods.liveUp}`); p.mods.liveUp = 0; }
   /* v0.44：穗乃果觉醒——免疫降低检定的负面效果（liveDown 不扣减） */
   if(p.mods.liveDown > 0){
@@ -2201,6 +2227,7 @@ function doLiveCheck(pk, a, t, opts = {}){
     p.albums = p.albums.filter(n => n !== a.name);
     p.progress += isTokyo ? 2 : 1;
     if(p.encore > 0){ log(`安可成功兑现，增益清零`, pk); p.encore = 0; }   // v0.40：安可成功即清零
+    if(p.chikaBonus > 0){ log(`【高海千歌】LIVE 成功，蓄力 +${p.chikaBonus} 清零`, pk); p.chikaBonus = 0; }   // v1.1
     log(`LIVE大成功！胜利进度 +${isTokyo ? 2 : 1}，当前 ${p.progress}/${WIN_TARGET}`, pk);
     playLiveBgm(a.name);                                 // v0.31：专属曲片段淡入播放（联机时各端同步）
     if(NET.role === 'host' && NET.connected) send({ type:'fx', fx:{ kind:'liveBgm', album: a.name } });
@@ -2224,10 +2251,20 @@ function doLiveCheck(pk, a, t, opts = {}){
       log(`【响彻东京巨蛋吧！】代价：本局角色技能全部失效，且无法再触发挑战格！`, pk);
     }
   }
-  /* v0.45：高海千歌觉醒——LIVE 失败后随机获得 1 张素材 */
-  if(check <= target && skillActive(pk, 'chika') && isAwaken(pk, 'chika')){
-    gainMaterial(pk, rand(['music','dance','costume']));
-    log(`【高海千歌】觉醒：LIVE 失败后随机获得 1 张素材`, pk);
+  /* v1.1：高海千歌——LIVE 失败后随机获得 2 张素材；觉醒再让 LIVE 检定 +1（可叠加，成功清零）
+     东京巨蛋挑战失败不触发补偿与蓄力（即使技能封印的结算顺序变化也显式排除） */
+  if(check <= target && skillActive(pk, 'chika') && !opts.dash){
+    if(p.mods.noGain > 0){
+      log(`【高海千歌】LIVE 失败，但素材获取被封锁，无法获得素材`, pk);
+    } else {
+      gainMaterial(pk, rand(['music','dance','costume']));
+      gainMaterial(pk, rand(['music','dance','costume']));
+      log(`【高海千歌】LIVE 失败，随机获得 2 张素材`, pk);
+    }
+    if(isAwaken(pk, 'chika')){
+      p.chikaBonus++;
+      log(`【高海千歌】觉醒：LIVE 检定蓄力 +${p.chikaBonus}（可叠加，成功清零）`, pk);
+    }
   }
   render();
   endTurnStep();
@@ -2456,13 +2493,15 @@ function render(){
   createBtn.disabled = !cands.length;
   createBtn.textContent = `＋ 创作专辑（${state.players[cur].name}）`;
   createBtn.title = cands.length ? '素材足够，点击选择专辑创作' : '素材不足，无法创作专辑';
-  /* v0.44：觉醒按钮——需有已完成未演出专辑 + 未觉醒角色 */
+  /* v0.44：觉醒按钮——每局限 1 次，需有已完成未演出专辑 + 未觉醒角色 */
   const awakenBtn = document.getElementById('awaken-btn');
   const pCur = state.players[cur];
-  const canAwaken = pCur.albums.some(a => !a.performed) && pCur.chars.some(id => !pCur.awakenChars.includes(id));
+  const canAwaken = !pCur.awakenUsed && pCur.albums.some(a => !a.performed) && pCur.chars.some(id => !pCur.awakenChars.includes(id));
   awakenBtn.disabled = !canAwaken || state.gameOver || moving || rolling || !modalMask.classList.contains('hidden');
   awakenBtn.textContent = `✦ 觉醒（${pCur.awakenChars.length}/${pCur.chars.length}）`;
-  awakenBtn.title = canAwaken ? '消耗 1 张已完成未演出专辑觉醒一名角色' : (pCur.chars.length && pCur.albums.some(a=>!a.performed) ? '所有角色均已觉醒' : '需要 1 张已完成未演出专辑');
+  awakenBtn.title = canAwaken ? '消耗 1 张已完成未演出专辑觉醒一名角色'
+    : pCur.awakenUsed ? '本局已使用过觉醒（每人每局限 1 次）'
+    : (pCur.chars.length && pCur.albums.some(a=>!a.performed) ? '所有角色均已觉醒' : '需要 1 张已完成未演出专辑');
   diceEl.textContent = (state.lastDice != null) ? state.lastDice : '?';
   if(NET.role){   // 联机：只允许本座位在无弹窗时行动
     const myTurn = state.current === NET.seat && state.setupDone;
@@ -2916,7 +2955,6 @@ function aiChooseOption(title, options){
   }
   if(title === '星空凛的技能') return Math.floor(Math.random() * options.length);
   if(title === '渡边曜的技能') return Math.random() < .5 ? 0 : 1;   // v0.45：AI 随机决定是否再前进
-  if(title === '松浦果南的技能') return Math.random() < .5 ? 0 : 1; // v0.45：AI 随机决定是否重掷 LIVE
   if(title === '主题公演 · 二选一') return Math.random() < .5 ? 0 : 1;
   if(title.startsWith('跑圈奖励')) return aiLapRewardChoose(options);   // v0.40：AI 选最优音乐素材
   if(title.startsWith('对手的背影') || title.startsWith('抢镜') || title.startsWith('来自对手的宣战') || title.startsWith('津岛善子')){   // v0.40/v0.45：干扰/指定目标选最强对手
@@ -3052,7 +3090,7 @@ document.getElementById('lb-join').addEventListener('click', () => {
 /* =========================================================
  * 十、开局公告（发布更新时：编辑 HTML 中 #notice-box 内容，并把 NOTICE_VERSION 调大，全员重新可见）
  * ========================================================= */
-const NOTICE_VERSION = 'v1.0';
+const NOTICE_VERSION = 'v1.1';
 const noticeMask = document.getElementById('notice-mask');
 try{ if(localStorage.getItem('ll-notice-read') === NOTICE_VERSION) noticeMask.classList.add('hidden'); }catch(e){}
 document.getElementById('notice-close').addEventListener('click', () => {
