@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>学园偶像大进击！ v1.1</title>
+<title>学园偶像大进击！ v1.2</title>
 <meta name="theme-color" content="#e94f6a">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
@@ -264,6 +264,48 @@
   .lb-count{ display:flex; gap:8px; align-items:center; justify-content:center; font-size:13px; color:var(--ink); }
   .lb-count button{ flex:none; width:44px; padding:7px 0 !important; background:#f3ecfd !important; color:#7a5fa8 !important; border:1.5px solid var(--line) !important; }
   .lb-count button.on{ background:#b89ae0 !important; color:#fff !important; border-color:#b89ae0 !important; }
+  #lb-online{ background:#eaf4ff !important; color:#3f7bb5 !important; border:1.5px solid var(--line) !important; }
+  .page{ position:fixed; inset:0; z-index:81; background:linear-gradient(135deg,#eaf4ff,#fde8f1);
+    display:flex; align-items:center; justify-content:center; padding:16px; overflow-y:auto; }
+  .page-box{ width:380px; max-width:94vw; max-height:92%; overflow-y:auto; background:#fff; border-radius:16px; padding:20px 22px;
+    box-shadow:0 10px 40px rgba(90,60,140,.25); display:flex; flex-direction:column; gap:10px; text-align:center; }
+  .page-box button{ padding:11px; border:none; border-radius:10px; cursor:pointer;
+    background:linear-gradient(90deg,#e94f6a,#b89ae0); color:#fff; font-size:14px; font-weight:bold; }
+  .page-box button:disabled{ opacity:.55; cursor:not-allowed; }
+  .page-head{ display:flex; align-items:center; gap:8px; }
+  .page-title{ flex:1; font-size:17px; font-weight:bold; color:var(--ink); text-align:center; }
+  .page-note{ font-size:11.5px; color:var(--muted); line-height:1.6; }
+  .room-code-line{ font-size:13px; color:var(--muted); }
+  .room-code-line b{ font-size:24px; letter-spacing:5px; color:#e94f6a; margin:0 6px; }
+  .room-vis{ font-size:10.5px; font-weight:bold; color:#2e9e5b; background:#eaf6ec; border:1px solid #c3e2c9; border-radius:999px; padding:1px 7px; vertical-align:middle; }
+  .room-vis.private{ color:#c9a24a; background:#fdf8ec; border-color:#f0dfae; }
+  .room-sub{ font-size:11.5px; color:var(--muted); line-height:1.5; }
+  .room-players{ display:flex; flex-direction:column; gap:6px; }
+  .room-seat{ display:flex; align-items:center; gap:7px; }
+  .wait-player.empty{ opacity:.55; }
+  .room-hint{ font-size:11.5px; color:var(--muted); line-height:1.6; }
+  .lb-back{ width:auto !important; align-self:flex-start; padding:4px 10px !important; font-size:12px !important; background:#f3ecfd !important; color:#7a5fa8 !important; border:1.5px solid var(--line) !important; }
+  .lb-check{ display:flex; align-items:center; justify-content:center; gap:6px; font-size:12px; color:var(--muted); cursor:pointer; }
+  .lb-check input{ width:14px; height:14px; cursor:pointer; }
+  #lb-browse{ background:#f3ecfd !important; color:#7a5fa8 !important; border:1.5px solid var(--line) !important; }
+  .lb-rooms{ border:1px solid var(--line); border-radius:10px; padding:8px; background:rgba(255,255,255,.6); text-align:left; }
+  .lb-rooms-head{ display:flex; justify-content:space-between; align-items:center; font-size:12px; font-weight:bold; color:var(--muted); margin-bottom:6px; }
+  #lb-refresh{ width:auto; padding:3px 8px !important; font-size:11px !important; background:#f3ecfd !important; color:#7a5fa8 !important; }
+  .lb-room-list{ max-height:180px; overflow-y:auto; display:flex; flex-direction:column; gap:6px; }
+  .room-item{ display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 8px; background:#fff; border:1px solid #f4e4ec; border-radius:8px; }
+  .room-main{ display:flex; flex-direction:column; gap:2px; min-width:0; }
+  .room-main b{ font-size:12.5px; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .room-main span{ font-size:11px; color:var(--muted); }
+  .room-side{ display:flex; align-items:center; gap:6px; flex:none; }
+  .room-code{ font-size:12px; font-weight:bold; letter-spacing:1px; color:#e94f6a; }
+  .room-join{ width:auto !important; padding:5px 9px !important; font-size:11px !important; border-radius:7px !important; }
+  .room-join:disabled{ opacity:.45; cursor:not-allowed; }
+  #lobby-box button:disabled{ opacity:.55; cursor:not-allowed; }
+  #room-ready:disabled{ opacity:.45; cursor:not-allowed; }
+  .room-empty{ font-size:11.5px; color:var(--muted); text-align:center; padding:8px 0; }
+  .wait-player{ display:flex; justify-content:space-between; align-items:center; padding:7px 10px; background:#faf5fb; border-radius:8px; font-size:13px; color:var(--ink); }
+  .wait-player .ready{ font-size:11px; color:#2e9e5b; font-weight:bold; }
+  .wait-player .notready{ font-size:11px; color:#c9a24a; font-weight:bold; }
 
   /* 弹窗 */
   #modal-mask{
@@ -583,7 +625,7 @@
 <body>
 
 <header>
-  <div class="title">学园偶像大进击！<span class="sub">v1.1 · 单机/联机</span></div>
+  <div class="title">学园偶像大进击！<span class="sub">v1.2 · 单机/联机</span></div>
   <div id="turn-banner"><button id="ori-btn" title="手机横竖屏显示异常时可手动切换">横屏:关</button><button id="notice-btn">公告</button><button id="bgm-btn" title="背景音乐开关（三首LoveLive歌曲循环）">音乐:开</button><span id="net-badge" class="tag" style="display:none;background:#8a7aa8;margin-right:10px;"></span><span class="turn-label">当前回合：</span><span id="turn-chip" class="tag red">红方</span></div>
 </header>
 
@@ -711,7 +753,7 @@
 <div id="notice-mask">
   <div id="notice-box">
     <div class="n-title">学园偶像大进击！</div>
-    <div class="n-ver">当前版本 v1.1 · 2026-11-20</div>
+    <div class="n-ver">当前版本 v1.2 · 2026-11-24</div>
     <div class="n-sec">
       <span class="n-sec-t">【玩法速览 · 30秒上手】</span>
       <ul>
@@ -723,6 +765,8 @@
       </ul>
       <span class="n-sec-t">【更新公告】</span>
       <ul>
+        <li>v1.2 房间列表：大厅点「联机对战」进入联机页，可创建房间或浏览公开房间、直接加入陌生人房间；创建/加入后进入独立房间页，点「准备」后满员即自动开局；创建时可取消公开，私密房仍凭房间码加入。</li>
+        <li>v1.2 觉醒规则：取消「每人每局限 1 次」，改为每名角色限觉醒 1 次，成本递增——第 1/2/3 次分别消耗 1/2/3 张已完成未演出专辑；可以围绕多核养成做取舍。</li>
         <li>v1.1 角色平衡：① 东条希觉醒改为成功/失败各获得 2 张素材；② 高海千歌改为 LIVE 失败获得 2 张素材，觉醒后失败累计 LIVE 检定 +1（可叠加、成功清零，东京巨蛋同样生效）；③ 国木田花丸改为经过休息区获得素材（基础每圈最多 2 次，觉醒不限次，单个休息区每圈限 1 次）；④ 松浦果南改为音乐转舞蹈，每圈首次获得音乐再额外 +1 舞蹈，觉醒首次触发额外获得服装。</li>
         <li>v1.0 正式版：① 支持安装到手机桌面（PWA），全屏运行、断网也能进入游戏；② 专辑池新增 8 张 Aqours 专辑（共 26 张）；③ LIVE 成功专属曲改为整曲播放——从 0 秒开始，播完自动随机换回背景音乐，期间换场直接切歌；④ 游戏进行中拦截手机返回误触。</li>
         <li>v0.46 规则修复：① 樱内梨子改为返还本次创作消耗的 1 张素材（不再随机给无关素材）；② 学园偶像部成立！按被洗回的角色数量重选（原有 2 名就重选 2 名）；③ 场馆支线统一为每圈每个场馆限一次，两个入口共用次数。</li>
@@ -754,20 +798,10 @@
 <div id="lobby">
   <div id="lobby-box">
     <div class="lb-title">学园偶像大进击！</div>
-    <div class="lb-sub">LoveLive 大赛主题对战桌游 · 选择模式</div>
-    <div class="lb-count" id="lb-count">联机人数
-      <button data-n="2" class="on">2人</button>
-      <button data-n="3">3人</button>
-      <button data-n="4">4人</button>
-    </div>
+    <div class="lb-sub">LoveLive 大赛主题对战桌游 · 单机 / 联机</div>
     <input id="lb-nick" maxlength="6" placeholder="你的昵称（可留空，仅字母/汉字）">
     <button id="lb-single">单机模式 · 对战AI（1v1）</button>
-    <button id="lb-host">创建房间 · 联机对战（我执红方）</button>
-    <div class="lb-joinrow">
-      <input id="lb-code" maxlength="5" placeholder="房间码">
-      <button id="lb-join">加入房间</button>
-    </div>
-    <div id="lb-status"></div>
+    <button id="lb-online">联机对战 · 创建 / 加入房间</button>
     <div class="vol-panel" style="margin-top:14px;padding:10px;background:rgba(255,255,255,.5);border-radius:8px;">
       <div style="font-size:12px;font-weight:bold;margin-bottom:8px;color:#666;">🎵 音量设置</div>
       <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
@@ -789,6 +823,49 @@
     <button id="lb-install">安装到桌面 · App 模式（全屏无地址栏）</button>
     <div id="lb-install-tip" style="display:none;font-size:11px;color:#8a7aa8;line-height:1.6;text-align:left;background:#f7f2ff;border-radius:8px;padding:8px 10px;">安装方法：安卓 Chrome / 电脑 Chrome 点上方按钮（或浏览器菜单 →「安装应用」）；iOS 用 Safari 打开本页 → 底部「分享」→「添加到主屏幕」。安装后从桌面图标启动即为全屏 App，游戏中的返回误触也会被拦截。</div>
     <div id="lb-ori" title="若手机上画面方向不对，点此切换横/竖屏">手机画面方向不对？点此切换横/竖屏</div>
+  </div>
+</div>
+
+<!-- 联机页：创建 / 加入房间 -->
+<div id="online-page" class="page" style="display:none;">
+  <div class="page-box">
+    <div class="page-head">
+      <button id="lb-online-back" class="lb-back">← 返回大厅</button>
+      <div class="page-title">联机对战</div>
+    </div>
+    <div class="page-note">创建房间后把房间码分享给好友，或保持公开让陌生人加入。</div>
+    <div class="lb-count" id="lb-count">联机人数
+      <button data-n="2" class="on">2人</button>
+      <button data-n="3">3人</button>
+      <button data-n="4">4人</button>
+    </div>
+    <label class="lb-check"><input type="checkbox" id="lb-public" checked> 公开到房间列表（陌生人可直接加入）</label>
+    <button id="lb-host">创建房间 · 联机对战（我执红方）</button>
+    <div class="lb-joinrow">
+      <input id="lb-code" maxlength="5" placeholder="房间码">
+      <button id="lb-join">加入房间</button>
+    </div>
+    <button id="lb-browse">浏览公开房间</button>
+    <div id="lb-rooms" class="lb-rooms" style="display:none;">
+      <div class="lb-rooms-head"><span>公开房间</span><button id="lb-refresh">刷新</button></div>
+      <div id="lb-room-list" class="lb-room-list"></div>
+    </div>
+    <div id="lb-status"></div>
+  </div>
+</div>
+
+<!-- 房间页：等待玩家 / 准备 / 开局 -->
+<div id="room-page" class="page" style="display:none;">
+  <div class="page-box">
+    <div class="page-head">
+      <button id="room-back" class="lb-back">← 退出房间</button>
+      <div class="page-title">联机房间</div>
+    </div>
+    <div class="room-code-line">房间码 <b id="room-code">-----</b><span id="room-vis" class="room-vis">公开</span></div>
+    <div class="room-sub" id="room-sub"></div>
+    <div id="room-players" class="room-players"></div>
+    <button id="room-ready" style="display:none;">准 备</button>
+    <div class="room-hint" id="room-hint"></div>
   </div>
 </div>
 
@@ -984,7 +1061,7 @@ function newPlayer(name){
     dir:1,                          // v0.45：全员固定顺时针，不再选择方向
     chars:[],                       // 已获得的角色卡（id）
     awakenChars:[],                 // v0.44：已觉醒的角色卡（id）
-    awakenUsed:false,               // v0.44：本局觉醒次数是否已用（每人每局限 1 次）
+    awakenCount:0,                  // v1.2：本局已觉醒次数（每名角色限 1 次，成本按次数递增）
     hanayoUsed:false, nozomiUsed:false,   // 「每圈一次」技能标记（经过休息区时重置）
     hanayoRestUsed:[],              // v0.44：花阳本圈已用过的休息区 id 列表
     rinRerollUsed:false,            // v0.44：凛本圈重投是否已用
@@ -998,7 +1075,7 @@ function newPlayer(name){
     rubyFirstSkillUsed:false,       // v0.45：黑泽露比觉醒——本圈首次技能是否已额外获得舞蹈
     diaReflected:false, diaFallbackUsed:false, // v0.45：黑泽黛雅——本圈是否反弹/兜底使用过干扰
     kananFirstTriggered:false,      // v1.1：松浦果南觉醒——本圈首次触发是否已用
-    kananLapBonusUsed:false,        // v1.2：松浦果南——本圈首次获得音乐素材的额外舞蹈是否已用
+    kananLapBonusUsed:false,        // v1.1：松浦果南——本圈首次获得音乐素材的额外舞蹈是否已用
     venuesUsedThisLap:[],             // v0.46：本圈已进入/穿行过的场馆（每圈每个场馆限一次）
     encore:0,                         // v0.40：安可增益（LIVE 连败累进：1→下次+1，2→+3，上限+3，成功清零）
     lapRest:false,                    // v0.40：本圈是否已经过穗村（跑圈奖励判定用：穗村→圈标=完成一圈）
@@ -1045,8 +1122,19 @@ const NET = {
   guests:[], myId:null, pendingModal:null, remoteModal:null, gameOverShown:false, brokerIdx:0,
   fxSteps:[], fxTimer:null, fxPlaying:false, fxPending:null, fxModal:null,   // 客人端移动动画
   pendingCard:null,                                                      // 客人抽卡确认（主机等待中）
+  publicRoom:true, ready:{}, roomInfo:null, myReady:false, roomTimer:null,   // v1.2：房间列表与准备状态
 };
 const BROKERS = ['wss://broker.emqx.io:8084/mqtt', 'wss://broker.hivemq.com:8884/mqtt'];
+
+/* v1.2：房间发现层——公共 MQTT retained 公告，双 broker 同时订阅 */
+const ROOM_PREFIX = 'lovelive-game/rooms/';
+const ROOM_CODE_RE = /^[ABCDEFGHJKMNPQRSTUVWXYZ2-9]{5}$/;
+const ROOM_TTL = 90000;
+const LIST = { clients:[], rooms:{}, started:false, timer:null };
+function escHtml(s){
+  return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+function cleanNick(n){ return String(n || '').replace(/[^A-Za-z\u4e00-\u9fa5]/g, '').slice(0, 6); }
 
 let modalOptions = [];
 let modalSeq = 0;
@@ -1252,7 +1340,7 @@ function gainMaterial(pk, cat, fixedName){
       gainMaterial(pk, 'dance');
     }
   }
-  /* v1.2：松浦果南——获得音乐素材时随机获得 1 张舞蹈素材；每圈首次获得音乐再额外 +1 舞蹈；
+  /* v1.1：松浦果南——获得音乐素材时随机获得 1 张舞蹈素材；每圈首次获得音乐再额外 +1 舞蹈；
      觉醒每圈首次触发再额外获得 1 张服装 */
   if(skillActive(pk, 'kanan') && cat === 'music'){
     gainMaterial(pk, 'dance');
@@ -1354,33 +1442,40 @@ document.getElementById('create-album-btn').addEventListener('click', () => {
   doCreateAlbum();
 });
 
-/* v0.44：觉醒系统——消耗 1 张已完成未演出专辑，觉醒 1 名角色（每局 1 次） */
-document.getElementById('awaken-btn').addEventListener('click', () => {
-  if(state.single && state.current !== 'red') return;
+/* v1.2：觉醒系统——每名角色限觉醒 1 次，成本按次数递增（第 1/2/3 次分别消耗 1/2/3 张已完成未演出专辑） */
+function doAwaken(){
   const pk = state.current;
   const p = state.players[pk];
-  if(p.awakenUsed){ log('本局已经使用过觉醒（每人每局限 1 次）', pk); return; }
-  const unperformed = p.albums.filter(a => !a.performed);
-  if(!unperformed.length){ log('没有可用于觉醒的已完成未演出专辑', pk); return; }
+  const owned = p.albums;              // p.albums 只保留已完成未演出的专辑（演出成功/失败都会移出）
+  const cost = p.awakenCount + 1;
   const awakenable = p.chars.filter(id => !p.awakenChars.includes(id));
   if(!awakenable.length){ log('所有角色均已觉醒', pk); return; }
+  if(owned.length < cost){ log(`觉醒需要 ${cost} 张已完成未演出专辑（当前 ${owned.length} 张）`, pk); return; }
   showModal('觉醒 · 选择角色',
-    `消耗 1 张已完成未演出专辑，选择要觉醒的角色（每局限 1 次）：`,
+    `消耗 ${cost} 张已完成未演出专辑，选择要觉醒的角色（每名角色限 1 次；本局第 ${p.awakenCount + 1} 次觉醒）：`,
     awakenable.map(id => {
       const c = CHARACTERS.find(c => c.id === id);
       return { label:`${c.name}：${c.awaken}`, onSelect(){
-        // 消耗 1 张已完成未演出专辑
-        const idx = p.albums.findIndex(a => !a.performed);
-        const consumed = p.albums.splice(idx, 1)[0];
-        /* 同步移出专辑池：置为 done（移出游戏），否则仍会出现在 LIVE 可选列表中 */
-        const consumedAlbum = state.albumPool.find(a => a.owner === pk && a.name === consumed);
-        if(consumedAlbum) consumedAlbum.owner = 'done';
+        /* 一次结算消耗 cost 张专辑，并同步移出专辑池（置 done），避免仍出现在 LIVE 可选列表 */
+        const consumedNames = p.albums.splice(0, cost);
+        consumedNames.forEach(name => {
+          const consumedAlbum = state.albumPool.find(a => a.owner === pk && a.name === name);
+          if(consumedAlbum) consumedAlbum.owner = 'done';
+        });
         p.awakenChars.push(id);
-        p.awakenUsed = true;
-        log(`觉醒 ${c.name}！消耗专辑《${consumed}》，效果：${c.awaken}`, pk);
+        p.awakenCount++;
+        log(`觉醒 ${c.name}！消耗 ${cost} 张专辑，效果：${c.awaken}`, pk);
         render();
       } };
     }), pk);
+}
+document.getElementById('awaken-btn').addEventListener('click', () => {
+  if(NET.role === 'guest'){
+    if(state.current === NET.seat) send({ type:'action', action:{ type:'awaken', seat: NET.seat } });
+    return;
+  }
+  if(state.single && state.current !== 'red') return;
+  doAwaken();
 });
 
 /* =========================================================
@@ -2012,7 +2107,7 @@ function continueMove(pk, passedRest, justPassedHokumura, restPassIds){
 function afterPassedRestSkills(pk, passedRest, restPassIds){
   const p = state.players[pk];
   if(!passedRest) return false;
-  /* v1.2：国木田花丸——经过休息区随机获得 1 张素材；基础每圈最多 2 次，觉醒不限次；单个休息区每圈限 1 次 */
+  /* v1.1：国木田花丸——经过休息区随机获得 1 张素材；基础每圈最多 2 次，觉醒不限次；单个休息区每圈限 1 次 */
   if(skillActive(pk, 'hanamaru') && restPassIds && restPassIds.length){
     const limit = isAwaken(pk, 'hanamaru') ? Infinity : 2;
     let count = 0;
@@ -2493,15 +2588,19 @@ function render(){
   createBtn.disabled = !cands.length;
   createBtn.textContent = `＋ 创作专辑（${state.players[cur].name}）`;
   createBtn.title = cands.length ? '素材足够，点击选择专辑创作' : '素材不足，无法创作专辑';
-  /* v0.44：觉醒按钮——每局限 1 次，需有已完成未演出专辑 + 未觉醒角色 */
+  /* v1.2：觉醒按钮——每名角色限 1 次，第 n 次消耗 n 张已完成未演出专辑 */
   const awakenBtn = document.getElementById('awaken-btn');
   const pCur = state.players[cur];
-  const canAwaken = !pCur.awakenUsed && pCur.albums.some(a => !a.performed) && pCur.chars.some(id => !pCur.awakenChars.includes(id));
+  const awakenCost = pCur.awakenCount + 1;
+  const unperformedCount = pCur.albums.length;   // albums 内均为已完成未演出的专辑
+  const hasAwakenableChar = pCur.chars.some(id => !pCur.awakenChars.includes(id));
+  const canAwaken = unperformedCount >= awakenCost && hasAwakenableChar;
   awakenBtn.disabled = !canAwaken || state.gameOver || moving || rolling || !modalMask.classList.contains('hidden');
   awakenBtn.textContent = `✦ 觉醒（${pCur.awakenChars.length}/${pCur.chars.length}）`;
-  awakenBtn.title = canAwaken ? '消耗 1 张已完成未演出专辑觉醒一名角色'
-    : pCur.awakenUsed ? '本局已使用过觉醒（每人每局限 1 次）'
-    : (pCur.chars.length && pCur.albums.some(a=>!a.performed) ? '所有角色均已觉醒' : '需要 1 张已完成未演出专辑');
+  awakenBtn.title = canAwaken ? `消耗 ${awakenCost} 张已完成未演出专辑觉醒一名角色（本局第 ${pCur.awakenCount + 1} 次）`
+    : !pCur.chars.length ? '需要先获得角色卡'
+    : !hasAwakenableChar ? '所有角色均已觉醒'
+    : `需要 ${awakenCost} 张已完成未演出专辑（当前 ${unperformedCount} 张）`;
   diceEl.textContent = (state.lastDice != null) ? state.lastDice : '?';
   if(NET.role){   // 联机：只允许本座位在无弹窗时行动
     const myTurn = state.current === NET.seat && state.setupDone;
@@ -2706,70 +2805,334 @@ function publishState(){
   if(NET.role !== 'host' || !NET.connected) return;
   NET.client.publish(topic(), JSON.stringify({ type:'state', state: snapshotState() }), { retain:true });
 }
+function clearRetainedState(){
+  if(NET.role === 'host' && NET.client && NET.connected && NET.roomId){
+    try{ NET.client.publish(topic(), '', { retain:true }); }catch(e){}
+  }
+}
+function dropClient(){
+  const c = NET.client;
+  NET.client = null; NET.connected = false;
+  if(c){ setTimeout(() => { try{ c.end(true); }catch(e){} }, 150); }   // 留出时间把 leave/roomclosed 发出去
+}
 function setNetStatus(t){ document.getElementById('lb-status').textContent = t; }
-function hideLobby(){ document.getElementById('lobby').style.display = 'none'; }
+function hideLobby(){
+  document.getElementById('lobby').style.display = 'none';
+  document.getElementById('online-page').style.display = 'none';
+  document.getElementById('room-page').style.display = 'none';
+}
 function showNetBadge(){
   const b = document.getElementById('net-badge');
   b.style.display = 'inline-block';
   b.textContent = '联机 · ' + (NET.role === 'host' ? '房主(红)' : '客人(' + (SEAT_NAMES[NET.seat] || '…') + ')') + ' · ' + NET.roomId;
 }
-function netConnect(idx, onOk, onFail){
-  const url = BROKERS[idx % BROKERS.length];
-  let settled = false;
-  const c = mqtt.connect(url, {
-    clientId: 'llgame-' + Math.random().toString(16).slice(2, 10),
-    keepalive: 30, reconnectPeriod: 3000, connectTimeout: 7000,   // 公共 broker 可能掉线：开启自动重连
-  });
-  c.on('connect', () => {
-    if(!settled){ settled = true; NET.myId = c.options.clientId; onOk(c); return; }
-    NET.connected = true; setNetStatus('');                        // 断线后重连成功：恢复正常收发
-    if(NET.role === 'host'){                                       // 主机：重发最新快照 + 未决弹窗/抽卡（客人离线期间的确认可能丢失）
-      publishState();
-      if(NET.pendingCard) send({ type:'cardfx', card:{ msgId: NET.pendingCard.msgId, seat: NET.pendingCard.seat, kind: NET.pendingCard.kind, name: NET.pendingCard.name, desc: NET.pendingCard.desc } });
-      if(NET.pendingModal) send({ type:'modal', modal:{ msgId: NET.pendingModal.msgId, title: NET.pendingModal.title, bodyHTML: NET.pendingModal.bodyHTML, labels: NET.pendingModal.options.map(o => o.label), seat: NET.pendingModal.seat } });
-    }
-    else if(NET.role === 'guest') send({ type:'hello', from: NET.myId, nick: NET.nick || '' });   // 客人：重新报到，主机补发状态与未决弹窗/抽卡
-  });
-  c.on('error', e => {
-    if(!settled){
-      settled = true; c.end(true);
-      if(idx + 1 < BROKERS.length) netConnect(idx + 1, onOk, onFail);   // 自动换备用服务器重试
-      else onFail('无法连接信令服务器');
-    }
-  });
-  c.on('message', (t, m) => handleNetMessage(m.toString()));
-  c.on('close', () => {
-    if(NET.role && NET.connected){ NET.connected = false; setNetStatus('与信令服务器断开，正在自动重连…'); }
-  });
+function netConnect(order, onOk, onFail){
+  order = (order || [0, 1]).filter((v, i, a) => Number.isInteger(v) && a.indexOf(v) === i);
+  if(!order.length) order = [0, 1];
+  let pos = 0;
+  const attempt = () => {
+    if(pos >= order.length){ onFail('无法连接信令服务器'); return; }
+    const idx = order[pos++];
+    const url = BROKERS[idx % BROKERS.length];
+    let settled = false;
+    const c = mqtt.connect(url, {
+      clientId: 'llgame-' + Math.random().toString(16).slice(2, 10),
+      keepalive: 30, reconnectPeriod: 3000, connectTimeout: 7000,   // 公共 broker 可能掉线：开启自动重连
+    });
+    NET.client = c;
+    c.on('connect', () => {
+      if(NET.client !== c) return;                                   // 已被新连接替换的旧客户端不再影响全局状态
+      if(!settled){ settled = true; NET.myId = c.options.clientId; onOk(c, idx); return; }
+      NET.connected = true; setNetStatus('');                        // 断线后重连成功：恢复正常收发
+      if(NET.role === 'host'){                                       // 主机：重发最新快照 + 未决弹窗/抽卡（客人离线期间的确认可能丢失）
+        publishState();
+        publishRoomAnnouncement();
+        if(NET.pendingCard) send({ type:'cardfx', card:{ msgId: NET.pendingCard.msgId, seat: NET.pendingCard.seat, kind: NET.pendingCard.kind, name: NET.pendingCard.name, desc: NET.pendingCard.desc } });
+        if(NET.pendingModal) send({ type:'modal', modal:{ msgId: NET.pendingModal.msgId, title: NET.pendingModal.title, bodyHTML: NET.pendingModal.bodyHTML, labels: NET.pendingModal.options.map(o => o.label), seat: NET.pendingModal.seat } });
+      }
+      else if(NET.role === 'guest') send({ type:'hello', from: NET.myId, nick: NET.nick || '' });   // 客人：重新报到，主机补发状态与未决弹窗/抽卡
+    });
+    c.on('error', e => {
+      if(NET.client !== c) return;
+      if(!settled){
+        settled = true; try{ c.end(true); }catch(_){}
+        attempt();                                                   // 自动换服务器重试
+      }
+    });
+    c.on('message', (t, m) => {
+      if(NET.client !== c) return;
+      handleNetMessage(m.toString());
+    });
+    c.on('close', () => {
+      if(NET.client !== c) return;
+      if(NET.role && NET.connected){ NET.connected = false; setNetStatus('与信令服务器断开，正在自动重连…'); }
+    });
+  };
+  attempt();
+}
+/* v1.2：房间公告——公开房以 retained 消息发布到发现主题，心跳 20s，90s 无心跳自动过期 */
+function publishRoomAnnouncement(){
+  if(NET.role !== 'host' || !NET.connected || !NET.publicRoom || !NET.roomId || state.setupDone) return;
+  const readyCount = NET.guests.filter(g => NET.ready[g.seat]).length;
+  NET.client.publish(ROOM_PREFIX + NET.roomId, JSON.stringify({
+    v:1, code:NET.roomId, broker:NET.brokerIdx, host:state.players.red.name,
+    max:state.playerCount, joined:NET.guests.length + 1, ready:readyCount, ts:Date.now(),
+  }), { retain:true, qos:1 });
+}
+function clearRoomAnnouncement(){
+  if(NET.client && NET.connected && NET.publicRoom && NET.roomId)
+    NET.client.publish(ROOM_PREFIX + NET.roomId, '', { retain:true });
+}
+function startRoomHeartbeat(){
+  stopRoomHeartbeat();
+  NET.roomTimer = setInterval(publishRoomAnnouncement, 20000);
+}
+function stopRoomHeartbeat(){
+  if(NET.roomTimer){ clearInterval(NET.roomTimer); NET.roomTimer = null; }
+}
+function broadcastRoomInfo(){
+  const seats = ['red', ...NET.guests.map(g => g.seat)];
+  send({ type:'room', room:{
+    code:NET.roomId, max:state.playerCount, public:NET.publicRoom,
+    players: seats.map(seat => ({
+      seat, name: state.players[seat].name,
+      ready: seat === 'red' ? true : !!NET.ready[seat],
+    })),
+  } });
+}
+function tryStartRoom(){
+  if(state.setupDone) return;
+  const need = state.playerCount - 1;
+  if(NET.guests.length < need) return;
+  if(!NET.guests.every(g => NET.ready[g.seat])) return;
+  clearRoomAnnouncement();
+  stopRoomHeartbeat();
+  stopRoomList();
+  hideLobby(); showNetBadge();
+  startGameFlow();
 }
 function updateHostWaiting(){
-  document.querySelector('#lb-status').innerHTML =
-    `房间已创建，房间码：<span class="lb-code-big">${NET.roomId}</span><br>请把这个房间码告诉其他玩家，等待加入…（${NET.guests.length + 1}/${state.playerCount}）`;
+  renderRoom();
 }
 function hostCreateRoom(nick){
+  stopRoomList();
+  if(NET.role === 'guest' && NET.connected) send({ type:'leave', from: NET.myId });
+  dropClient();
+  NET.role = null; NET.seat = null;
   NET.roomId = randRoomCode();
-  NET.guests = [];
+  NET.publicRoom = document.getElementById('lb-public').checked;
+  NET.guests = []; NET.ready = {};
   NET.fxSteps = []; NET.fxTimer = null; NET.fxPlaying = false; NET.fxPending = null; NET.fxModal = null;
   state.playerCount = lobbyCount;
+  nick = cleanNick(nick);
   state.players.red.name = nick ? '红方（' + nick + '）' : '红方';
-  netConnect(0, c => {
-    NET.role = 'host'; NET.seat = 'red'; NET.client = c; NET.connected = true;
+  netConnect([0, 1], (c, idx) => {
+    NET.role = 'host'; NET.seat = 'red'; NET.client = c; NET.connected = true; NET.brokerIdx = idx;
     c.subscribe(topic());
     setNetStatus('');
-    updateHostWaiting();
+    showRoomPage();
     publishState();   // retain：加入者订阅后立刻拿到初始状态
+    if(NET.publicRoom){ publishRoomAnnouncement(); startRoomHeartbeat(); }
   }, err => setNetStatus('创建失败：' + err + '，请重试'));
 }
-function guestJoinRoom(code, nick){
+function guestJoinRoom(code, nick, brokerIdx){
+  stopRoomList();
+  if(NET.role === 'guest' && NET.connected) send({ type:'leave', from: NET.myId });
+  dropClient();
+  NET.role = null; NET.seat = null;
   NET.roomId = code;
-  NET.nick = nick;
+  NET.nick = cleanNick(nick);
+  NET.myReady = false; NET.roomInfo = null;
+  state.netReady = false;
   NET.fxSteps = []; NET.fxTimer = null; NET.fxPlaying = false; NET.fxPending = null; NET.fxModal = null;
-  netConnect(0, c => {
-    NET.role = 'guest'; NET.seat = null; NET.client = c; NET.connected = true;
-    c.subscribe(topic(), () => send({ type:'hello', from: NET.myId, nick }));
+  const order = [brokerIdx, 0, 1].filter((v, i, a) => Number.isInteger(v) && a.indexOf(v) === i);
+  netConnect(order, (c, idx) => {
+    NET.role = 'guest'; NET.seat = null; NET.client = c; NET.connected = true; NET.brokerIdx = idx;
+    c.subscribe(topic(), () => send({ type:'hello', from: NET.myId, nick: NET.nick }));
     setNetStatus('已连接，等待主机同步…');
-    setTimeout(() => { if(!state.netReady) setNetStatus('未找到房间 ' + code + '，请检查房间码'); }, 10000);
+    setTimeout(() => {
+      if(NET.role === 'guest' && NET.roomId === code && !state.netReady)
+        setNetStatus('未找到房间 ' + code + '，请检查房间码后重试');
+    }, 10000);
   }, err => setNetStatus('加入失败：' + err + '，请重试'));
+}
+
+/* ===== 房间列表（陌生人匹配）：双 broker 订阅 + retained 公告 ===== */
+function startRoomList(){
+  if(typeof mqtt === 'undefined'){ setNetStatus('联机组件加载失败，无法浏览房间'); return; }
+  document.getElementById('lb-rooms').style.display = 'block';
+  if(LIST.started){ renderRoomList(); return; }
+  LIST.started = true;
+  renderRoomList();
+  BROKERS.forEach((_, idx) => listConnect(idx));
+  LIST.timer = setInterval(() => { pruneRooms(); renderRoomList(); }, 10000);
+}
+function listConnect(idx){
+  const c = mqtt.connect(BROKERS[idx], {
+    clientId: 'lllist-' + Math.random().toString(16).slice(2, 10),
+    keepalive: 30, reconnectPeriod: 5000, connectTimeout: 7000, clean: true,
+  });
+  c.on('connect', () => c.subscribe(ROOM_PREFIX + '+'));
+  c.on('message', (t, m) => handleRoomAnnouncement(t, m.toString(), idx));
+  c.on('error', () => {});
+  LIST.clients[idx] = c;
+}
+function stopRoomList(){
+  LIST.started = false;
+  if(LIST.timer){ clearInterval(LIST.timer); LIST.timer = null; }
+  LIST.clients.forEach(c => { try{ c.end(true); }catch(e){} });
+  LIST.clients = []; LIST.rooms = {};
+  const box = document.getElementById('lb-rooms');
+  if(box) box.style.display = 'none';
+  renderRoomList();
+}
+function handleRoomAnnouncement(t, raw, brokerIdx){
+  if(!LIST.started) return;
+  const code = t.slice(ROOM_PREFIX.length);
+  if(!ROOM_CODE_RE.test(code)) return;
+  const key = code + '@' + brokerIdx;
+  if(!raw){ delete LIST.rooms[key]; renderRoomList(); return; }
+  let r; try{ r = JSON.parse(raw); }catch(e){ return; }
+  if(!r || r.v !== 1 || r.code !== code || typeof r.ts !== 'number') return;
+  if(Date.now() - r.ts > ROOM_TTL){ delete LIST.rooms[key]; renderRoomList(); return; }
+  r.brokerIdx = brokerIdx;
+  LIST.rooms[key] = r;
+  pruneRooms(); renderRoomList();
+}
+function pruneRooms(){
+  const now = Date.now();
+  Object.keys(LIST.rooms).forEach(k => {
+    if(now - (LIST.rooms[k].ts || 0) > ROOM_TTL) delete LIST.rooms[k];
+  });
+  const keys = Object.keys(LIST.rooms);
+  if(keys.length > 50){
+    keys.sort((a, b) => (LIST.rooms[a].ts || 0) - (LIST.rooms[b].ts || 0));
+    keys.slice(0, keys.length - 50).forEach(k => delete LIST.rooms[k]);
+  }
+}
+function renderRoomList(){
+  const box = document.getElementById('lb-room-list');
+  if(!box) return;
+  const rooms = Object.values(LIST.rooms).filter(r => r && r.ts && Date.now() - r.ts <= ROOM_TTL)
+    .sort((a, b) => (b.ts || 0) - (a.ts || 0)).slice(0, 20);
+  if(!rooms.length){
+    box.innerHTML = '<div class="room-empty">' + (LIST.started ? '暂未发现公开房间，稍等或刷新…' : '点击「浏览公开房间」开始搜索') + '</div>';
+    return;
+  }
+  box.innerHTML = rooms.map(r => {
+    const hostName = String(r.host || '房主').slice(0, 20);
+    const max = Math.max(2, Math.min(4, Number(r.max) || 2));
+    const joined = Math.max(1, Math.min(max, Number(r.joined) || 1));
+    const ready = Math.max(0, Math.min(joined, Number(r.ready) || 0));
+    const full = joined >= max;
+    const mine = NET.role === 'host' && r.code === NET.roomId;
+    const locked = full || NET.role === 'host';
+    return `<div class="room-item"><div class="room-main"><b>${escHtml(hostName)}</b>`
+      + `<span>${joined}/${max} 人 · 已准备 ${ready}</span></div>`
+      + `<div class="room-side"><span class="room-code">${escHtml(r.code)}</span>`
+      + `<button class="room-join" data-code="${escHtml(r.code)}" data-broker="${r.brokerIdx}" ${locked ? 'disabled' : ''}>${mine ? '本房' : full ? '满员' : NET.role === 'host' ? '房主中' : '加入'}</button></div></div>`;
+  }).join('');
+}
+function showMainLobby(){
+  hideLobby();
+  document.getElementById('lobby').style.display = 'flex';
+}
+function showOnlineLobby(){
+  hideLobby();
+  document.getElementById('online-page').style.display = 'flex';
+}
+function showRoomPage(){
+  hideLobby();
+  document.getElementById('room-page').style.display = 'flex';
+  renderRoom();
+}
+function closeRoomConnection(){
+  if(NET.role === 'host'){
+    send({ type:'roomclosed' });
+    clearRoomAnnouncement();
+    clearRetainedState();
+    stopRoomHeartbeat();
+    dropClient();
+  }else{
+    if(NET.role === 'guest' && NET.connected) send({ type:'leave', from: NET.myId });
+    dropClient();
+  }
+}
+function resetNetState(){
+  stopRoomList();
+  NET.role = null; NET.seat = null; NET.client = null; NET.connected = false;
+  NET.roomId = ''; NET.roomInfo = null; NET.myReady = false;
+  NET.guests = []; NET.ready = {};
+  state.netReady = false;
+  document.getElementById('net-badge').style.display = 'none';
+  document.getElementById('lb-status').textContent = '';
+  document.getElementById('lb-code').value = '';
+}
+function backToMainLobby(){
+  closeRoomConnection();
+  resetNetState();
+  showMainLobby();
+}
+function leaveWaitingRoom(){
+  closeRoomConnection();
+  resetNetState();
+  showOnlineLobby();
+}
+function showGuestWaiting(){ showRoomPage(); }
+function renderGuestWaiting(){ renderRoom(); }
+function renderRoom(){
+  const isHost = NET.role === 'host';
+  const info = NET.roomInfo;
+  const max = isHost ? state.playerCount : ((info && info.max) ? info.max : state.playerCount);
+  const pub = isHost ? !!NET.publicRoom : (info ? !!info.public : true);
+  const rows = [];
+  if(isHost){
+    rows.push({ seat:'red', name: state.players.red.name, tag:'房主' });
+    NET.guests.forEach(g => rows.push({ seat:g.seat, name: state.players[g.seat].name, ready: !!NET.ready[g.seat] }));
+  }else if(info && info.players && info.players.length){
+    info.players.forEach(p => rows.push({ seat:p.seat, name:p.name, ready:!!p.ready, me: p.seat === NET.seat }));
+  }else if(NET.seat){
+    rows.push({ seat:NET.seat, name: state.players[NET.seat].name, ready: NET.myReady, me:true });
+  }
+  document.getElementById('room-code').textContent = NET.roomId || '-----';
+  document.getElementById('room-back').textContent = isHost ? '← 关闭房间' : '← 退出房间';
+  const vis = document.getElementById('room-vis');
+  vis.textContent = pub ? '公开' : '私密';
+  vis.className = 'room-vis' + (pub ? '' : ' private');
+  document.getElementById('room-sub').textContent = pub
+    ? '房间已公开，陌生人可在列表中找到并加入'
+    : '私密房间，仅凭房间码加入';
+  const bySeat = {};
+  rows.forEach(r => { bySeat[r.seat] = r; });
+  const order = ['red','blue','green','yellow'];
+  let html = '';
+  for(let i = 0; i < max; i++){
+    const seat = order[i];
+    const p = bySeat[seat];
+    if(p){
+      const status = p.tag === '房主' ? '房主'
+        : p.ready ? (p.me ? '✓ 已准备（我）' : '✓ 已准备')
+        : (p.me ? '未准备（我）' : '未准备');
+      const cls = (p.tag === '房主' || p.ready) ? 'ready' : 'notready';
+      html += '<div class="wait-player"><span class="room-seat"><i class="chip ' + seat + '"></i>'
+        + escHtml(p.name) + '</span><span class="' + cls + '">' + status + '</span></div>';
+    }else{
+      html += '<div class="wait-player empty"><span class="room-seat"><i class="chip ' + seat + '"></i>等待加入…</span></div>';
+    }
+  }
+  document.getElementById('room-players').innerHTML = html;
+  const btn = document.getElementById('room-ready');
+  btn.style.display = isHost ? 'none' : '';
+  btn.textContent = NET.myReady ? '取消准备' : '准 备';
+  btn.disabled = !NET.seat;
+  const joined = rows.length;
+  const readyCount = rows.filter(r => r.ready).length;
+  document.getElementById('room-hint').textContent = isHost
+    ? '玩家 ' + joined + '/' + max + '，已准备 ' + readyCount + '/' + Math.max(0, joined - 1)
+      + ' · ' + (joined >= max ? '等待全员准备后自动开局…' : '满员且全员准备后自动开局')
+    : (NET.myReady
+      ? (joined >= max ? '已准备，等待房主开局…' : '已准备，等待其他玩家（' + joined + '/' + max + '）')
+      : '点「准备」，满员且全员准备后自动开局');
 }
 function adoptState(s){
   Object.assign(state, JSON.parse(JSON.stringify(s)));
@@ -2845,21 +3208,44 @@ function handleNetMessage(raw){
       const known = NET.guests.find(g => g.id === msg.from);
       if(known){
         send({ type:'welcome', to: msg.from, seat: known.seat });
+        broadcastRoomInfo();                         // 重连报到：补发准备状态
         publishState();                              // 重连报到：补发最新快照
         if(NET.pendingCard) send({ type:'cardfx', card:{ msgId: NET.pendingCard.msgId, seat: NET.pendingCard.seat, kind: NET.pendingCard.kind, name: NET.pendingCard.name, desc: NET.pendingCard.desc } });   // 补发未决抽卡动画
         if(NET.pendingModal) send({ type:'modal', modal:{ msgId: NET.pendingModal.msgId, title: NET.pendingModal.title, bodyHTML: NET.pendingModal.bodyHTML, labels: NET.pendingModal.options.map(o => o.label), seat: NET.pendingModal.seat } });   // 补发未决弹窗
         return;
       }
-      if(state.setupDone || NET.guests.length >= state.playerCount - 1){ send({ type:'roomfull', to: msg.from }); return; }
-      const seat = SEATS[NET.guests.length + 1];
+      if(state.setupDone){ send({ type:'roomfull', to: msg.from }); return; }
+      const used = NET.guests.map(g => g.seat);
+      const seat = SEATS.slice(1, state.playerCount).find(s => used.indexOf(s) < 0);
+      if(!seat){ send({ type:'roomfull', to: msg.from }); return; }
+      const nick = cleanNick(msg.nick);
       NET.guests.push({ id: msg.from, seat });
-      state.players[seat].name = msg.nick ? SEAT_NAMES[seat] + '（' + msg.nick + '）' : SEAT_NAMES[seat];
+      NET.ready[seat] = false;                        // v1.2：加入后需点「准备」才开局
+      state.players[seat].name = nick ? SEAT_NAMES[seat] + '（' + nick + '）' : SEAT_NAMES[seat];
       send({ type:'welcome', to: msg.from, seat });
       log(state.players[seat].name + '玩家已加入房间！', null, true);
-      if(NET.guests.length >= state.playerCount - 1){
-        hideLobby(); showNetBadge();
-        startGameFlow();
-      } else updateHostWaiting();
+      broadcastRoomInfo();
+      updateHostWaiting();
+      publishRoomAnnouncement();
+      publishState();
+    } else if(msg.type === 'ready'){
+      const g = NET.guests.find(x => x.id === msg.from);
+      if(!g) return;
+      NET.ready[g.seat] = !!msg.ready;
+      broadcastRoomInfo();
+      updateHostWaiting();
+      publishRoomAnnouncement();
+      tryStartRoom();
+    } else if(msg.type === 'leave'){
+      const idx = NET.guests.findIndex(x => x.id === msg.from);
+      if(idx < 0) return;
+      const seat = NET.guests[idx].seat;
+      NET.guests.splice(idx, 1);
+      delete NET.ready[seat];
+      state.players[seat].name = SEAT_NAMES[seat];
+      broadcastRoomInfo();
+      updateHostWaiting();
+      publishRoomAnnouncement();
       publishState();
     } else if(msg.type === 'action'){
       const a = msg.action || {};
@@ -2882,6 +3268,8 @@ function handleNetMessage(raw){
         doRoll();
       } else if(a.type === 'createAlbum' && a.seat === state.current && state.setupDone){
         doCreateAlbum();
+      } else if(a.type === 'awaken' && a.seat === state.current && state.setupDone){
+        doAwaken();
       }
     }
   } else if(NET.role === 'guest'){
@@ -2890,6 +3278,16 @@ function handleNetMessage(raw){
       NET.remoteModal = null; hideModal(); resetCardFx();   // 重连场景：清掉本机残留的旧弹窗/旧抽卡层，未决内容会由主机紧接着补发
       setNetStatus('座位已分配：' + SEAT_NAMES[msg.seat]);
       showNetBadge();
+      if(state.setupDone) hideLobby(); else showGuestWaiting();
+    } else if(msg.type === 'room'){
+      NET.roomInfo = msg.room;
+      const me = msg.room && msg.room.players ? msg.room.players.find(p => p.seat === NET.seat) : null;
+      if(me) NET.myReady = !!me.ready;
+      if(!state.setupDone) renderGuestWaiting();
+    } else if(msg.type === 'roomclosed'){
+      NET.role = null;                 // 房主主动关房：不再回发 leave
+      leaveWaitingRoom();
+      setNetStatus('房主已关闭房间，已返回联机页');
     } else if(msg.type === 'fx'){
       guestFx(msg.fx);
     } else if(msg.type === 'cardfx'){   // 抽卡动画镜像：自动翻开，自己的卡点「生效」确认后回传 cardDone
@@ -2901,11 +3299,13 @@ function handleNetMessage(raw){
       } else showCardFx(c, 'other', null);
     } else if(msg.type === 'state'){
       if(!state.netReady){
-        state.netReady = true; hideLobby(); showNetBadge();
+        state.netReady = true; showNetBadge();
         log('已同步主机状态，等待开局…', null, true);
       }
       if(NET.fxPlaying) NET.fxPending = msg.state;   // 移动动画播放中：暂存，播完再应用
       else adoptState(msg.state);
+      if(msg.state && msg.state.setupDone) hideLobby();
+      else if(!state.setupDone) showGuestWaiting();
     } else if(msg.type === 'modal'){
       if(NET.fxPlaying) NET.fxModal = msg.modal;
       else showNetModal(msg.modal);
@@ -3065,32 +3465,73 @@ document.getElementById('lb-nick').addEventListener('input', function(){
   this.value = this.value.replace(/[^A-Za-z\u4e00-\u9fa5]/g, '').slice(0, 6);
 });
 document.getElementById('lb-single').addEventListener('click', () => {
+  stopRoomList();
   state.single = true;
   state.playerCount = 2;
-  const nick = document.getElementById('lb-nick').value.trim();
+  const nick = cleanNick(document.getElementById('lb-nick').value);
   state.players.red.name = nick ? '红方（' + nick + '）' : '红方';
   state.players.blue.name = '蓝方（AI）';
   hideLobby();
   log('单机模式：你执红方，蓝方由 AI 自动行动（其决策会以弹窗和日志展示）。', null, true);
   startGameFlow();
 });
+document.getElementById('lb-online').addEventListener('click', () => {
+  showOnlineLobby();
+  setNetStatus('');
+});
+document.getElementById('lb-online-back').addEventListener('click', backToMainLobby);
 document.getElementById('lb-host').addEventListener('click', () => {
   if(typeof mqtt === 'undefined'){ setNetStatus('联机组件 mqtt.js 加载失败，请检查网络后刷新页面'); return; }
   setNetStatus('正在连接免费信令服务器…');
-  hostCreateRoom(document.getElementById('lb-nick').value.trim());
+  hostCreateRoom(document.getElementById('lb-nick').value);
 });
 document.getElementById('lb-join').addEventListener('click', () => {
   const code = document.getElementById('lb-code').value.trim().toUpperCase();
-  if(code.length < 4){ setNetStatus('请输入主机显示的 5 位房间码'); return; }
+  if(!ROOM_CODE_RE.test(code)){ setNetStatus('请输入主机显示的 5 位房间码'); return; }
   if(typeof mqtt === 'undefined'){ setNetStatus('联机组件 mqtt.js 加载失败，请检查网络后刷新页面'); return; }
   setNetStatus('正在加入房间 ' + code + '…');
-  guestJoinRoom(code, document.getElementById('lb-nick').value.trim());
+  guestJoinRoom(code, document.getElementById('lb-nick').value);
+});
+document.getElementById('lb-browse').addEventListener('click', startRoomList);
+document.getElementById('lb-refresh').addEventListener('click', () => {
+  if(LIST.started) stopRoomList();
+  startRoomList();
+});
+document.getElementById('lb-room-list').addEventListener('click', e => {
+  const btn = e.target.closest('button[data-code]');
+  if(!btn || btn.disabled || NET.role) return;
+  const code = btn.dataset.code;
+  setNetStatus('正在加入房间 ' + code + '…');
+  guestJoinRoom(code, document.getElementById('lb-nick').value, +btn.dataset.broker);
+});
+document.getElementById('room-ready').addEventListener('click', () => {
+  if(!NET.seat || !NET.connected) return;
+  NET.myReady = !NET.myReady;
+  send({ type:'ready', from: NET.myId, ready: NET.myReady });
+  if(NET.roomInfo && NET.roomInfo.players){
+    const me = NET.roomInfo.players.find(p => p.seat === NET.seat);
+    if(me) me.ready = NET.myReady;
+  }
+  renderRoom();
+});
+document.getElementById('room-back').addEventListener('click', () => {
+  const wasHost = NET.role === 'host';
+  leaveWaitingRoom();
+  setNetStatus(wasHost ? '已关闭房间' : '已退出房间');
+});
+window.addEventListener('beforeunload', () => {
+  if(NET.connected && NET.role === 'guest') send({ type:'leave', from: NET.myId });          // 尽量让主机释放座位
+  if(NET.connected && NET.role === 'host' && !state.setupDone) send({ type:'roomclosed' });   // 未开局关页：通知客人回联机页
+  clearRoomAnnouncement();
+  clearRetainedState();
+  stopRoomHeartbeat();
+  stopRoomList();
 });
 
 /* =========================================================
  * 十、开局公告（发布更新时：编辑 HTML 中 #notice-box 内容，并把 NOTICE_VERSION 调大，全员重新可见）
  * ========================================================= */
-const NOTICE_VERSION = 'v1.1';
+const NOTICE_VERSION = 'v1.2';
 const noticeMask = document.getElementById('notice-mask');
 try{ if(localStorage.getItem('ll-notice-read') === NOTICE_VERSION) noticeMask.classList.add('hidden'); }catch(e){}
 document.getElementById('notice-close').addEventListener('click', () => {
