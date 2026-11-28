@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0b0b0f">
+<title>专属视频</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    min-height: 100vh;
+    background: #0b0b0f;
+    color: #f2f2f5;
+    font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    display: flex;
+    justify-content: center;
+  }
+  #app {
+    width: 100%;
+    max-width: 560px;
+    padding: calc(16px + env(safe-area-inset-top)) 16px calc(40px + env(safe-area-inset-bottom));
+    animation: rise .35s ease-out both;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    #app { animation: none; }
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: none; }
+  }
+  video {
+    display: block;
+    width: 100%;
+    height: auto;
+    background: #000;
+    border-radius: 16px;
+    outline: none;
+  }
+  .name {
+    margin: 22px 0 10px;
+    font-size: 14px;
+    letter-spacing: .12em;
+    color: #8f8f9c;
+  }
+  .intro {
+    margin: 0;
+    font-size: 16px;
+    line-height: 1.9;
+    color: #e9e9f0;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+  .state {
+    min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    text-align: center;
+    color: #8f8f9c;
+    font-size: 15px;
+    line-height: 1.7;
+    padding: 0 24px;
+  }
+  .state strong {
+    display: block;
+    color: #f2f2f5;
+    font-size: 17px;
+    font-weight: 500;
+  }
+  .hint { font-size: 13px; color: #63636e; }
+</style>
+</head>
+<body>
+  <div id="app">
+    <div class="state"><span>正在加载…</span></div>
+  </div>
+
+<script>
+(function () {
+  var app = document.getElementById('app');
+
+  function getUid() {
+    var params = new URLSearchParams(window.location.search);
+    return (params.get('uid') || '').trim();
+  }
+
+  function showState(title, hint) {
+    app.innerHTML = '';
+    var box = document.createElement('div');
+    box.className = 'state';
+    var t = document.createElement('strong');
+    t.textContent = title;
+    box.appendChild(t);
+    if (hint) {
+      var h = document.createElement('span');
+      h.className = 'hint';
+      h.textContent = hint;
+      box.appendChild(h);
+    }
+    app.appendChild(box);
+  }
+
+  function render(person) {
+    document.title = (person.name ? person.name + ' · ' : '') + '专属视频';
+    app.innerHTML = '';
+
+    var video = document.createElement('video');
+    video.controls = true;
+    video.playsInline = true;
+    video.setAttribute('playsinline', '');
+    video.setAttribute('webkit-playsinline', '');
+    video.preload = 'metadata';
+    video.src = person.video;
+    if (person.poster) video.poster = person.poster;
+    app.appendChild(video);
+
+    if (person.name) {
+      var name = document.createElement('p');
+      name.className = 'name';
+      name.textContent = person.name;
+      app.appendChild(name);
+    }
+
+    if (person.intro) {
+      var intro = document.createElement('p');
+      intro.className = 'intro';
+      intro.textContent = person.intro;
+      app.appendChild(intro);
+    }
+  }
+
+  var uid = getUid();
+  if (!uid) {
+    showState('请扫描专属二维码进入', '每个二维码对应一个专属页面');
+    return;
+  }
+
+  fetch('people.json', { cache: 'no-store' })
+    .then(function (res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    })
+    .then(function (data) {
+      var person = data && data.people ? data.people[uid] : null;
+      if (!person) {
+        showState('这个页面不存在', '二维码可能已失效，请联系管理员');
+        return;
+      }
+      render(person);
+    })
+    .catch(function () {
+      showState('页面加载失败', '请检查网络后刷新重试');
+    });
+})();
+</script>
+</body>
+</html>
