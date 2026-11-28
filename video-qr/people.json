@@ -2,19 +2,19 @@
   "event": "2026 毕业纪念",
   "people": {
     "001": {
-      "name": "张三",
-      "intro": "这是张三的专属页面示例。\n\n视频和这段文字都可以直接在 people.json 里替换，页面部分不需要改动。",
-      "video": "sample.mp4"
+      "name": "新专属视频示例",
+      "intro": "这是新的专属视频示例。\n\n视频和这段文字都来自 people.json，替换成各自的内容即可，页面部分不需要改动。",
+      "video": "demo.mp4"
     },
     "002": {
       "name": "李四",
       "intro": "李四的简介示例。\n\n每个编号对应一个二维码，扫描后只会看到这个编号下的内容。",
-      "video": "sample.mp4"
+      "video": "demo.mp4"
     },
     "003": {
       "name": "王五",
       "intro": "王五的简介示例。\n\n正式使用时，把视频换成各自的链接，文案换成各自的介绍即可。",
-      "video": "sample.mp4"
+      "video": "demo.mp4"
     }
   }
 }
