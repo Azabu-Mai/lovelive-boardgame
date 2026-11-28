@@ -3,7 +3,7 @@
   "people": {
     "001": {
       "name": "新专属视频示例",
-      "intro": "这是新的专属视频示例。\n\n视频和这段文字都来自 people.json，替换成各自的内容即可，页面部分不需要改动。",
+      "intro": "贵阳LoveLive甲子园only欢迎大家来玩",
       "video": "demo.mp4"
     },
     "002": {
